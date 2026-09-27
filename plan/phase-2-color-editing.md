@@ -20,11 +20,11 @@ Turn the tool from view-only into a "nudge" instrument. Add manual color editing
 
 ### 2. Real-time updates
 - Specimen updates live while dragging, zero perceptible lag.
-- No animation requirement yet beyond what Phase 1 already has — GSAP easing for slider repositioning is Phase 5.
+- No animation requirement yet beyond what Phase 1 already has — GSAP easing for slider repositioning is Phase 7.
 
 ### 3. Five-format value display
 - HEX, RGB, HSL, HSB, OKLCH all viewable for the active color (extends the Phase 1 hex-only swatch display).
-- Plain text updates on change — TubeText 3D animation is Phase 5.
+- Plain text updates on change — TubeText 3D animation is Phase 7.
 
 ## Open questions to resolve before building
 - Does opening a slider panel replace the bottom control bar, or slide up above it (per original spec: "slides up to reveal sliders")?
@@ -34,7 +34,7 @@ Turn the tool from view-only into a "nudge" instrument. Add manual color editing
 ## Explicitly out of scope for Phase 2
 - Threshold bumping, APCA (Phase 3)
 - Export (Phase 4)
-- GSAP slider easing, TubeText animation (Phase 5)
+- GSAP slider easing, TubeText animation (Phase 7)
 
 ## Done means
 Click a swatch → slider panel opens → drag OKLCH/HSB/RGB sliders → specimen updates live with zero lag → switch slider mode without losing the edit → see the color's value in all 5 formats.

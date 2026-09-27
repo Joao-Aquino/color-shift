@@ -20,10 +20,10 @@ Let people take a color pair out of the tool. Self-contained, low risk, no depen
 ### 3. Export panel
 - Slides in from the right, replacing the arrow navigation area. EXPORT button is the anchor (stays in place).
 - Contains COPY and DOWNLOAD .MD actions.
-- Plain show/hide for now — GSAP Flip animation for the WCAG/APCA button layout shift during export state is Phase 5.
+- Plain show/hide for now — GSAP Flip animation for the WCAG/APCA button layout shift during export state is Phase 7.
 
 ## Explicitly out of scope for Phase 4
-- GSAP Flip transition into/out of export state (Phase 5)
+- GSAP Flip transition into/out of export state (Phase 7)
 - Any additional export formats beyond markdown
 
 ## Done means

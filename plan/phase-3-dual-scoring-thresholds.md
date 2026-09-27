@@ -23,7 +23,7 @@ Add the second contrast algorithm (APCA) and threshold bumping, building on Phas
 
 ## Explicitly out of scope for Phase 3
 - Export (Phase 4)
-- Animation polish for threshold/score transitions (Phase 5)
+- Animation polish for threshold/score transitions (Phase 7)
 
 ## Done means
 Toggle between WCAG and APCA and see the score pill + thresholds update → click a threshold → active color snaps to that exact contrast level via minimal lightness change → active threshold stays highlighted as sliders move.

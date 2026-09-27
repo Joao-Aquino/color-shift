@@ -1,7 +1,7 @@
-# Color Shift — Phase 7 Spec (Draft)
+# Color Shift — Phase 6 Spec (Draft)
 
 *Status: Draft — not yet discussed/approved in detail*
-*Written: 2026-09-26*
+*Written: 2026-09-26. Renumbered from Phase 7 to Phase 6 on 2026-09-27 (Animation Polish moved to the end).*
 
 ## Goal
 
@@ -24,7 +24,7 @@ Add the secondary discovery/layout modes and inputs beyond the core Unsplash-dri
 - Each photo gets a different typeface for the specimen (20 fonts total), Aa-only glyphs loaded (~1–2KB each) to keep this cheap.
 - Supersedes Phase 1's Geist-only specimen font.
 
-## Explicitly out of scope for Phase 7
+## Explicitly out of scope for Phase 6
 - Native camera capture (iOS-specific, Phase 8)
 - Figma MCP export (stretch, see `stretch.md`)
 

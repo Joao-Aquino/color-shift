@@ -1,7 +1,7 @@
-# Color Shift — Phase 6 Spec (Draft)
+# Color Shift — Phase 5 Spec (Draft)
 
 *Status: Draft — not yet discussed/approved in detail*
-*Written: 2026-09-26*
+*Written: 2026-09-26. Renumbered from Phase 6 to Phase 5 on 2026-09-27 (Animation Polish moved to the end).*
 
 ## Goal
 
@@ -24,8 +24,8 @@ Extend the tool beyond the desktop-dark-only baseline: light theme and mobile re
 - Does the existing Figma file include mobile frames, or does mobile layout need fresh design work first?
 - Should touch interactions (tap-and-hold for sliders, swipe for photo nav) be added here, or is mobile just a responsive reflow of the same click/drag interactions?
 
-## Explicitly out of scope for Phase 6
-- Scrollable vertical gallery layout mode (that's a distinct layout mode, Phase 7)
+## Explicitly out of scope for Phase 5
+- Scrollable vertical gallery layout mode (that's a distinct layout mode, Phase 6)
 
 ## Done means
-Toggle `T` → chrome crossfades to a palette-tinted light theme and back → resize to mobile width → specimen and control bar reflow to the mobile spec without breaking any Phase 1–5 functionality.
+Toggle `T` → chrome crossfades to a palette-tinted light theme and back → resize to mobile width → specimen and control bar reflow to the mobile spec without breaking any Phase 1–4 functionality.
