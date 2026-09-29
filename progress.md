@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-09-29 — Phase 2 color editing completed
+
+Implemented the approved editor panel from Figma frame `3359:1654`. Clicking either color row now opens an accessible sidebar editor with HEX, RGB, HSL, HSB, and OKLCH tabs; per-channel gradient sliders; editable numeric values; and a format-aware readout. All formats round-trip through `culori`, HSB input is parsed explicitly, alpha colors are rejected, and OKLCH chroma is capped to the current lightness/hue's sRGB gamut with a binary search.
+
+Color changes update the field rows, specimen, and WCAG score live. The readout accepts valid HEX/RGB/HSL/HSB/OKLCH input and preserves the last valid color with an inline error for invalid input. The panel switches cleanly between background and foreground, follows the color through swap, closes on outside click or `Esc`, restores focus to its color row, and avoids collisions between global photo shortcuts and focused tabs, sliders, fields, links, or buttons.
+
+Added a per-photo undo stack with the reserved action-row button and `Cmd/Ctrl+Z`. Numeric/readout edits and swaps create discrete entries; a complete pointer or keyboard slider gesture creates one entry; and previous, next, or shuffle resets history. Validated with ESLint, a production webpack build, and live browser checks covering all five tabs, valid and invalid readouts, real-time score changes, slider keyboard editing, button and shortcut undo, `Esc` focus restoration, shortcut isolation, swap, and history reset on photo navigation. No browser errors or framework overlay were observed.
+
 ## 2026-09-29 — Phase 1 core loop completed
 
 Implemented the full photo-driven loop from the approved Phase 1 spec. The app now proxies the Unsplash random-photo API through `/api/photos`, normalizes attribution-safe photo data, keeps a ten-photo buffer with automatic refill, and extracts six named swatches client-side with `node-vibrant`. The color engine ranks palette pairs, computes WCAG contrast with `culori`, and reuses a generic OKLCH `bumpToContrast(color, against, target)` binary search to guarantee a minimum 4.5:1 ratio.

@@ -1,7 +1,9 @@
-# Color Shift — Phase 2 Spec (Draft)
+# Color Shift — Phase 2 Spec
 
-*Status: Draft — layout decisions closed 2026-09-29 (Figma "Controls V6"); detail otherwise not yet approved*
+*Status: Complete (2026-09-29)*
 *Written: 2026-09-26. Revised 2026-09-29 for the sidebar layout.*
+
+*Figma source: [`Color-Shift`, editor frame `3359:1654`](https://www.figma.com/design/Fu0DGoLsLeY6wj7oLr5cVh/Color-Shift?node-id=3359-1654&m=dev).*
 
 ## Goal
 
@@ -32,6 +34,7 @@ Five tabs: HEX · RGB · HSL · HSB · OKLCH. The active tab sets both the slide
 
 ### 3. Readout row
 - Below the sliders: a monospace row showing the active color in the active tab's format. Editable; paste any valid color format, auto-detect and convert.
+- If the entered value is invalid, preserve the last valid color and show an inline error on the field.
 - The color field row above (hex) always updates live.
 
 ### 4. Real-time updates
@@ -40,6 +43,7 @@ Five tabs: HEX · RGB · HSL · HSB · OKLCH. The active tab sets both the slide
 
 ### 5. Undo
 - Undo button in the action row (slot reserved in Phase 1). History stack of color edits for the current photo; resets when the photo changes.
+- A complete slider gesture creates exactly one history entry, regardless of how many intermediate values it emits while dragging.
 - Shortcut: `Cmd/Ctrl+Z`. Disabled (with a non-color-only cue) when the stack is empty.
 - Phase 3's fix/wrench and threshold bumps push onto the same stack.
 

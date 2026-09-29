@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { ColorEditor } from "@/components/control-bar/color-editor";
 import { ControlContainer } from "@/components/control-bar/control-container";
 import { CSButton } from "@/components/control-bar/cs-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getContrastScore } from "@/lib/color/contrast";
 import { createFallbackPair, extractColorPair } from "@/lib/color/palette";
 import { fetchPhotos } from "@/lib/photos/client";
-import type { ColorPair, Photo } from "@/types/color-shift";
+import type { ColorPair, ColorTarget, Photo } from "@/types/color-shift";
 
 const INITIAL_BUFFER_SIZE = 10;
 const REFILL_THRESHOLD = 3;
@@ -17,6 +18,11 @@ const REFILL_THRESHOLD = 3;
 interface PhotoEntry {
   photo: Photo;
   pair: ColorPair | null;
+}
+
+interface ColorSnapshot {
+  background: string;
+  foreground: string;
 }
 
 function LoadingPanel({ className = "" }: { className?: string }) {
@@ -33,21 +39,141 @@ export function ColorShiftApp() {
   const [showCircle, setShowCircle] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
+  const [activeColor, setActiveColor] = useState<ColorTarget | null>(null);
+  const [history, setHistory] = useState<ColorSnapshot[]>([]);
   const entriesRef = useRef(entries);
   const indexRef = useRef(index);
+  const activeColorRef = useRef(activeColor);
+  const historyRef = useRef(history);
+  const gestureStartRef = useRef<ColorSnapshot | null>(null);
   const refillInFlight = useRef(false);
   const requestInFlight = useRef(false);
 
   const updateEntries = useCallback(
     (updater: (current: PhotoEntry[]) => PhotoEntry[]) => {
-      setEntries((current) => {
-        const next = updater(current);
-        entriesRef.current = next;
-        return next;
-      });
+      const next = updater(entriesRef.current);
+      entriesRef.current = next;
+      setEntries(next);
     },
     [],
   );
+
+  const resetHistory = useCallback(() => {
+    historyRef.current = [];
+    gestureStartRef.current = null;
+    setHistory([]);
+  }, []);
+
+  const pushHistory = useCallback((snapshot: ColorSnapshot) => {
+    const next = [...historyRef.current, snapshot].slice(-100);
+    historyRef.current = next;
+    setHistory(next);
+  }, []);
+
+  const getCurrentSnapshot = useCallback((): ColorSnapshot | null => {
+    const pair = entriesRef.current[indexRef.current]?.pair;
+    if (!pair) return null;
+
+    return {
+      background: pair.background,
+      foreground: pair.foreground,
+    };
+  }, []);
+
+  const updateCurrentPair = useCallback(
+    (updater: (pair: ColorPair) => ColorPair) => {
+      const currentId = entriesRef.current[indexRef.current]?.photo.id;
+      if (!currentId) return;
+
+      updateEntries((current) =>
+        current.map((entry) =>
+          entry.photo.id === currentId && entry.pair
+            ? { ...entry, pair: updater(entry.pair) }
+            : entry,
+        ),
+      );
+    },
+    [updateEntries],
+  );
+
+  const applyEditedColor = useCallback(
+    (target: ColorTarget, color: string) => {
+      updateCurrentPair((pair) => {
+        const next = { ...pair, [target]: color };
+        return {
+          ...next,
+          originalForeground: next.foreground,
+          wasBumped: false,
+        };
+      });
+    },
+    [updateCurrentPair],
+  );
+
+  const commitEditedColor = useCallback(
+    (target: ColorTarget, color: string) => {
+      const snapshot = getCurrentSnapshot();
+      if (!snapshot || snapshot[target] === color) return;
+
+      pushHistory(snapshot);
+      applyEditedColor(target, color);
+    },
+    [applyEditedColor, getCurrentSnapshot, pushHistory],
+  );
+
+  const beginColorGesture = useCallback(() => {
+    if (gestureStartRef.current) return;
+    gestureStartRef.current = getCurrentSnapshot();
+  }, [getCurrentSnapshot]);
+
+  const endColorGesture = useCallback(() => {
+    const start = gestureStartRef.current;
+    const current = getCurrentSnapshot();
+    gestureStartRef.current = null;
+
+    if (
+      start &&
+      current &&
+      (start.background !== current.background ||
+        start.foreground !== current.foreground)
+    ) {
+      pushHistory(start);
+    }
+  }, [getCurrentSnapshot, pushHistory]);
+
+  const undo = useCallback(() => {
+    const nextHistory = historyRef.current.slice(0, -1);
+    const snapshot = historyRef.current.at(-1);
+    if (!snapshot) return;
+
+    historyRef.current = nextHistory;
+    gestureStartRef.current = null;
+    setHistory(nextHistory);
+    updateCurrentPair((pair) => ({
+      ...pair,
+      ...snapshot,
+      originalForeground: snapshot.foreground,
+      wasBumped: false,
+    }));
+  }, [updateCurrentPair]);
+
+  const selectColor = useCallback((target: ColorTarget) => {
+    activeColorRef.current = target;
+    setActiveColor(target);
+  }, []);
+
+  const closeEditor = useCallback(() => {
+    const target = activeColorRef.current;
+    if (!target) return;
+
+    activeColorRef.current = null;
+    setActiveColor(null);
+    window.requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLButtonElement>(`[data-color-field="${target}"]`)
+        ?.focus();
+    });
+  }, []);
 
   const processPhoto = useCallback(
     async (photo: Photo) => {
@@ -149,21 +275,23 @@ export function ColorShiftApp() {
   }, [entries.length, index]);
 
   const goPrevious = useCallback(() => {
-    setIndex((current) => {
-      const next = Math.max(0, current - 1);
-      indexRef.current = next;
-      return next;
-    });
-  }, []);
+    const next = Math.max(0, indexRef.current - 1);
+    if (next === indexRef.current) return;
+
+    indexRef.current = next;
+    setIndex(next);
+    resetHistory();
+  }, [resetHistory]);
 
   const goNext = useCallback(() => {
-    setIndex((current) => {
-      const lastIndex = Math.max(0, entriesRef.current.length - 1);
-      const next = Math.min(lastIndex, current + 1);
-      indexRef.current = next;
-      return next;
-    });
-  }, []);
+    const lastIndex = Math.max(0, entriesRef.current.length - 1);
+    const next = Math.min(lastIndex, indexRef.current + 1);
+    if (next === indexRef.current) return;
+
+    indexRef.current = next;
+    setIndex(next);
+    resetHistory();
+  }, [resetHistory]);
 
   const shuffle = useCallback(async () => {
     if (requestInFlight.current) return;
@@ -183,6 +311,7 @@ export function ColorShiftApp() {
       });
       indexRef.current = nextIndex;
       setIndex(nextIndex);
+      resetHistory();
       processPhotos([photo]);
     } catch (error) {
       setErrorMessage(
@@ -192,33 +321,74 @@ export function ColorShiftApp() {
       requestInFlight.current = false;
       setIsRequesting(false);
     }
-  }, [processPhotos, updateEntries]);
+  }, [processPhotos, resetHistory, updateEntries]);
 
   const swapColors = useCallback(() => {
-    const currentId = entriesRef.current[indexRef.current]?.photo.id;
-    if (!currentId) return;
+    const snapshot = getCurrentSnapshot();
+    if (!snapshot) return;
 
-    updateEntries((current) =>
-      current.map((entry) => {
-        if (entry.photo.id !== currentId || !entry.pair) return entry;
+    pushHistory(snapshot);
+    updateCurrentPair((pair) => ({
+      ...pair,
+      background: pair.foreground,
+      foreground: pair.background,
+      originalForeground: pair.background,
+      wasBumped: false,
+    }));
 
-        return {
-          ...entry,
-          pair: {
-            ...entry.pair,
-            background: entry.pair.foreground,
-            foreground: entry.pair.background,
-            originalForeground: entry.pair.background,
-            wasBumped: false,
-          },
-        };
-      }),
-    );
-  }, [updateEntries]);
+    const target = activeColorRef.current;
+    if (target) selectColor(target === "background" ? "foreground" : "background");
+  }, [getCurrentSnapshot, pushHistory, selectColor, updateCurrentPair]);
+
+  useEffect(() => {
+    if (!activeColor) return;
+
+    function handleClick(event: MouseEvent) {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest("[data-color-editor], [data-color-field]")) return;
+      closeEditor();
+    }
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [activeColor, closeEditor]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target;
+      const isEditable =
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA");
+      const isInteractive =
+        target instanceof HTMLElement &&
+        !!target.closest(
+          'a[href], button, input, select, textarea, [contenteditable="true"], [role="slider"], [role="tab"]',
+        );
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+        if (isEditable) return;
+        event.preventDefault();
+        undo();
+        return;
+      }
+
+      if (event.key === "Escape" && activeColorRef.current) {
+        event.preventDefault();
+        closeEditor();
+        return;
+      }
+
+      if (
+        isInteractive ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey
+      ) {
+        return;
+      }
 
       if (event.key === "ArrowLeft") {
         event.preventDefault();
@@ -237,7 +407,7 @@ export function ColorShiftApp() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goNext, goPrevious, shuffle, swapColors]);
+  }, [closeEditor, goNext, goPrevious, shuffle, swapColors, undo]);
 
   const current = entries[index];
   const pair = current?.pair ?? null;
@@ -249,15 +419,31 @@ export function ColorShiftApp() {
   return (
     <main className="flex h-screen min-h-[720px] min-w-[1180px] gap-12 overflow-hidden bg-[var(--color-chrome-bg)] p-10">
       <ControlContainer
+        activeTarget={activeColor}
         background={pair?.background ?? null}
         canGoNext={index < entries.length - 1}
         canGoPrevious={index > 0}
+        canUndo={history.length > 0}
         disabled={!ready || isRequesting}
+        editor={
+          activeColor && pair ? (
+            <ColorEditor
+              color={pair[activeColor]}
+              onChange={(color) => applyEditedColor(activeColor, color)}
+              onCommit={(color) => commitEditedColor(activeColor, color)}
+              onGestureEnd={endColorGesture}
+              onGestureStart={beginColorGesture}
+              target={activeColor}
+            />
+          ) : null
+        }
         foreground={pair?.foreground ?? null}
         onNext={goNext}
         onPrevious={goPrevious}
+        onSelectColor={selectColor}
         onShuffle={() => void shuffle()}
         onSwap={swapColors}
+        onUndo={undo}
         score={score}
       />
 

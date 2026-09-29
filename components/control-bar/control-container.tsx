@@ -1,16 +1,21 @@
 import { ColorFields } from "./color-fields";
 import { ControlsBar } from "./controls-bar";
 import { Score } from "./score";
-import type { ContrastScore } from "@/types/color-shift";
+import type { ColorTarget, ContrastScore } from "@/types/color-shift";
 
 interface ControlContainerProps {
+  activeTarget: ColorTarget | null;
   score: ContrastScore | null;
   background: string | null;
   foreground: string | null;
+  editor: React.ReactNode;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  canUndo: boolean;
   disabled?: boolean;
+  onSelectColor: (target: ColorTarget) => void;
   onPrevious: () => void;
+  onUndo: () => void;
   onShuffle: () => void;
   onSwap: () => void;
   onNext: () => void;
@@ -21,13 +26,18 @@ function Divider() {
 }
 
 export function ControlContainer({
+  activeTarget,
   score,
   background,
   foreground,
+  editor,
   canGoPrevious,
   canGoNext,
+  canUndo,
   disabled,
+  onSelectColor,
   onPrevious,
+  onUndo,
   onShuffle,
   onSwap,
   onNext,
@@ -46,17 +56,27 @@ export function ControlContainer({
         <Divider />
         <Score score={score} />
         <Divider />
-        <ColorFields background={background} foreground={foreground} />
-        <div data-slot="editor-region" className="min-h-0 flex-1" aria-hidden />
+        <ColorFields
+          activeTarget={activeTarget}
+          background={background}
+          foreground={foreground}
+          onSelect={onSelectColor}
+        />
+        <div className="min-h-0" data-slot="editor-region" id="color-editor">
+          {editor}
+        </div>
+        <div className="min-h-0 flex-1" aria-hidden />
       </div>
 
       <div className="shrink-0 pt-6">
         <ControlsBar
           canGoNext={canGoNext}
           canGoPrevious={canGoPrevious}
+          canUndo={canUndo}
           disabled={disabled}
           onNext={onNext}
           onPrevious={onPrevious}
+          onUndo={onUndo}
           onShuffle={onShuffle}
           onSwap={onSwap}
         />
