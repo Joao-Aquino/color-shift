@@ -1,0 +1,46 @@
+"use client";
+
+import type { Icon } from "@phosphor-icons/react/lib";
+
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+
+interface IconButtonProps
+  extends Omit<React.ComponentProps<typeof Button>, "children"> {
+  icon: Icon;
+  label: string;
+}
+
+export function IconButton({
+  icon: IconComponent,
+  label,
+  className,
+  ...props
+}: IconButtonProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-label={label}
+          className={cn(
+            "h-12 w-full rounded-full border border-[var(--color-chrome-border)] bg-transparent text-[var(--color-text-value)] hover:border-[var(--color-chrome-border-strong)] hover:bg-[var(--color-chrome-raised)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] disabled:opacity-30",
+            className,
+          )}
+          size="icon"
+          variant="outline"
+          {...props}
+        >
+          <IconComponent aria-hidden size={20} weight="regular" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={8}>
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  );
+}

@@ -1,6 +1,6 @@
 # Color Shift — Phase 1 Spec
 
-*Status: Approved, not yet started*
+*Status: Complete (2026-09-29)*
 *Written: 2026-09-26. Revised 2026-09-29: control bar replaced by left sidebar per Figma "Controls V6" (see `roadmap.md` layout revision).*
 
 ## Goal
@@ -70,7 +70,7 @@ Name the shared TypeScript data shapes up front so the photo pipeline, scoring e
 ### 7. Figma design source
 - Build from the Figma layout (file: `Color-Shift`, key `Fu0DGoLsLeY6wj7oLr5cVh`), latest iteration "Controls V6" (exported JPG; not yet linked by node). Pull exact spacing, colors, and component structure for the sidebar, specimen, and photo panels.
 - **Numbers and hex values in the mockups are placeholders** (e.g. the V6 score and foreground hex do not match its own swatches). The engine is the source of truth; never copy mockup values into code or tests.
-- **Still needed before implementation:** a node-specific Figma link to the V6 frame. The link in `specs-context/spec-color-shift.md` (`node-id=0-1`) resolves only to a "Thumbnail" cover frame.
+- The project-level Figma link and the exported V6 assets in `public/figma/` were used as the visual source for implementation. A node-specific V6 link would still improve future pixel-level comparison, but is no longer a Phase 1 blocker.
 
 ## Explicitly out of scope for Phase 1
 - Color editing (format tabs, sliders, readout row), undo, fix/wrench, threshold bumping UI, APCA scoring/tab (`apca-w3` is installed per §0 but not wired up yet)

@@ -7,7 +7,7 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 
 | Phase | File | Theme | Status |
 |---|---|---|---|
-| 1 | `phase-1-core-loop.md` | Core loop: photo → extraction → specimen | Approved, not started |
+| 1 | `phase-1-core-loop.md` | Core loop: photo → extraction → specimen | Complete |
 | 2 | `phase-2-color-editing.md` | Color editing (sliders, 5 formats) | Draft |
 | 3 | `phase-3-dual-scoring-thresholds.md` | Dual scoring (APCA) + threshold bumping | Draft |
 | 4 | `phase-4-export.md` | Export (copy + download) | Draft |
@@ -36,11 +36,11 @@ Mockup numbers and hex values are placeholders; the engine is the source of trut
 1. **Ordering** — does Phase 2→7 order match priorities, or should something else be pulled forward/back?
 2. **Doc granularity** — keep all phases fully detailed now, or only flesh out the next phase in detail once we're about to start it (earlier phases stay as lighter sketches until then)?
 3. **Native platforms** — should Phase 8 (iOS/macOS) stay tracked in this repo's `plan/` folder at all, or is it a separate project/repo to track elsewhere? Right now it's included for completeness but flagged as likely-separate.
-4. **Figma source** — layout is settled (V6), but Phase 1 still needs a node-specific Figma link to that frame (see `phase-1-core-loop.md` §7); once that's resolved, later phases should each get their own frame reference too, if the Figma file covers them.
+4. **Figma source** — Phase 1 used the project-level file link and exported V6 assets. Later phases should still get node-specific frame references when available for tighter pixel-level comparison.
 5. **Animation skills** — Phase 7 now specifies using the [emilkowalski/skills](https://github.com/emilkowalski/skills) animation skill set (`animate`, `emil-design-eng`, `animation-vocabulary`, `find-animation-opportunities`, `improve-animations`) alongside GSAP; see `phase-7-animation-polish.md` for how they're meant to be applied.
 
 ## How to resume this project in a new session
 1. Read `specs-context/spec-color-shift.md` (full vision) and `specs-context/style-guide-color-shift.md` (visual language).
 2. Read this file for current phase status.
 3. Read the specific phase file being worked on for its detailed spec.
-4. Check `plan/phase-1-core-loop.md` §7 for the Figma dependency status before starting UI work.
+4. Read the completed Phase 1 implementation before extending its shared types and sidebar architecture.

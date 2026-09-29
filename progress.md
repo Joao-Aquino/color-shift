@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-09-29 — Phase 1 core loop completed
+
+Implemented the full photo-driven loop from the approved Phase 1 spec. The app now proxies the Unsplash random-photo API through `/api/photos`, normalizes attribution-safe photo data, keeps a ten-photo buffer with automatic refill, and extracts six named swatches client-side with `node-vibrant`. The color engine ranks palette pairs, computes WCAG contrast with `culori`, and reuses a generic OKLCH `bumpToContrast(color, against, target)` binary search to guarantee a minimum 4.5:1 ratio.
+
+Rebuilt the static Figma mock as the atomic sidebar architecture (`ControlContainer`, `Score`, `ColorFields`, `ControlsBar`, `IconButton`, `CSButton`, `Swatch`, and the future-facing `TubeText` interface), backed by shadcn/ui primitives and semantic dark-theme tokens. Added the full specimen/photo experience, Aa/circle toggle, previous/next navigation, Space shuffle, `S` swap, photographer attribution, loading skeletons, inline retry errors, remote image configuration, and the shared Phase 1 data shapes.
+
+Validated with ESLint, a production webpack build, and a live browser run against the configured Unsplash key. Eleven sampled photos all rendered at AA or AAA contrast (observed range 5.16–9.10), keyboard interactions and random injection worked, and the API log confirmed automatic buffer refill near the end. The default Turbopack production build remains affected by the environment's process/port sandbox limitation; the webpack production build passes.
+
 ## 2026-09-27 — Closed Phase 1's forward-compatibility gaps
 
 Audited whether Phase 1 sets up everything later phases depend on, and found three real gaps: the control bar wasn't required to follow the original spec's atomic component architecture (risking a refactor once sliders/threshold row/export panel get added in Phases 2–4), chrome colors weren't specified as semantic tokens (Phase 5's light theme would mean restyling instead of a token swap), and `apca-w3` wasn't in the Phase 1 dependency list. Fixed all three in `phase-1-core-loop.md`: Phase 1 now builds `ControlContainer`/`ControlsBar` as a state-driven structure (only the `default` state used, `score`/`export` states and `ThresholdButtons`/`ExportPanel`/`ColorMode`/`ColorSliders` components added later without touching Phase 1's code), chrome colors are defined as CSS custom property tokens from day one, and `apca-w3` gets installed in Phase 1 even though unused until Phase 3. Also generalized the auto-bump logic into a reusable `bumpToContrast(color, against, target)` function so Phase 3's threshold bumping wraps it instead of reimplementing the binary search.

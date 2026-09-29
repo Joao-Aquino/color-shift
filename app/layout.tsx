@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,11 +17,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Color Shift",
-  description: "Color Shift - Interactive color palette generator",
+  description: "Photo-driven color pairs with guaranteed readable contrast.",
   metadataBase: new URL("https://colorshift.co-opstudio.com"),
   openGraph: {
     title: "Color Shift",
-    description: "Color Shift - Interactive color palette generator",
+    description: "Photo-driven color pairs with guaranteed readable contrast.",
     url: "https://colorshift.co-opstudio.com",
     siteName: "Color Shift",
     locale: "en_US",
@@ -27,7 +30,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Color Shift",
-    description: "Color Shift - Interactive color palette generator",
+    description: "Photo-driven color pairs with guaranteed readable contrast.",
   },
 };
 
@@ -35,9 +38,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} dark h-full`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col antialiased">
+        <TooltipProvider>{children}</TooltipProvider>
+      </body>
     </html>
   );
 }
