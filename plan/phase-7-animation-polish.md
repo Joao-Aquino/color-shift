@@ -10,7 +10,7 @@ Layer GSAP-driven motion polish onto the now-feature-complete tool (Phases 1–6
 ## Animation skill requirement
 
 Use the animation skills installed from [emilkowalski/skills](https://github.com/emilkowalski/skills) when implementing this phase, rather than freehand GSAP:
-- **`animate`** — for building each new animation from scratch (specimen squish/pop, photo crossfade, control bar state transitions, slider easing): the ordered decisions (should it animate, which properties, which curve/duration, how it interrupts, how it exits) apply on top of the GSAP tool choice already locked in by the original spec's Design Decisions Log.
+- **`animate`** — for building each new animation from scratch (specimen squish/pop, photo crossfade, sidebar state transitions, slider easing): the ordered decisions (should it animate, which properties, which curve/duration, how it interrupts, how it exits) apply on top of the GSAP tool choice already locked in by the original spec's Design Decisions Log.
 - **`emil-design-eng`** — overall polish philosophy governing this phase's feel.
 - **`animation-vocabulary`** — reference for naming/discussing specific effects (e.g. confirming what "back-ease overshoot" or "rubber-band" style effects are actually called) when refining the spec further.
 - **`find-animation-opportunities`** / **`improve-animations`** — run once this phase's first pass is in, to catch anything in Phases 1–6 that should animate but doesn't, or to audit/prioritize fixes across the whole motion system.
@@ -29,8 +29,8 @@ Use the animation skills installed from [emilkowalski/skills](https://github.com
 ### 3. TubeText
 - 3D per-character rotation animation (GSAP SplitText) on any changing numeric/text value: hex swatches, score value, slider numbers.
 
-### 4. Control bar state transitions
-- GSAP Flip animation for layout shifts between default / score-expanded / export states.
+### 4. Sidebar state transitions
+- GSAP Flip animation for layout shifts: action row ↔ export state, score tile ↔ expanded threshold row, and editor panel open/close (including switching between the BG and FG editor).
 - Ease-out-quint curves; exit animations (150ms) faster than entrance (200ms); only transform + opacity animated (GPU-composited).
 
 ### 5. Slider easing
@@ -45,4 +45,4 @@ Use the animation skills installed from [emilkowalski/skills](https://github.com
 - Any new interactive features — this phase only adds motion to what Phases 1–6 already built.
 
 ## Done means
-Every interaction (specimen toggle, photo nav, value changes, control bar state changes, slider updates) has the GSAP-driven motion described in the original spec, and every motion parameter is DialKit-tunable via CSS custom properties.
+Every interaction (specimen toggle, photo nav, value changes, sidebar state changes, slider updates) has the GSAP-driven motion described in the original spec, and every motion parameter is DialKit-tunable via CSS custom properties.

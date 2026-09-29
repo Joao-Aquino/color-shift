@@ -23,7 +23,7 @@ Not a 5-color palette generator. Not a color theory teaching tool. Two colors, o
 - **The colors ARE the interface.** The specimen block and the photo share the screen. You're living inside the combination, not looking at swatches.
 - **Photo-driven discovery.** Random Unsplash photography is the entry point. Each photo arrives with extracted color pairs, ready to evaluate. Navigate through photos with arrow keys to discover new palettes.
 - **Discoverable, not labeled.** No dropdowns of color theory terms. Harmony rules power the engine invisibly.
-- **Minimal chrome.** The control bar is a single compact row at the bottom. Everything else is color and photography.
+- **Minimal chrome.** One compact sidebar holds every control. Everything else is color and photography.
 - **Buttery smooth.** GSAP animations on every interaction. Color transitions ease between states. Slider updates are instant. The specimen squishes on press and pops on release. This is a Shift Nudge product.
 
 
@@ -46,11 +46,15 @@ Not a 5-color palette generator. Not a color theory teaching tool. Two colors, o
 
 
 
-### Split Screen (desktop)
+### Sidebar + Split Screen (desktop)
 
-- **Left half:** Aa specimen. Background color fills the panel. Foreground color renders "Aa" at massive scale, centered. Click/tap toggles between Aa text and a filled circle (same foreground color).
-- **Right half:** Unsplash photo. Full-bleed, edge to edge. Photographer credit at bottom-left.
-- **Bottom:** Control bar. Single row of compact controls on black chrome. Slides up to reveal sliders when a swatch is clicked.
+- **Left sidebar (~320px):** logo and theme toggle, score tile, background/foreground color rows, editor panel (when open), action row, EXPORT. See "Sidebar Architecture".
+- **Specimen panel:** Aa specimen. Background color fills the panel. Foreground color renders "Aa" at massive scale, centered. Click/tap toggles between Aa text and a filled circle (same foreground color).
+- **Photo panel:** Unsplash photo, full-bleed within its panel. Credit at bottom-right, "Photographer, Unsplash", both linking out.
+- Panels have page padding and rounded corners (Figma V6).
+- Mobile (Phase 5): the sidebar becomes a bottom sheet.
+
+> Numbers and hex values in the Figma mockups are placeholders. The engine is the source of truth.
 
 
 
@@ -98,7 +102,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 
 - **WCAG 2:** contrast ratio (e.g. "4.50:1"), grades: AAA (≥7.0), AA (≥4.5), AA Large (≥3.0), Fail
 - **APCA:** Lc value (e.g. "Lc 72.3"), grades: AAA (≥75), AA (≥60), AA Large (≥45), Fail
-- Toggle between algorithms with a button in the control bar
+- Toggle between algorithms with the WCAG | APCA tabs at the top of the score tile
 - Score component uses TubeText (3D per-character rotation animation on value change)
 
 
@@ -106,37 +110,38 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 ### 5. Threshold Bumping
 
 - Thresholds: 1.5, 3.0, 4.5, 7.0 (WCAG) or 30, 45, 60, 75 (APCA)
-- Click a threshold button to bump the active color (fg by default, bg if its slider is open) to that exact contrast level
+- Click the score tile to expand the threshold row. Click a threshold to bump the active color (fg by default, bg if its editor panel is open) to that exact contrast level
 - Binary search on OKLCH lightness to find the minimal color change that hits the target
 - Active threshold (nearest to current score) is visually highlighted
 
 
 
-### 6. Color Sliders (Three Modes)
+### 6. Color Editor (Format Tabs + Sliders)
 
-- **OKLCH:** L (lightness 0-100), C (chroma 0-max gamut), H (hue 0-360)
-- **HSB:** H (hue 0-360), S (saturation 0-100), B (brightness 0-100)
-- **RGB:** R (0-255), G (0-255), B (0-255)
-- Toggle between modes with OKLCH / HSB / RGB buttons. Close button collapses the panel.
-- Each slider has three gradient layers (one per color space), all always rendered. Active mode at opacity 1, others at 0. CSS transition crossfades between them when switching modes.
-- Slider values are normalized to 0-100 percentages internally. GSAP animates slider positions when the photo changes (power4.inOut). During manual drag, animation is killed and updates are instant.
-- All sliders update the specimen in real time. Zero perceptible lag.
+- Click the BACKGROUND or FOREGROUND row to open the editor panel for that color; clicking the other row switches it. Closes on click outside or `Esc` (no close button).
+- Five format tabs: **HEX / RGB / HSL / HSB / OKLCH**. The active tab sets the slider set and the readout row.
+  - HEX and RGB: R/G/B (0-255). HSL: H/S/L. HSB: H/S/B. OKLCH: L (0-100), C (0-max gamut), H (0-360).
+- Each slider has a gradient track for its channel at the current values of the other channels, with an editable number at its right end. Tracks crossfade when the tab changes.
+- A monospace readout row shows the color in the active format. Editable; paste any valid format and it auto-converts.
+- No 2D picker, no alpha (transparency is out of scope).
+- Slider values are normalized to 0-100 internally. GSAP animates slider positions when the photo changes (power4.inOut). During manual drag, animation is killed and updates are instant.
+- All sliders update the specimen and score in real time. Zero perceptible lag.
 - OKLCH chroma slider uses binary search gamut mapping to find the maximum in-gamut chroma for the current L and H values.
 
 
 
 ### 7. Swap
 
-- Button between bg and fg swatches in the control bar
+- Button in the action row
 - Flips foreground and background colors
-- If sliders are open, the slider target swaps too (bg becomes fg, fg becomes bg)
+- If the editor panel is open, its target swaps too (bg becomes fg, fg becomes bg)
 - Keyboard shortcut: S
 
 
 
 ### 8. Color Format Display
 
-- Swatch buttons show hex values with animated TubeText (3D character rotation on change)
+- Color rows show monospace hex values with animated TubeText (3D character rotation on change)
 - Export includes all five formats: HEX, RGB, HSL, HSB, OKLCH
 
 
@@ -145,12 +150,13 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 
 - **Copy:** copies markdown with both colors in all 5 formats + contrast score + grade + photo credit to clipboard
 - **Download .MD:** planned (handler exists, not yet wired)
-- Export panel slides in from the right, replacing the arrow navigation. EXPORT button is the anchor (never moves). GSAP Flip animates the WCAG/APCA button layout shift.
+- The EXPORT button (bottom of the sidebar) switches the action row to COPY / DOWNLOAD .MD. EXPORT is the anchor (never moves). GSAP Flip animates the layout shift.
 
 
 
 ### 10. Dark / Light Theme
 
+- Light | Dark segmented toggle in the sidebar header.
 - Dark mode (default): black chrome (#000), muted text (#a39f9f), subtle borders (#2B2727)
 - Light mode: planned tinting from active palette (currently functional toggle)
 - Keyboard shortcut: T
@@ -163,34 +169,73 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 - `--color-duration`, `--photo-duration`, `--photo-opacity`, `--squish-scale`, `--squish-duration`, `--pop-scale`, `--pop-duration`, `--exit-duration`, `--enter-duration`, `--enter-overshoot`
 - DialKit can live-tune any of these during development or demonstration
 
+
+
+### 12. Undo
+
+- Undo button in the action row. History stack of color edits (slider changes, threshold bumps, fix) for the current photo. Resets when the photo changes.
+- Shortcut: `Cmd/Ctrl+Z`.
+
+
+
+### 13. Fix (wrench)
+
+- Snaps the active color to the closest color that still passes the selected threshold (default: AA, 4.5 WCAG / 60 APCA), via the same minimal-lightness `bumpToContrast`. Undoable.
+
+
+
+### 14. Loading and Error States
+
+- Skeleton panels while photos load or extract. If the photo API fails, an inline message in the photo panel with retry.
+
 ---
 
 
 
-## Control Bar Architecture
+## Sidebar Architecture
 
-The control bar is a Figma-matched component system built from atomic pieces:
-
-
-| Component          | What It Does                                                                                             |
-| ------------------ | -------------------------------------------------------------------------------------------------------- |
-| `ControlContainer` | Orchestrates slider panel (animated slide-up) + controls bar                                             |
-| `ControlsBar`      | Full toolbar: swatches, score, algorithm, arrows, export. Three animated states (default, score, export) |
-| `Swatches`         | BG swatch + swap icon + FG swatch. Clicking a swatch opens its slider panel                              |
-| `Score`            | Contrast pill: rating (AAA/AA/Fail) + value (ratio or Lc). Click expands threshold buttons               |
-| `ThresholdButtons` | Row of contrast thresholds. Click to bump. Active threshold highlighted                                  |
-| `Arrows`           | Left/right photo navigation. Hidden during export state                                                  |
-| `ExportPanel`      | COPY URL + DOWNLOAD .MD buttons. Visible during export state                                             |
-| `CSButton`         | Atomic button with optional swatch chip + TubeText label                                                 |
-| `TubeText`         | 3D per-character rotation animation using GSAP SplitText                                                 |
-| `ColorMode`        | OKLCH / HSB / RGB toggle row with optional CLOSE button                                                  |
-| `ColorSliders`     | Three gradient-tracked sliders, one per channel                                                          |
-| `ColorSlider`      | Single slider with triple gradient layers (crossfade on mode change)                                     |
-| `Swatch`           | 12x12 color chip with adaptive inner border (white for dark colors, black for light)                     |
-| `IconButton`       | Wrapper for icon-only interactive elements                                                               |
+The sidebar is a Figma-matched component system built from atomic pieces:
 
 
-**State transitions** between default/score/export use GSAP with ease-out-quint curves. Exit animations (150ms) run faster than entrance animations (200ms). Only transform + opacity are animated (GPU-composited).
+| Component          | What It Does                                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| `ControlContainer` | Sidebar shell: header, score, color rows, editor region, action row, export                                |
+| `Score`            | Tile with WCAG/APCA tabs, large monospace value, grade badge, per-grade description. Click expands thresholds |
+| `ThresholdButtons` | Row of contrast thresholds inside the expanded score tile. Click to bump. Active threshold highlighted    |
+| `ColorFields`      | BACKGROUND and FOREGROUND rows: label, monospace hex, swatch chip. Clicking opens the editor              |
+| `EditorPanel`      | Format tabs + sliders + readout row for the selected color. Closes on outside click / Esc                 |
+| `ControlsBar`      | Action row: prev, undo, shuffle, swap, fix, next. States: `default`, `export`                              |
+| `Arrows`           | Previous/next photo buttons (outer ends of the action row)                                                |
+| `ExportPanel`      | COPY + DOWNLOAD .MD buttons. Replaces the action row in export state; EXPORT button stays                 |
+| `CSButton`         | Atomic button with optional swatch chip + TubeText label                                                  |
+| `TubeText`         | 3D per-character rotation animation using GSAP SplitText                                                  |
+| `FormatTabs`       | HEX / RGB / HSL / HSB / OKLCH tab row                                                                     |
+| `ColorSliders`     | Three gradient-tracked sliders with numeric values, one per channel of the active format                  |
+| `ColorSlider`      | Single slider with gradient layers (crossfade on tab change)                                              |
+| `Swatch`           | Color chip with adaptive inner border (white for dark colors, black for light)                            |
+| `IconButton`       | Wrapper for Phosphor icon-only interactive elements                                                       |
+
+
+Phosphor icons use `regular` weight for most controls and `fill` only for active/selected states. Standard sizes are 16px for compact controls, 20px for primary action-row buttons, and 24px only for larger touch/mobile controls. Exact glyph choices come from the Figma design.
+
+Every icon-only button must have an accessible label, visible focus state, and a non-color-only indication for selected, active, and disabled states. The theme toggle and score-tab info icons meet the same minimums (no sub-16px targets).
+
+**State transitions** for the action row (default/export), score expansion, and editor open/close use GSAP with ease-out-quint curves. Exit animations (150ms) run faster than entrance animations (200ms). Only transform + opacity are animated (GPU-composited).
+
+---
+
+
+
+## Shared Data Shapes
+
+| Type               | Purpose                                                                   |
+| ------------------ | ------------------------------------------------------------------------- |
+| `Photo`            | Normalized Unsplash photo data used by the UI and photo buffer            |
+| `PaletteSwatch`    | One extracted color candidate with metadata useful for ranking            |
+| `ExtractedPalette` | Named swatches extracted from a photo                                     |
+| `ColorPair`        | Selected foreground/background pair, including original and bumped values |
+| `ContrastScore`    | WCAG/APCA score value plus rating label                                   |
+| `ControlBarState`  | Current action-row mode (`default`, `export`, and future states)          |
 
 ---
 
@@ -206,6 +251,7 @@ The control bar is a Figma-matched component system built from atomic pieces:
 | `tailwindcss` v4         | Styling                                                                             |
 | `culori`                 | OKLCH/HSB/RGB color engine (perceptually uniform conversions, gamut mapping)        |
 | `apca-w3`                | APCA contrast algorithm (Lc values)                                                 |
+| `@phosphor-icons/react`  | Web UI icon library for swap, arrows, generate, export/copy/download, close controls |
 | `gsap` + `@gsap/react`   | All animations: color transitions, slider easing, TubeText, Flip layout, squish/pop |
 | `node-vibrant` (browser) | Photo color extraction (VibrantPalette: 6 swatches per image)                       |
 | `dialkit`                | Live motion parameter tuning via CSS custom properties                              |
@@ -238,6 +284,8 @@ The control bar is a Figma-matched component system built from atomic pieces:
 | ← / → | Navigate photos              |
 | Space | Inject new random photo      |
 | S     | Swap foreground / background |
+| Cmd/Ctrl+Z | Undo color edit         |
+| Esc   | Close editor panel           |
 | T     | Toggle dark / light theme    |
 
 
@@ -286,7 +334,7 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | Download .MD button               | Handler exists | Not yet wired to file download                                                                                      |
 | Editable Aa text                  | Considered     | Type custom text to test real content                                                                               |
 | Tile/grid photo transitions       | Researched     | 9 animation patterns documented in `transitions.md`                                                                 |
-| Responsive mobile layout          | Planned        |                                                                                                                     |
+| Responsive mobile layout          | Planned        | Sidebar becomes a bottom sheet                                                                                      |
 | Vercel deployment                 | Planned        |                                                                                                                     |
 | iOS build                         | Planned        | Full native Swift app                                                                                               |
 | macOS build                       | Planned        | Full native menu bar app                                                                                            |
@@ -325,7 +373,7 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | DialKit integration       | CSS custom properties as a design-engineering workflow      |
 | TubeText component        | 3D CSS transforms, per-character animation                  |
 | Figma-matched components  | Translating a design system into atomic React components    |
-| Control bar state machine | GSAP-driven UI state transitions (default/score/export)     |
+| Sidebar state machine     | GSAP-driven UI state transitions (action row, score, editor) |
 | Export (markdown)         | File generation, clipboard API                              |
 | Responsive design         | Tailwind v4 responsive patterns                             |
 | Native builds             | Swift/SwiftUI (iOS + macOS)                                 |
@@ -348,9 +396,11 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | TubeText (3D character rotation)         | 2026-03 | Values change constantly. Smooth per-character animation makes it feel alive, not flickering.           |
 | 20 rotating specimen fonts               | 2026-03 | Each photo gets a different typeface. Keeps the experience fresh. Only Aa glyphs loaded (~1-2KB each).  |
 | DialKit CSS custom properties            | 2026-03 | Demonstrates the designer's fine-tuning workflow. Students see animation parameters they can touch.     |
+| Left sidebar replaces bottom bar         | 2026-09 | Figma V6: all controls in one column keep both panels full height and give the editor room to grow.     |
+| Format tabs drive sliders (no picker/alpha) | 2026-09 | One control sets format and sliders; per-channel sliders work in every space, a 2D picker does not.  |
 | Aa ↔ Circle toggle on specimen           | 2026-03 | Shows the color relationship as both typography and pure form. The interaction itself teaches contrast. |
 
 
 ---
 
-*Spec rewritten: 2026-03-28 (from codebase, replaces 2026-03-25 original)*
+*Spec rewritten: 2026-03-28 (from codebase, replaces 2026-03-25 original). Layout revised 2026-09-29 (sidebar, Figma V6).*

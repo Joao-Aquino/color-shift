@@ -19,11 +19,24 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 
 *Animation Polish was moved from Phase 5 to Phase 7 on 2026-09-27, so it lands after all other web-feature phases are stable instead of in the middle of them.*
 
+## Layout revision (2026-09-29)
+The bottom control bar with a slide-up slider panel was replaced by a **left sidebar** (Figma "Controls V6"): logo + theme toggle, score tile (WCAG | APCA), BACKGROUND/FOREGROUND rows, an editor panel (format tabs + sliders + readout), an action row (prev · undo · shuffle · swap · fix · next), and EXPORT. Specs and Phases 1–5 were updated accordingly. Feature placement by phase:
+
+| Sidebar piece | Phase |
+|---|---|
+| Score tile (WCAG), color rows, prev/shuffle/swap/next, loading/error states | 1 |
+| Editor panel, format tabs, sliders, readout row, undo | 2 |
+| APCA tab, threshold row, fix (wrench) | 3 |
+| EXPORT button + export state | 4 |
+| Light/Dark toggle, mobile bottom sheet | 5 |
+
+Mockup numbers and hex values are placeholders; the engine is the source of truth.
+
 ## Open questions (unresolved as of 2026-09-26)
 1. **Ordering** — does Phase 2→7 order match priorities, or should something else be pulled forward/back?
 2. **Doc granularity** — keep all phases fully detailed now, or only flesh out the next phase in detail once we're about to start it (earlier phases stay as lighter sketches until then)?
 3. **Native platforms** — should Phase 8 (iOS/macOS) stay tracked in this repo's `plan/` folder at all, or is it a separate project/repo to track elsewhere? Right now it's included for completeness but flagged as likely-separate.
-4. **Figma source** — Phase 1 now depends on a specific Figma frame link (see `phase-1-core-loop.md` §7); once that's resolved, later phases should each get their own frame reference too, if the Figma file covers them.
+4. **Figma source** — layout is settled (V6), but Phase 1 still needs a node-specific Figma link to that frame (see `phase-1-core-loop.md` §7); once that's resolved, later phases should each get their own frame reference too, if the Figma file covers them.
 5. **Animation skills** — Phase 7 now specifies using the [emilkowalski/skills](https://github.com/emilkowalski/skills) animation skill set (`animate`, `emil-design-eng`, `animation-vocabulary`, `find-animation-opportunities`, `improve-animations`) alongside GSAP; see `phase-7-animation-polish.md` for how they're meant to be applied.
 
 ## How to resume this project in a new session

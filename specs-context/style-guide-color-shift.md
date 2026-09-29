@@ -16,20 +16,19 @@ The design DNA will come from the design system from Vercel called [Geist](https
 
 ## Layout
 
-### Specimen Block (top 55-60% of viewport)
+### Specimen and Photo Panels
 
-- Full-bleed, edge to edge. No border-radius. No border. No visible padding around the color.
-- Background color fills the entire block.
-- Foreground color renders "Aa" (or user-typed text) at massive scale, centered.
+- Two large panels side by side, beside the sidebar. Rounded corners and page padding (Figma V6); no borders.
+- Specimen: background color fills the panel. Foreground color renders "Aa" (or user-typed text) at massive scale, centered.
 - The specimen is the hero. It dominates. Everything else serves it.
-- On mobile: specimen takes more vertical space (65-70%). Controls collapse below.
+- Photo credit sits bottom-right on the photo: "Photographer, Unsplash", both linked.
+- On mobile (Phase 5): specimen takes more vertical space (65-70%) and the sidebar becomes a bottom sheet.
 
-### Control Strip (bottom 40-45%)
+### Sidebar (~320px, left)
 
-- Lives beneath the specimen on dark neutral chrome.
-- Horizontally organized groups, separated by whitespace (not dividers).
-- Compact. Dense information, generous spacing between groups.
-- Groups in order: hex pair + swap | WCAG badge + ratio + threshold markers | sliders | export
+- Lives on dark neutral chrome beside the panels.
+- Sections stacked top to bottom, separated by whitespace and hairline dividers only where they separate functional groups.
+- Order: logo + theme toggle | score tile (WCAG | APCA) | background and foreground rows | editor panel (when open) | action row | EXPORT.
 
 ---
 
@@ -64,27 +63,27 @@ The design DNA will come from the design system from Vercel called [Geist](https
 - Font: [https://fonts.google.com/specimen/Geist](https://fonts.google.com/specimen/Geist)
 - Centered in the specimen block. Generous vertical centering. Floats in the color.
 
-### Control Strip — Values
+### Sidebar — Values
 
 - Monospace for ALL numeric values: hex codes, RGB values, HSL values, OKLCH values, contrast ratio, slider numbers, threshold markers.
 - Small size. Precise. Technical but not cold.
 
-### Control Strip — Labels
+### Sidebar — Labels
 
 - Clean sans-serif. Smaller than values. Muted opacity.
 - Labels like "Background", "Foreground", "H", "S", "B" are functional, not decorative.
-- WCAG badge (AAA, AA, AA+, Fail) is the most prominent element in the control strip: slightly larger, bolder, possibly with a subtle background shape.
+- The score tile is the most prominent element in the sidebar: a large monospace value with a grade badge, on a tinted tile.
 
 ### Hierarchy Rule
 
-- Maximum 2 type sizes in the control strip. Weight, opacity, and monospace/sans distinction create all remaining hierarchy.
+- Maximum 2 type sizes in the sidebar, plus the large score numeral as the single exception. Weight, opacity, and monospace/sans distinction create all remaining hierarchy.
 - The Aa specimen is the only large type on the screen.
 
 ---
 
 ## Spacing
 
-- Generous within the control strip. Groups breathe.
+- Generous within the sidebar. Groups breathe.
 - Tight within groups (hex pair + swap are close together, sliders are close together).
 - Whitespace separates groups, not lines or dividers.
 - Alignment to a baseline grid. Values line up. Labels line up.
@@ -94,44 +93,36 @@ The design DNA will come from the design system from Vercel called [Geist](https
 
 ## Interactive Elements
 
-### Hex Values
+### Color Rows and Editor
 
-- Editable on click. Hover shows text cursor.
-- Click the format label beneath (HEX, RGB, HSL, HSB, OKLCH) to cycle through formats.
-- Paste any valid color format. Auto-detect and convert.
+- Two rows, BACKGROUND and FOREGROUND: uppercase label left, monospace hex and swatch chip right, row tinted from its color.
+- Clicking a row opens the editor panel for that color; clicking the other row switches it. Clicking outside the panel or pressing `Esc` closes it (no close button).
+- The panel has five format tabs (HEX, RGB, HSL, HSB, OKLCH) that set both the sliders and the readout row.
+- Sliders: three per-channel sliders with a labeled row, a gradient track at the current value of the other channels, and an editable number at the right end. No 2D picker, no alpha.
+- Readout row: monospace, editable, paste any valid format and it auto-converts.
 
-### Swap Button
+### Action Row
 
-- Between the two hex values. Bi-directional arrows.
-- Click flips foreground and background.
-- Animation: TBD (simple masking + X/Y transforms likely).
+- Order: previous · undo · shuffle · swap · fix (wrench) · next, followed by the full-width EXPORT button.
+- Swap flips foreground and background (animation TBD: simple masking + X/Y transforms likely). Shuffle is the discoverable fallback for Space. Fix snaps to the closest passing color at the selected threshold.
 
-### Threshold Markers (1.5, 3.0, 4.5, 7.0)
+### Icon Controls
 
-- Horizontal segmented row.
-- The active threshold (closest to current ratio) is visually highlighted.
-- Up/down chevrons bump the color to the next threshold.
-- This is the UseContrast DNA: tap up, color shifts just enough to pass. Minimal change, maximum impact.
+- Icons use Phosphor.
+- Default icon weight is `regular`; use `fill` only for active or selected states.
+- Use 16px icons for compact controls, 20px for primary toolbar buttons, and reserve 24px for larger touch/mobile controls.
+- Icon-only controls require accessible labels, visible focus states, and non-color-only active/selected/disabled states.
 
-### HSB Sliders
+### Score Tile
 
-- Two groups: Background and Foreground.
-- Three sliders each: H (0-360), S (0-100), B (0-100).
-- Numeric value visible at each end or beside the slider.
-- Real-time specimen update as you drag. No lag.
-- Slider track could be colored (hue slider shows the spectrum, saturation slider shows gray-to-saturated, brightness slider shows dark-to-light).
-
-### Generate Button
-
-- Subtle, not primary. Shuffle or dice icon. Small.
-- The real generate action is spacebar. The button is the discoverable fallback.
+- Tabs WCAG | APCA (with info icons) select the algorithm. Large monospace value, grade badge, and a per-grade description.
+- Every grade has its own state (AAA, AA, AA Large, Fail), from the Figma state components. Passing grades are never red; Fail is visually distinct. The badge is text, so meaning never depends on color alone.
+- Clicking the tile expands the threshold row: 1.5 / 3.0 / 4.5 / 7.0 (APCA: 30 / 45 / 60 / 75). The active threshold (closest to the current score) is highlighted. Clicking one bumps the active color to that level with the minimal lightness change. This is the UseContrast DNA.
 
 ### Export (Copy + Download)
 
-- Small icons, side by side.
-- Copy: all formats + WCAG data to clipboard.
-- Download: markdown file with same data.
-- Positioned at the bottom of controls. Not prominent. Functional.
+- A full-width EXPORT button at the bottom of the sidebar. Clicking it swaps the action row for COPY and DOWNLOAD .MD.
+- Copy: all formats + WCAG data to clipboard. Download: markdown file with the same data.
 
 ---
 
@@ -170,7 +161,7 @@ The design DNA will come from the design system from Vercel called [Geist](https
 
 - Not clinical. Not a science tool with a UI bolted on.
 - Not busy. Not a dashboard with 12 panels.
-- Not trendy. No glassmorphism, no floating cards, no heavy gradients, no scattered accent colors.
+- Not trendy. No glassmorphism, no floating cards, no heavy gradients, no scattered accent colors. (Rounded panels are structural, not decorative.)
 - Not generic. This should feel like it was designed by someone who has been thinking about color tools for a decade. Because it was.
 
 ---
@@ -183,4 +174,4 @@ A premium instrument for color, where the specimen is the experience and everyth
 
 ---
 
-*Created: 2026-03-25*
+*Created: 2026-03-25. Layout revised 2026-09-29 (sidebar, Figma V6).*

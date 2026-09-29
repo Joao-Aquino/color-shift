@@ -1,40 +1,53 @@
 # Color Shift — Phase 2 Spec (Draft)
 
-*Status: Draft — not yet discussed/approved in detail*
-*Written: 2026-09-26*
+*Status: Draft — layout decisions closed 2026-09-29 (Figma "Controls V6"); detail otherwise not yet approved*
+*Written: 2026-09-26. Revised 2026-09-29 for the sidebar layout.*
 
 ## Goal
 
 Turn the tool from view-only into a "nudge" instrument. Add manual color editing so any extracted pair can be adjusted by hand, in the color space that makes sense for the task.
 
-## What gets built (proposed)
+## What gets built
 
-### 1. Color sliders — three modes
-- **OKLCH:** L (0–100), C (0–max in-gamut chroma for current L/H), H (0–360).
-- **HSB:** H (0–360), S (0–100), B (0–100).
-- **RGB:** R/G/B (0–255 each).
-- Toggle between modes (OKLCH / HSB / RGB buttons in the control bar).
-- Slider panel opens when a swatch (bg or fg) is clicked; closes with a close button.
-- Values normalized internally to 0–100 for consistent slider behavior across modes.
-- OKLCH chroma slider gamut-maps via binary search (max in-gamut chroma for current L/H).
+### 1. Editor panel (in the sidebar)
+- Clicking the BACKGROUND or FOREGROUND row opens the editor panel for that color, in the editor region Phase 1 reserved. Clicking the other row switches the panel to that color.
+- Closes on click outside the panel or `Esc`. No close button. Focus returns to the row that opened it.
+- No 2D picker square and no alpha slider. Per-channel sliders only.
 
-### 2. Real-time updates
-- Specimen updates live while dragging, zero perceptible lag.
-- No animation requirement yet beyond what Phase 1 already has — GSAP easing for slider repositioning is Phase 7.
+### 2. Format tabs drive the sliders
+Five tabs: HEX · RGB · HSL · HSB · OKLCH. The active tab sets both the slider set and the readout row.
 
-### 3. Five-format value display
-- HEX, RGB, HSL, HSB, OKLCH all viewable for the active color (extends the Phase 1 hex-only swatch display).
-- Plain text updates on change — TubeText 3D animation is Phase 7.
+| Tab | Sliders |
+|---|---|
+| HEX | R / G / B (hex is RGB encoded) |
+| RGB | R / G / B (0–255) |
+| HSL | H / S / L |
+| HSB | H / S / B (0–100 for S and B, 0–360 for H) |
+| OKLCH | L (0–100) / C (0–max in-gamut for current L/H) / H (0–360) |
 
-## Open questions to resolve before building
-- Does opening a slider panel replace the bottom control bar, or slide up above it (per original spec: "slides up to reveal sliders")?
-- Which color's slider opens by default when a swatch is clicked — always that swatch's own color (bg swatch → bg sliders, fg swatch → fg sliders)?
-- Do all 5 formats need to be simultaneously visible, or cycle-through via click (style guide suggests click-to-cycle)?
+- Each slider has a gradient track for its channel at the current values of the other channels (e.g. Brightness runs black → full-brightness color at current H and S). Tracks crossfade when the tab changes.
+- Each slider shows an editable numeric value at its right end.
+- Switching tabs never loses the edit; values convert through the OKLCH engine.
+- OKLCH chroma gamut-maps via binary search (max in-gamut chroma for current L/H).
+
+### 3. Readout row
+- Below the sliders: a monospace row showing the active color in the active tab's format. Editable; paste any valid color format, auto-detect and convert.
+- The color field row above (hex) always updates live.
+
+### 4. Real-time updates
+- Specimen and score update live while dragging, zero perceptible lag.
+- No animation requirement beyond Phase 1 — GSAP slider easing is Phase 7.
+
+### 5. Undo
+- Undo button in the action row (slot reserved in Phase 1). History stack of color edits for the current photo; resets when the photo changes.
+- Shortcut: `Cmd/Ctrl+Z`. Disabled (with a non-color-only cue) when the stack is empty.
+- Phase 3's fix/wrench and threshold bumps push onto the same stack.
 
 ## Explicitly out of scope for Phase 2
-- Threshold bumping, APCA (Phase 3)
+- Alpha / transparency (not in the product; contrast against transparency is undefined)
+- Threshold bumping, fix/wrench, APCA (Phase 3)
 - Export (Phase 4)
 - GSAP slider easing, TubeText animation (Phase 7)
 
 ## Done means
-Click a swatch → slider panel opens → drag OKLCH/HSB/RGB sliders → specimen updates live with zero lag → switch slider mode without losing the edit → see the color's value in all 5 formats.
+Click a color row → editor panel opens → switch tabs and drag sliders → specimen and score update live with zero lag → edit the value in the readout row → undo steps back → click outside or `Esc` closes the panel.
