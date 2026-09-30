@@ -3,8 +3,9 @@
 import { ArrowLeftIcon } from "@phosphor-icons/react/ArrowLeft";
 import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
 import { ArrowUUpLeftIcon } from "@phosphor-icons/react/ArrowUUpLeft";
-import { ShuffleIcon } from "@phosphor-icons/react/Shuffle";
-import { SwapIcon } from "@phosphor-icons/react/Swap";
+import { ArrowsClockwiseIcon } from "@phosphor-icons/react/ArrowsClockwise";
+import { ArrowsLeftRightIcon } from "@phosphor-icons/react/ArrowsLeftRight";
+import { WrenchIcon } from "@phosphor-icons/react/Wrench";
 
 import type { ControlBarState } from "@/types/color-shift";
 
@@ -15,11 +16,13 @@ interface ControlsBarProps {
   canGoPrevious: boolean;
   canGoNext: boolean;
   canUndo: boolean;
+  canFix: boolean;
   disabled?: boolean;
   onPrevious: () => void;
   onUndo: () => void;
   onShuffle: () => void;
   onSwap: () => void;
+  onFix: () => void;
   onNext: () => void;
 }
 
@@ -28,11 +31,13 @@ export function ControlsBar({
   canGoPrevious,
   canGoNext,
   canUndo,
+  canFix,
   disabled,
   onPrevious,
   onUndo,
   onShuffle,
   onSwap,
+  onFix,
   onNext,
 }: ControlsBarProps) {
   if (state !== "default") return null;
@@ -53,17 +58,23 @@ export function ControlsBar({
       />
       <IconButton
         disabled={disabled}
-        icon={ShuffleIcon}
+        icon={ArrowsLeftRightIcon}
         label="New random photo (Space)"
         onClick={onShuffle}
       />
       <IconButton
         disabled={disabled}
-        icon={SwapIcon}
+        icon={ArrowsClockwiseIcon}
         label="Swap colors (S)"
         onClick={onSwap}
       />
-      <span aria-hidden />
+      <IconButton
+        data-fix-contrast
+        disabled={disabled || !canFix}
+        icon={WrenchIcon}
+        label="Fix contrast to selected threshold"
+        onClick={onFix}
+      />
       <IconButton
         disabled={disabled || !canGoNext}
         icon={ArrowRightIcon}

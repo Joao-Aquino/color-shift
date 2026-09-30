@@ -7,6 +7,7 @@ export type PaletteName =
   | "LightMuted";
 
 export type ContrastGrade = "AAA" | "AA" | "AA Large" | "Fail";
+export type ContrastAlgorithm = "WCAG" | "APCA";
 export type ColorTarget = "background" | "foreground";
 export type ColorFormat = "HEX" | "RGB" | "HSL" | "HSB" | "OKLCH";
 
@@ -42,8 +43,9 @@ export interface ColorPair {
 }
 
 export interface ContrastScore {
-  algorithm: "WCAG";
+  algorithm: ContrastAlgorithm;
   value: number;
+  signedValue: number;
   grade: ContrastGrade;
   description: string;
 }

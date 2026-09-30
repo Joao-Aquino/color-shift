@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-09-29 — Phase 3 dual scoring and thresholds completed
+
+Implemented the approved contrast result from Figma frame `3359:1577`. The score tile now switches between WCAG 2 and APCA, matches the six good/meh/bad visual states, shows APCA as unsigned `Lc` while retaining its signed polarity internally, and exposes algorithm-specific descriptions and thresholds. Each algorithm remembers its own selected level (WCAG 4.5 and APCA 60 by default) across photos, while a separate dot identifies the level nearest to the live score.
+
+Clicking the score body expands the four thresholds. A threshold click adjusts the open editor's color, or the foreground by default, to that exact level even when doing so lowers a stronger pair. The OKLCH search preserves APCA polarity and falls back to the maximum available contrast when a target cannot be reached. Score interactions keep the active editor target intact; `Escape` and outside clicks collapse the thresholds.
+
+Filled the reserved action-row slot with the wrench control. It moves the active color only when the pair is below the selected threshold, becomes disabled once the pair passes, and records one undo step. Validated foreground and background adjustments, exact WCAG/APCA targets, per-algorithm threshold memory, photo persistence, Fix/no-op behavior, Undo availability, panel dismissal, and the WCAG/APCA layouts in the live browser. ESLint, TypeScript, and the Next.js 16 webpack production build pass.
+
 ## 2026-09-29 — Phase 2 color editing completed
 
 Implemented the approved editor panel from Figma frame `3359:1654`. Clicking either color row now opens an accessible sidebar editor with HEX, RGB, HSL, HSB, and OKLCH tabs; per-channel gradient sliders; editable numeric values; and a format-aware readout. All formats round-trip through `culori`, HSB input is parsed explicitly, alpha colors are rejected, and OKLCH chroma is capped to the current lightness/hue's sRGB gamut with a binary search.

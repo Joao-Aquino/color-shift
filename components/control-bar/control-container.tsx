@@ -1,10 +1,19 @@
 import { ColorFields } from "./color-fields";
 import { ControlsBar } from "./controls-bar";
 import { Score } from "./score";
-import type { ColorTarget, ContrastScore } from "@/types/color-shift";
+import type {
+  ColorTarget,
+  ContrastAlgorithm,
+  ContrastScore,
+} from "@/types/color-shift";
 
 interface ControlContainerProps {
   activeTarget: ColorTarget | null;
+  algorithm: ContrastAlgorithm;
+  scoreExpanded: boolean;
+  nearestThreshold: number;
+  selectedThreshold: number;
+  thresholds: readonly number[];
   score: ContrastScore | null;
   background: string | null;
   foreground: string | null;
@@ -12,12 +21,17 @@ interface ControlContainerProps {
   canGoPrevious: boolean;
   canGoNext: boolean;
   canUndo: boolean;
+  canFix: boolean;
   disabled?: boolean;
   onSelectColor: (target: ColorTarget) => void;
+  onAlgorithmChange: (algorithm: ContrastAlgorithm) => void;
+  onScoreExpandedChange: (expanded: boolean) => void;
+  onThresholdSelect: (threshold: number) => void;
   onPrevious: () => void;
   onUndo: () => void;
   onShuffle: () => void;
   onSwap: () => void;
+  onFix: () => void;
   onNext: () => void;
 }
 
@@ -27,6 +41,11 @@ function Divider() {
 
 export function ControlContainer({
   activeTarget,
+  algorithm,
+  scoreExpanded,
+  nearestThreshold,
+  selectedThreshold,
+  thresholds,
   score,
   background,
   foreground,
@@ -34,12 +53,17 @@ export function ControlContainer({
   canGoPrevious,
   canGoNext,
   canUndo,
+  canFix,
   disabled,
   onSelectColor,
+  onAlgorithmChange,
+  onScoreExpandedChange,
+  onThresholdSelect,
   onPrevious,
   onUndo,
   onShuffle,
   onSwap,
+  onFix,
   onNext,
 }: ControlContainerProps) {
   return (
@@ -54,7 +78,17 @@ export function ControlContainer({
           </h1>
         </header>
         <Divider />
-        <Score score={score} />
+        <Score
+          algorithm={algorithm}
+          expanded={scoreExpanded}
+          nearestThreshold={nearestThreshold}
+          onAlgorithmChange={onAlgorithmChange}
+          onExpandedChange={onScoreExpandedChange}
+          onThresholdSelect={onThresholdSelect}
+          score={score}
+          selectedThreshold={selectedThreshold}
+          thresholds={thresholds}
+        />
         <Divider />
         <ColorFields
           activeTarget={activeTarget}
@@ -70,10 +104,12 @@ export function ControlContainer({
 
       <div className="shrink-0 pt-6">
         <ControlsBar
+          canFix={canFix}
           canGoNext={canGoNext}
           canGoPrevious={canGoPrevious}
           canUndo={canUndo}
           disabled={disabled}
+          onFix={onFix}
           onNext={onNext}
           onPrevious={onPrevious}
           onUndo={onUndo}

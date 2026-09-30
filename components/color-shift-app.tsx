@@ -7,10 +7,20 @@ import { ColorEditor } from "@/components/control-bar/color-editor";
 import { ControlContainer } from "@/components/control-bar/control-container";
 import { CSButton } from "@/components/control-bar/cs-button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getContrastScore } from "@/lib/color/contrast";
+import {
+  adjustColorToContrast,
+  CONTRAST_THRESHOLDS,
+  DEFAULT_CONTRAST_THRESHOLD,
+  getContrastScore,
+} from "@/lib/color/contrast";
 import { createFallbackPair, extractColorPair } from "@/lib/color/palette";
 import { fetchPhotos } from "@/lib/photos/client";
-import type { ColorPair, ColorTarget, Photo } from "@/types/color-shift";
+import type {
+  ColorPair,
+  ColorTarget,
+  ContrastAlgorithm,
+  Photo,
+} from "@/types/color-shift";
 
 const INITIAL_BUFFER_SIZE = 10;
 const REFILL_THRESHOLD = 3;
@@ -41,6 +51,12 @@ export function ColorShiftApp() {
   const [isRequesting, setIsRequesting] = useState(false);
   const [activeColor, setActiveColor] = useState<ColorTarget | null>(null);
   const [history, setHistory] = useState<ColorSnapshot[]>([]);
+  const [contrastAlgorithm, setContrastAlgorithm] =
+    useState<ContrastAlgorithm>("WCAG");
+  const [scoreExpanded, setScoreExpanded] = useState(false);
+  const [selectedThresholds, setSelectedThresholds] = useState<
+    Record<ContrastAlgorithm, number>
+  >(() => ({ ...DEFAULT_CONTRAST_THRESHOLD }));
   const entriesRef = useRef(entries);
   const indexRef = useRef(index);
   const activeColorRef = useRef(activeColor);
@@ -340,19 +356,76 @@ export function ColorShiftApp() {
     if (target) selectColor(target === "background" ? "foreground" : "background");
   }, [getCurrentSnapshot, pushHistory, selectColor, updateCurrentPair]);
 
+  const adjustActiveColor = useCallback(
+    (targetValue: number, mode: "exact" | "minimum") => {
+      const pair = entriesRef.current[indexRef.current]?.pair;
+      if (!pair) return;
+
+      const colorTarget = activeColorRef.current ?? "foreground";
+      const against =
+        colorTarget === "foreground" ? pair.background : pair.foreground;
+      const adjusted = adjustColorToContrast({
+        color: pair[colorTarget],
+        against,
+        algorithm: contrastAlgorithm,
+        target: targetValue,
+        colorTarget,
+        mode,
+      });
+
+      commitEditedColor(colorTarget, adjusted);
+    },
+    [commitEditedColor, contrastAlgorithm],
+  );
+
+  const selectThreshold = useCallback(
+    (threshold: number) => {
+      setSelectedThresholds((current) => ({
+        ...current,
+        [contrastAlgorithm]: threshold,
+      }));
+      adjustActiveColor(threshold, "exact");
+    },
+    [adjustActiveColor, contrastAlgorithm],
+  );
+
+  const fixContrast = useCallback(() => {
+    adjustActiveColor(selectedThresholds[contrastAlgorithm], "minimum");
+  }, [adjustActiveColor, contrastAlgorithm, selectedThresholds]);
+
   useEffect(() => {
     if (!activeColor) return;
 
     function handleClick(event: MouseEvent) {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      if (target.closest("[data-color-editor], [data-color-field]")) return;
+      if (
+        target.closest(
+          "[data-color-editor], [data-color-field], [data-contrast-score], [data-fix-contrast]",
+        )
+      ) {
+        return;
+      }
       closeEditor();
     }
 
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, [activeColor, closeEditor]);
+
+  useEffect(() => {
+    if (!scoreExpanded) return;
+
+    function handleClick(event: MouseEvent) {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest("[data-contrast-score]")) return;
+      setScoreExpanded(false);
+    }
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [scoreExpanded]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -375,9 +448,13 @@ export function ColorShiftApp() {
         return;
       }
 
-      if (event.key === "Escape" && activeColorRef.current) {
+      if (event.key === "Escape") {
+        const hasOpenPanel = !!activeColorRef.current || scoreExpanded;
+        if (!hasOpenPanel) return;
+
         event.preventDefault();
-        closeEditor();
+        if (activeColorRef.current) closeEditor();
+        if (scoreExpanded) setScoreExpanded(false);
         return;
       }
 
@@ -407,20 +484,31 @@ export function ColorShiftApp() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeEditor, goNext, goPrevious, shuffle, swapColors, undo]);
+  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo]);
 
   const current = entries[index];
   const pair = current?.pair ?? null;
   const score = pair
-    ? getContrastScore(pair.foreground, pair.background)
+    ? getContrastScore(pair.foreground, pair.background, contrastAlgorithm)
     : null;
+  const thresholds = CONTRAST_THRESHOLDS[contrastAlgorithm];
+  const selectedThreshold = selectedThresholds[contrastAlgorithm];
+  const nearestThreshold = score
+    ? thresholds.reduce((nearest, threshold) =>
+        Math.abs(threshold - score.value) < Math.abs(nearest - score.value)
+          ? threshold
+          : nearest,
+      )
+    : selectedThreshold;
   const ready = !!current && !!pair;
 
   return (
     <main className="flex h-screen min-h-[720px] min-w-[1180px] gap-12 overflow-hidden bg-[var(--color-chrome-bg)] p-10">
       <ControlContainer
         activeTarget={activeColor}
+        algorithm={contrastAlgorithm}
         background={pair?.background ?? null}
+        canFix={!!score && score.value < selectedThreshold}
         canGoNext={index < entries.length - 1}
         canGoPrevious={index > 0}
         canUndo={history.length > 0}
@@ -438,13 +526,21 @@ export function ColorShiftApp() {
           ) : null
         }
         foreground={pair?.foreground ?? null}
+        nearestThreshold={nearestThreshold}
+        onAlgorithmChange={setContrastAlgorithm}
+        onFix={fixContrast}
         onNext={goNext}
         onPrevious={goPrevious}
         onSelectColor={selectColor}
+        onScoreExpandedChange={setScoreExpanded}
         onShuffle={() => void shuffle()}
         onSwap={swapColors}
+        onThresholdSelect={selectThreshold}
         onUndo={undo}
         score={score}
+        scoreExpanded={scoreExpanded}
+        selectedThreshold={selectedThreshold}
+        thresholds={thresholds}
       />
 
       <div className="flex min-w-0 flex-1 gap-1 overflow-hidden rounded-[12px]">
@@ -488,7 +584,7 @@ export function ColorShiftApp() {
                 sizes="(min-width: 1180px) 38vw, 50vw"
                 src={current.photo.url}
               />
-              <p className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded-[4px] bg-black/80 px-2 py-1 text-xs backdrop-blur-sm">
+              <p className="absolute right-4 bottom-4 z-10 flex items-center gap-1 rounded-[4px] bg-black/80 px-2 py-1 text-xs backdrop-blur-sm">
                 <span className="tracking-[0.04em] text-[var(--color-text-label)] uppercase">
                   Photo
                 </span>

@@ -15,14 +15,12 @@
   --color-text-value: #ededed;
   --color-focus: #ffffff;
   --color-panel-loading: #151515;
-  --color-score-tab: #163520;
-  --color-score-strong: #0f2e18;
-  --color-score-pass: #183a27;
-  --color-score-large: #3a3117;
-  --color-score-fail: #3b171a;
-  --color-score-label: #72cf83;
-  --color-score-large-label: #e3be54;
-  --color-score-fail-label: #ef8a91;
+  --color-score-good: #0f2e18;
+  --color-score-meh: #331b00;
+  --color-score-bad: #3c1618;
+  --color-score-good-label: #62c073;
+  --color-score-meh-label: #ff990a;
+  --color-score-bad-label: #ff6166;
 
   --background: var(--color-chrome-bg);
   --foreground: var(--color-text-value);

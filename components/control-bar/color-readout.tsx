@@ -99,7 +99,7 @@ export function ColorReadout({
       </div>
       {invalid ? (
         <p
-          className="px-3 text-[11px] text-[var(--color-score-fail-label)]"
+          className="px-3 text-[11px] text-[var(--color-score-bad-label)]"
           id={descriptionId}
           role="alert"
         >

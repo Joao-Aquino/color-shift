@@ -9,7 +9,7 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 |---|---|---|---|
 | 1 | `phase-1-core-loop.md` | Core loop: photo → extraction → specimen | Complete |
 | 2 | `phase-2-color-editing.md` | Color editing (sliders, 5 formats) | Complete |
-| 3 | `phase-3-dual-scoring-thresholds.md` | Dual scoring (APCA) + threshold bumping | Draft |
+| 3 | `phase-3-dual-scoring-thresholds.md` | Dual scoring (APCA) + threshold bumping | Complete |
 | 4 | `phase-4-export.md` | Export (copy + download) | Draft |
 | 5 | `phase-5-theming-responsive.md` | Theming (light mode) + responsive mobile | Draft |
 | 6 | `phase-6-extended-input-layouts.md` | Extended input & layout modes | Draft |
