@@ -1,10 +1,12 @@
 import { ColorFields } from "./color-fields";
 import { ControlsBar } from "./controls-bar";
+import { ExportControls } from "./export-controls";
 import { Score } from "./score";
 import type {
   ColorTarget,
   ContrastAlgorithm,
   ContrastScore,
+  Photo,
 } from "@/types/color-shift";
 
 interface ControlContainerProps {
@@ -17,6 +19,7 @@ interface ControlContainerProps {
   score: ContrastScore | null;
   background: string | null;
   foreground: string | null;
+  photo: Photo | null;
   editor: React.ReactNode;
   canGoPrevious: boolean;
   canGoNext: boolean;
@@ -49,6 +52,7 @@ export function ControlContainer({
   score,
   background,
   foreground,
+  photo,
   editor,
   canGoPrevious,
   canGoNext,
@@ -103,20 +107,27 @@ export function ControlContainer({
       </div>
 
       <div className="shrink-0 pt-6">
-        <ControlsBar
-          canFix={canFix}
-          canGoNext={canGoNext}
-          canGoPrevious={canGoPrevious}
-          canUndo={canUndo}
+        <ExportControls
+          background={background}
           disabled={disabled}
-          onFix={onFix}
-          onNext={onNext}
-          onPrevious={onPrevious}
-          onUndo={onUndo}
-          onShuffle={onShuffle}
-          onSwap={onSwap}
-        />
-        <div data-slot="export-region" className="h-0" aria-hidden />
+          foreground={foreground}
+          key={`${photo?.id ?? "empty"}-${background}-${foreground}`}
+          photo={photo}
+        >
+          <ControlsBar
+            canFix={canFix}
+            canGoNext={canGoNext}
+            canGoPrevious={canGoPrevious}
+            canUndo={canUndo}
+            disabled={disabled}
+            onFix={onFix}
+            onNext={onNext}
+            onPrevious={onPrevious}
+            onUndo={onUndo}
+            onShuffle={onShuffle}
+            onSwap={onSwap}
+          />
+        </ExportControls>
       </div>
     </aside>
   );

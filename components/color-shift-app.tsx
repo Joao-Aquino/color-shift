@@ -537,6 +537,7 @@ export function ColorShiftApp() {
         onSwap={swapColors}
         onThresholdSelect={selectThreshold}
         onUndo={undo}
+        photo={current?.photo ?? null}
         score={score}
         scoreExpanded={scoreExpanded}
         selectedThreshold={selectedThreshold}

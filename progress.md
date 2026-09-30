@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-09-29 — Phase 4 Markdown export completed
+
+Implemented the approved export component from Figma node `3377:327`. The sidebar keeps the six photo controls visible while the full-width EXPORT button moves through the two progress-bar loading states and then replaces itself, in the same slot, with COPY and DOWNLOAD .MD. The local row, progress, and success-label transitions respect reduced-motion preferences; COPY and DOWNLOAD both show their check-mark confirmation for 1.5 seconds before restoring EXPORT.
+
+Both actions use one shared Markdown generator. Its payload includes background and foreground in HEX, RGB, HSL, HSB, and OKLCH; WCAG 2 and APCA scores with grades; and linked Unsplash credit. Downloads use the approved `color-shift-<background-hex>-<foreground-hex>.md` filename. Added accessible expanded, disabled, focus, and live-status behavior, and reset the export state whenever the active photo or color pair changes.
+
+Validated the new files with ESLint and the full project with TypeScript and a Next.js 16 webpack production build. Live browser checks covered both loading stages, the in-place EXPORT replacement, COPY/COPIED, DOWNLOAD/DOWNLOADED, the 1.5-second reset, Escape dismissal, persistent photo controls, and a clean browser console. The repository-wide lint command still reports pre-existing hook-rule violations in the uncommitted animation work in `color-fields.tsx` and `score.tsx`; the Phase 4 files pass lint.
+
 ## 2026-09-29 — Phase 3 dual scoring and thresholds completed
 
 Implemented the approved contrast result from Figma frame `3359:1577`. The score tile now switches between WCAG 2 and APCA, matches the six good/meh/bad visual states, shows APCA as unsigned `Lc` while retaining its signed polarity internally, and exposes algorithm-specific descriptions and thresholds. Each algorithm remembers its own selected level (WCAG 4.5 and APCA 60 by default) across photos, while a separate dot identifies the level nearest to the live score.
