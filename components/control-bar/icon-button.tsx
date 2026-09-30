@@ -28,7 +28,7 @@ export function IconButton({
         <Button
           aria-label={label}
           className={cn(
-            "h-12 w-full rounded-full border border-[var(--color-chrome-border)] bg-transparent text-[var(--color-text-value)] hover:border-[var(--color-chrome-border-strong)] hover:bg-[var(--color-chrome-raised)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] disabled:opacity-30",
+            "h-12 w-full rounded-full border border-[var(--color-chrome-border)] bg-transparent text-[var(--color-text-value)] transition-[border-color,background-color,opacity,transform] duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[var(--color-chrome-border-strong)] hover:bg-[var(--color-chrome-raised)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] active:translate-y-0 motion-safe:active:scale-[0.97] disabled:opacity-30",
             className,
           )}
           size="icon"

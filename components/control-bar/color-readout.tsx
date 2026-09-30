@@ -9,6 +9,8 @@ import {
 } from "@/lib/color/editor";
 import type { ColorFormat } from "@/types/color-shift";
 
+import { Odometer } from "./odometer";
+
 interface ColorReadoutProps {
   color: string;
   format: ColorFormat;
@@ -24,17 +26,16 @@ export function ColorReadout({
 }: ColorReadoutProps) {
   const descriptionId = useId();
   const cancelCommit = useRef(false);
-  const focused = useRef(false);
-  const [draft, setDraft] = useState(() =>
-    formatColorReadout(color, format, fallbackHue),
-  );
+  const inputRef = useRef<HTMLInputElement>(null);
+  const displayValue = formatColorReadout(color, format, fallbackHue);
+  const [draft, setDraft] = useState(displayValue);
   const [invalid, setInvalid] = useState(false);
 
   useEffect(() => {
-    if (focused.current) return;
-    setDraft(formatColorReadout(color, format, fallbackHue));
+    if (inputRef.current && document.activeElement === inputRef.current) return;
+    setDraft(displayValue);
     setInvalid(false);
-  }, [color, fallbackHue, format]);
+  }, [displayValue]);
 
   function commit(value = draft) {
     const parsed = parseColorReadout(value);
@@ -54,48 +55,55 @@ export function ColorReadout({
         <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase">
           {format}
         </span>
-        <Input
-          aria-describedby={invalid ? descriptionId : undefined}
-          aria-invalid={invalid}
-          aria-label={`${format} color value`}
-          className="h-7 min-w-0 flex-1 rounded-full border-0 bg-transparent px-2 text-right font-mono text-xs tabular-nums focus-visible:ring-1"
-          onBlur={() => {
-            focused.current = false;
-            if (cancelCommit.current) {
-              cancelCommit.current = false;
-            } else {
-              commit();
-            }
-          }}
-          onChange={(event) => {
-            setDraft(event.target.value);
-            if (invalid) setInvalid(false);
-          }}
-          onFocus={(event) => {
-            focused.current = true;
-            event.currentTarget.select();
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") event.currentTarget.blur();
-            if (event.key === "Escape") {
-              cancelCommit.current = true;
+        <div className="relative min-w-0 flex-1 focus-within:[&_[data-odometer-element]]:invisible focus-within:[&_input]:text-[var(--color-text-value)] focus-within:[&_input]:caret-current">
+          <Input
+            aria-describedby={invalid ? descriptionId : undefined}
+            aria-invalid={invalid}
+            aria-label={`${format} color value`}
+            className="h-7 w-full rounded-full border-0 bg-transparent px-2 text-right font-mono text-xs text-transparent caret-transparent tabular-nums focus-visible:ring-1"
+            onBlur={() => {
+              if (cancelCommit.current) {
+                cancelCommit.current = false;
+                setDraft(displayValue);
+                setInvalid(false);
+              } else {
+                commit();
+              }
+            }}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              if (invalid) setInvalid(false);
+            }}
+            onFocus={(event) => {
+              setDraft(displayValue);
+              event.currentTarget.select();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") event.currentTarget.blur();
+              if (event.key === "Escape") {
+                cancelCommit.current = true;
+                event.currentTarget.blur();
+              }
+            }}
+            onPaste={(event) => {
+              const pasted = event.clipboardData.getData("text");
+              const parsed = parseColorReadout(pasted);
+              if (!parsed) return;
+              event.preventDefault();
+              setDraft(formatColorReadout(parsed, format, fallbackHue));
               setInvalid(false);
-              setDraft(formatColorReadout(color, format, fallbackHue));
-              event.currentTarget.blur();
-            }
-          }}
-          onPaste={(event) => {
-            const pasted = event.clipboardData.getData("text");
-            const parsed = parseColorReadout(pasted);
-            if (!parsed) return;
-            event.preventDefault();
-            setDraft(formatColorReadout(parsed, format, fallbackHue));
-            setInvalid(false);
-            if (parsed !== color) onCommit(parsed);
-          }}
-          spellCheck={false}
-          value={draft}
-        />
+              if (parsed !== color) onCommit(parsed);
+            }}
+            ref={inputRef}
+            spellCheck={false}
+            value={draft}
+          />
+          <Odometer
+            className="pointer-events-none absolute inset-0 flex items-center justify-end px-2 text-xs text-[var(--color-text-value)]"
+            key={format}
+            value={displayValue}
+          />
+        </div>
       </div>
       {invalid ? (
         <p

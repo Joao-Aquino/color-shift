@@ -401,7 +401,7 @@ export function ColorShiftApp() {
       if (!(target instanceof Element)) return;
       if (
         target.closest(
-          "[data-color-editor], [data-color-field], [data-contrast-score], [data-fix-contrast]",
+          "[data-color-editor], [data-color-field], [data-color-field-shell], [data-contrast-score], [data-fix-contrast]",
         )
       ) {
         return;
@@ -585,7 +585,7 @@ export function ColorShiftApp() {
                 sizes="(min-width: 1180px) 38vw, 50vw"
                 src={current.photo.url}
               />
-              <p className="absolute right-4 bottom-4 z-10 flex items-center gap-1 rounded-[4px] bg-black/80 px-2 py-1 text-xs backdrop-blur-sm">
+              <p className="absolute right-4 bottom-4 z-10 flex items-center gap-1 rounded-full bg-black/80 px-2 py-1 text-xs backdrop-blur-sm">
                 <span className="tracking-[0.04em] text-[var(--color-text-label)] uppercase">
                   Photo
                 </span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import type { ContrastAlgorithm } from "@/types/color-shift";
 
 interface ThresholdButtonsProps {
@@ -24,7 +25,7 @@ export function ThresholdButtons({
   return (
     <div
       aria-label={`${algorithm} contrast thresholds`}
-      className="grid grid-cols-4 gap-1 border-t border-white/10 px-3 py-3"
+      className="flex gap-1"
       role="group"
     >
       {thresholds.map((threshold) => {
@@ -35,20 +36,23 @@ export function ThresholdButtons({
           <button
             aria-label={`Set ${algorithm} contrast to ${formatThreshold(threshold, algorithm)}`}
             aria-pressed={isSelected}
-            className={`relative h-9 rounded-[4px] border text-xs font-medium tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current ${
+            className={cn(
+              "relative flex h-8 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-full border font-mono text-xs tracking-[-0.48px] tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current",
               isSelected
-                ? "border-current bg-white/10"
-                : "border-white/10 hover:border-current hover:bg-white/5"
-            }`}
+                ? "border-[var(--score-pill-border)] bg-[var(--score-pill)] text-current"
+                : "border-[var(--score-border)] bg-transparent text-[var(--score-text)]",
+            )}
             key={threshold}
             onClick={() => onSelect(threshold)}
             type="button"
           >
-            {formatThreshold(threshold, algorithm)}
-            {isNearest ? (
+            <span className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both]">
+              {formatThreshold(threshold, algorithm)}
+            </span>
+            {isNearest && !isSelected ? (
               <span
                 aria-label="Nearest to current score"
-                className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-current"
+                className="absolute bottom-[3px] left-1/2 size-1 -translate-x-1/2 rounded-full bg-current"
               />
             ) : null}
           </button>

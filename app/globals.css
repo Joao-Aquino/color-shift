@@ -21,6 +21,18 @@
   --color-score-good-label: #62c073;
   --color-score-meh-label: #ff990a;
   --color-score-bad-label: #ff6166;
+  --color-score-good-border: #12361b;
+  --color-score-meh-border: #4d2a00;
+  --color-score-bad-border: #561a1e;
+  --color-score-good-pill: #0c451b;
+  --color-score-meh-pill: #573300;
+  --color-score-bad-pill: #671e21;
+  --color-score-good-pill-border: #126426;
+  --color-score-meh-pill-border: #6b4105;
+  --color-score-bad-pill-border: #832126;
+  --color-score-good-text: #e5fbea;
+  --color-score-meh-text: #fef3dc;
+  --color-score-bad-text: #feecee;
 
   --background: var(--color-chrome-bg);
   --foreground: var(--color-text-value);
@@ -89,4 +101,30 @@
   a {
     -webkit-tap-highlight-color: transparent;
   }
+}
+
+/* Osmo number odometer */
+[data-odometer-element] {
+  display: inline-flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-odometer-part="mask"],
+[data-odometer-part="static"] {
+  display: inline-block;
+  overflow: clip;
+  padding: 0.05em;
+  margin: -0.05em;
+}
+
+[data-odometer-part="roller"] {
+  display: block;
+  white-space: pre;
+  text-align: center;
+  will-change: transform;
+}
+
+[data-odometer-part="static"] {
+  display: inline-block;
 }

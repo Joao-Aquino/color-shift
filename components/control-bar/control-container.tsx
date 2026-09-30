@@ -97,12 +97,10 @@ export function ControlContainer({
         <ColorFields
           activeTarget={activeTarget}
           background={background}
+          editor={editor}
           foreground={foreground}
           onSelect={onSelectColor}
         />
-        <div className="min-h-0" data-slot="editor-region" id="color-editor">
-          {editor}
-        </div>
         <div className="min-h-0 flex-1" aria-hidden />
       </div>
 

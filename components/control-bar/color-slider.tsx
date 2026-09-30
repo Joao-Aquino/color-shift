@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -9,6 +9,8 @@ import {
   parseChannelValue,
   type EditorChannel,
 } from "@/lib/color/editor";
+
+import { Odometer } from "./odometer";
 
 interface ColorSliderProps {
   channel: EditorChannel;
@@ -38,11 +40,17 @@ export function ColorSlider({
   onGestureEnd,
   onDiscreteChange,
 }: ColorSliderProps) {
-  const [draft, setDraft] = useState(() => formatChannelValue(channel));
-  const [editing, setEditing] = useState(false);
+  const formatted = formatChannelValue(channel);
+  const [draft, setDraft] = useState(formatted);
+  const inputRef = useRef<HTMLInputElement>(null);
   const cancelCommit = useRef(false);
   const gestureActive = useRef(false);
   const sliderLabelId = `slider-${channel.key}-label`;
+
+  useEffect(() => {
+    if (inputRef.current && document.activeElement === inputRef.current) return;
+    setDraft(formatted);
+  }, [formatted]);
 
   function startGesture() {
     if (gestureActive.current) return;
@@ -59,7 +67,7 @@ export function ColorSlider({
   function commitDraft() {
     const value = parseChannelValue(draft, channel);
     if (value === null) {
-      setDraft(formatChannelValue(channel));
+      setDraft(formatted);
       return;
     }
 
@@ -90,7 +98,7 @@ export function ColorSlider({
         />
         <Slider
           aria-labelledby={sliderLabelId}
-          className="relative z-10 [&_[data-slot=slider-range]]:bg-transparent [&_[data-slot=slider-thumb]]:size-4 [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-thumb]]:bg-[url('/figma/handle-slider.svg')] [&_[data-slot=slider-thumb]]:bg-cover [&_[data-slot=slider-thumb]]:shadow-none [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-track]]:bg-transparent"
+          className="relative z-10 [&_[data-slot=slider-range]]:bg-transparent [&_[data-slot=slider-thumb]]:size-4 [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-thumb]]:bg-transparent [&_[data-slot=slider-thumb]]:bg-[url('/figma/handle-slider.svg')] [&_[data-slot=slider-thumb]]:bg-cover [&_[data-slot=slider-thumb]]:shadow-none [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-track]]:bg-transparent"
           max={channel.max}
           min={channel.min}
           onKeyDown={(event) => {
@@ -108,34 +116,40 @@ export function ColorSlider({
           value={[channel.value]}
         />
       </div>
-      <Input
-        aria-label={`${channel.label} value`}
-        className="h-7 w-14 rounded-full border-0 bg-black/20 px-2 text-right font-mono text-xs tabular-nums focus-visible:ring-1"
-        inputMode={channel.display === "hex" ? "text" : "decimal"}
-        onBlur={() => {
-          if (cancelCommit.current) {
-            cancelCommit.current = false;
-          } else {
-            commitDraft();
-          }
-          setEditing(false);
-        }}
-        onChange={(event) => setDraft(event.target.value)}
-        onFocus={(event) => {
-          setDraft(formatChannelValue(channel));
-          setEditing(true);
-          event.currentTarget.select();
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") event.currentTarget.blur();
-          if (event.key === "Escape") {
-            cancelCommit.current = true;
-            event.currentTarget.blur();
-          }
-        }}
-        spellCheck={false}
-        value={editing ? draft : formatChannelValue(channel)}
-      />
+      <div className="relative h-7 w-14 shrink-0 focus-within:[&_[data-odometer-element]]:invisible focus-within:[&_input]:text-[var(--color-text-value)] focus-within:[&_input]:caret-current">
+        <Input
+          aria-label={`${channel.label} value`}
+          className="h-7 w-14 rounded-full border-0 bg-black/20 px-2 text-right font-mono text-xs text-transparent caret-transparent tabular-nums focus-visible:ring-1 md:text-xs"
+          inputMode={channel.display === "hex" ? "text" : "decimal"}
+          onBlur={() => {
+            if (cancelCommit.current) {
+              cancelCommit.current = false;
+              setDraft(formatted);
+            } else {
+              commitDraft();
+            }
+          }}
+          onChange={(event) => setDraft(event.target.value)}
+          onFocus={(event) => {
+            setDraft(formatted);
+            event.currentTarget.select();
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") event.currentTarget.blur();
+            if (event.key === "Escape") {
+              cancelCommit.current = true;
+              event.currentTarget.blur();
+            }
+          }}
+          ref={inputRef}
+          spellCheck={false}
+          value={draft}
+        />
+        <Odometer
+          className="pointer-events-none absolute inset-0 flex items-center justify-end px-2 text-xs text-[var(--color-text-value)]"
+          value={formatted}
+        />
+      </div>
     </div>
   );
 }

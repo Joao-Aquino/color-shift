@@ -129,12 +129,12 @@ export function ExportControls({
 
     setPhase("loading");
     setProgress(0);
-    schedule(() => setProgress(33), 20);
-    schedule(() => setProgress(94), 280);
+    schedule(() => setProgress(40), 16);
+    schedule(() => setProgress(90), 140);
     schedule(() => {
       setProgress(100);
       setPhase("open");
-    }, 620);
+    }, 260);
   }
 
   function completeAction(kind: Exclude<ExportSuccess, null>) {
@@ -212,7 +212,7 @@ export function ExportControls({
           <button
             aria-controls="export-actions"
             className={cn(
-              "relative flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-[var(--color-chrome-border)] bg-transparent px-2 text-sm leading-5 font-medium text-[var(--color-text-value)] transition-[border-color,background-color,transform,opacity] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[var(--color-chrome-raised)] focus-visible:outline-1 focus-visible:outline-offset-[-4px] focus-visible:outline-dashed focus-visible:outline-[var(--color-focus)] motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 motion-safe:active:scale-[0.99] disabled:cursor-wait",
+              "relative flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-[var(--color-chrome-border)] bg-transparent px-2 text-sm leading-5 font-medium text-[var(--color-text-value)] transition-[border-color,background-color,opacity,transform] duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[var(--color-chrome-border-strong)] hover:bg-[var(--color-chrome-raised)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-[0.97] motion-safe:duration-150 motion-safe:active:scale-[0.97] disabled:cursor-wait",
               disabled && "cursor-not-allowed opacity-30",
             )}
             disabled={disabled || phase === "loading"}
@@ -221,8 +221,10 @@ export function ExportControls({
           >
             <span
               aria-hidden
-              className="absolute inset-y-0 left-0 bg-[var(--color-chrome-divider)] transition-[width] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
-              style={{ width: phase === "loading" ? `${progress}%` : "0%" }}
+              className="absolute inset-y-0 left-0 w-full origin-left bg-[var(--color-chrome-divider)] transition-transform duration-200 ease-linear motion-reduce:transition-none"
+              style={{
+                transform: `scaleX(${phase === "loading" ? progress / 100 : 0})`,
+              }}
             />
             <span className="relative">EXPORT</span>
           </button>

@@ -22,6 +22,10 @@ interface ColorEditorProps {
   onCommit: (color: string) => void;
   onGestureStart: () => void;
   onGestureEnd: () => void;
+  format?: ColorFormat;
+  onFormatChange?: (format: ColorFormat) => void;
+  fallbackHue?: number;
+  onFallbackHueChange?: (hue: number) => void;
 }
 
 export function ColorEditor({
@@ -31,9 +35,20 @@ export function ColorEditor({
   onCommit,
   onGestureStart,
   onGestureEnd,
+  format: formatProp,
+  onFormatChange,
+  fallbackHue: fallbackHueProp,
+  onFallbackHueChange,
 }: ColorEditorProps) {
-  const [format, setFormat] = useState<ColorFormat>("HEX");
-  const [fallbackHue, setFallbackHue] = useState(0);
+  const [formatState, setFormatState] = useState<ColorFormat>("HEX");
+  const [fallbackHueState, setFallbackHueState] = useState(0);
+
+  const format = formatProp ?? formatState;
+  const setFormat = onFormatChange ?? setFormatState;
+  const fallbackHue = fallbackHueProp ?? fallbackHueState;
+  const setFallbackHue = onFallbackHueChange ?? setFallbackHueState;
+
+  const formatIndex = FORMATS.indexOf(format);
   const channels = getEditorChannels(color, format, fallbackHue);
 
   function colorForChannel(key: (typeof channels)[number]["key"], value: number) {
@@ -63,17 +78,24 @@ export function ColorEditor({
   return (
     <section
       aria-label={`Edit ${target} color`}
-      className="rounded-[20px] border border-[var(--color-chrome-border)] bg-[var(--color-chrome-bg)] p-2"
       data-color-editor
     >
       <Tabs
         onValueChange={(value) => setFormat(value as ColorFormat)}
         value={format}
       >
-        <TabsList className="h-9 w-full rounded-full bg-[var(--color-chrome-raised)] p-1">
+        <TabsList className="relative h-9 w-full rounded-full bg-[var(--color-chrome-raised)] p-1 group-data-horizontal/tabs:h-9">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute top-1 bottom-1 left-1 rounded-full bg-[var(--color-chrome-border-strong)] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.77,0,0.175,1)]"
+            style={{
+              width: `calc((100% - 0.5rem) / ${FORMATS.length})`,
+              transform: `translateX(${formatIndex * 100}%)`,
+            }}
+          />
           {FORMATS.map((item) => (
             <TabsTrigger
-              className="h-7 rounded-full px-1 text-[11px] font-medium text-[var(--color-text-muted)] data-active:bg-[var(--color-chrome-border-strong)] data-active:text-[var(--color-text-value)]"
+              className="z-10 h-7 rounded-full bg-transparent px-1 text-[11px] font-medium text-[var(--color-text-muted)] transition-colors group-data-[variant=default]/tabs-list:data-active:shadow-none data-active:bg-transparent data-active:text-[var(--color-text-value)] data-active:shadow-none dark:data-active:border-transparent dark:data-active:bg-transparent"
               key={item}
               value={item}
             >
