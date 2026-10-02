@@ -3,16 +3,14 @@
 import {
   cloneElement,
   isValidElement,
-  useEffect,
-  useRef,
   useState,
   type CSSProperties,
   type ReactElement,
   type ReactNode,
-  type TransitionEvent,
 } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCollapsiblePresence } from "@/lib/use-collapsible-presence";
 import { cn } from "@/lib/utils";
 import type { ColorFormat, ColorTarget } from "@/types/color-shift";
 
@@ -38,32 +36,14 @@ function ColorField({
   editor,
   onSelect,
 }: ColorFieldProps) {
-  const [rendered, setRendered] = useState(active);
-  const cachedEditorRef = useRef(editor);
+  const { present: showEditor, onTransitionEnd } = useCollapsiblePresence(active);
+  const [cachedEditor, setCachedEditor] = useState(editor);
 
-  if (editor) {
-    cachedEditorRef.current = editor;
+  if (editor != null && editor !== cachedEditor) {
+    setCachedEditor(editor);
   }
 
-  useEffect(() => {
-    if (active) {
-      setRendered(true);
-      return;
-    }
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setRendered(false);
-    }
-  }, [active]);
-
-  function handleGridTransitionEnd(event: TransitionEvent<HTMLDivElement>) {
-    if (event.propertyName !== "grid-template-rows") return;
-    if (event.target !== event.currentTarget) return;
-    if (!active) setRendered(false);
-  }
-
-  const showEditor = active || rendered;
-  const editorContent = editor ?? cachedEditorRef.current;
+  const editorContent = editor ?? cachedEditor;
 
   return (
     <div
@@ -112,7 +92,7 @@ function ColorField({
             ? "grid-rows-[1fr] motion-safe:duration-200"
             : "grid-rows-[0fr] motion-safe:duration-150",
         )}
-        onTransitionEnd={handleGridTransitionEnd}
+        onTransitionEnd={onTransitionEnd}
       >
         <div className="min-h-0 overflow-hidden">
           {showEditor ? (
@@ -160,12 +140,15 @@ export function ColorFields({
 }: ColorFieldsProps) {
   const [format, setFormat] = useState<ColorFormat>("HEX");
   const [fallbackHue, setFallbackHue] = useState(0);
+  const [previousTarget, setPreviousTarget] = useState(activeTarget);
 
-  useEffect(() => {
-    if (activeTarget) return;
-    setFormat("HEX");
-    setFallbackHue(0);
-  }, [activeTarget]);
+  if (previousTarget !== activeTarget) {
+    setPreviousTarget(activeTarget);
+    if (!activeTarget) {
+      setFormat("HEX");
+      setFallbackHue(0);
+    }
+  }
 
   const boundEditor =
     editor && isValidElement(editor)

@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-10-01 - Follow-up: all five lint errors corrected
+
+Corrected the five hook-rule errors recorded at the session handoff: two render-time ref accesses in `color-fields.tsx`, its effect-driven presence and format/hue resets, and the effect-driven threshold presence in `score.tsx`. Editor exit content is now cached in state, and format/hue resets use guarded prop-change state updates. The shared `lib/use-collapsible-presence.ts` hook retains content until the closing grid transition ends, ignores bubbled/unrelated transition events, and subscribes to live reduced-motion preferences through `useSyncExternalStore` instead of synchronous state updates in effects. No lint rules were disabled to accept the application code.
+
+Validation: the repository-wide `npm run lint` and `npx tsc --noEmit --incremental false` passed. All six new deterministic presence-hook tests and the eight existing responsive-motion tests passed. Live browser checks confirmed editor/score opening and closing, closing-content removal, HSL preservation when switching targets, HEX reset on reopening, Escape focus restoration, and no browser warnings/errors. Reduced-motion changes and server-side window isolation were tested with mocks, not browser emulation. No production build was rerun.
+
+This follow-up commit includes the corrections, the new hook and tests, and the five previously untracked plans in `.cursor/plans` as historical planning records. Those older plans describe their original implementation targets; this progress log and `plans/README.md` describe the current state, including the later removal of editor odometers. The preceding session was pushed as `d152260`. Phase 5 remains the next milestone: start from `plan/phase-5-theming-responsive.md`. The continuous-resize animation limitation below is unchanged.
+
 ## 2026-10-01 - Editor polish, development tools, and Phase 5 handoff
 
 Removed the slider track border that produced a white dot at its starting edge. Removed odometer overlays from all color-editor channel inputs and the format readout; values now remain plain editable text with consistent 12px monospace typography when idle, focused, or typing. The score odometer remains animated. Slider/readout rows now have 8px right padding, and the score description uses its natural height.

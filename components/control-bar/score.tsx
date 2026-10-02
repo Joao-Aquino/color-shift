@@ -1,7 +1,7 @@
 "use client";
 
 import { InfoIcon } from "@phosphor-icons/react/Info";
-import { useEffect, useState, type CSSProperties, type TransitionEvent } from "react";
+import { type CSSProperties } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useCollapsiblePresence } from "@/lib/use-collapsible-presence";
 import type {
   ContrastAlgorithm,
   ContrastScore,
@@ -98,7 +99,7 @@ export function Score({
   onExpandedChange,
   onThresholdSelect,
 }: ScoreProps) {
-  const [rendered, setRendered] = useState(expanded && !!score);
+  const { present, onTransitionEnd } = useCollapsiblePresence(expanded && !!score);
   const scoreBackground = score
     ? gradeBackgrounds[score.grade]
     : "bg-[var(--color-chrome-raised)]";
@@ -108,29 +109,8 @@ export function Score({
   const tabSelectedText = score
     ? gradeTabText[score.grade]
     : "text-[var(--color-text-muted)]";
-  const showThresholds = (expanded || rendered) && !!score;
+  const showThresholds = present && !!score;
   const toneStyle = score ? gradeToneVars[score.grade] : undefined;
-
-  useEffect(() => {
-    if (expanded && score) {
-      setRendered(true);
-      return;
-    }
-
-    if (!expanded && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setRendered(false);
-    }
-
-    if (!score) {
-      setRendered(false);
-    }
-  }, [expanded, score]);
-
-  function handleGridTransitionEnd(event: TransitionEvent<HTMLDivElement>) {
-    if (event.propertyName !== "grid-template-rows") return;
-    if (event.target !== event.currentTarget) return;
-    if (!expanded) setRendered(false);
-  }
 
   return (
     <section
@@ -261,7 +241,7 @@ export function Score({
                 : "grid-rows-[0fr] motion-safe:duration-150",
             )}
             id="contrast-thresholds"
-            onTransitionEnd={handleGridTransitionEnd}
+            onTransitionEnd={onTransitionEnd}
           >
             <div className="min-h-0 overflow-hidden">
               {showThresholds ? (
