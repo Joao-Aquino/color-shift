@@ -129,7 +129,7 @@ export function Score({
                 aria-controls="contrast-score-panel"
                 aria-selected={selected}
                 className={cn(
-                  "flex min-w-0 flex-1 items-center gap-1 py-2 text-sm font-medium tracking-[0.1em] uppercase transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white",
+                  "flex min-w-0 flex-1 items-center gap-1 py-2 text-sm font-medium tracking-[0.1em] uppercase transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--color-focus)]",
                   method === "WCAG"
                     ? "justify-start rounded-t-[12px] pr-4 pl-6"
                     : "justify-end rounded-t-[12px] pr-6 pl-4",
@@ -151,7 +151,7 @@ export function Score({
                         aria-hidden
                         className={cn(
                           "transition-colors duration-300",
-                          selected ? "text-current" : "text-[#454545]",
+                          selected ? "text-current" : "text-[var(--color-text-label)]",
                         )}
                         size={14}
                         weight="regular"

@@ -11,7 +11,7 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 | 2 | `phase-2-color-editing.md` | Color editing (sliders, 5 formats) | Complete |
 | 3 | `phase-3-dual-scoring-thresholds.md` | Dual scoring (APCA) + threshold bumping | Complete |
 | 4 | `phase-4-export.md` | Export (copy + download) | Complete |
-| 5 | `phase-5-theming-responsive.md` | Theming (light mode) + responsive mobile | Draft |
+| 5 | `phase-5-theming-responsive.md` | Theming (light mode) + responsive mobile | Implemented/browser-verified 2026-10-02; device checks pending |
 | 6 | `phase-6-extended-input-layouts.md` | Extended input & layout modes | Draft |
 | 7 | `phase-7-animation-polish.md` | Animation polish (GSAP, TubeText, DialKit) | Draft |
 | 8 | `phase-8-native-platforms.md` | Native platforms (iOS + macOS) | Draft |
@@ -28,9 +28,12 @@ The bottom control bar with a slide-up slider panel was replaced by a **left sid
 | Editor panel, format tabs, sliders, readout row, undo | 2 |
 | APCA tab, threshold row, fix (wrench) | 3 |
 | EXPORT button + export state | 4 |
-| Light/Dark toggle, mobile bottom sheet | 5 |
+| Light/Dark toggle, mobile fixed footer + floating actions | 5 |
 
 Mockup numbers and hex values are placeholders; the engine is the source of truth.
+
+## Mobile revision (2026-10-01)
+Phase 5 follows mobile frames `3387:311` (Dark) and `3387:482` (Light), plus `ControlMobile` variants `3389:788`. Mobile uses a side-by-side specimen/photo above scrolling score and color controls. A fixed footer places EXPORT beside a 48px trigger; opening it reveals six vertically stacked actions. This supersedes the bottom-sheet proposal. The user confirmed white/neutral Light chrome, deferred the 2D picker, and deferred swipe navigation. See `phase-5-theming-responsive.md` for measurements, interaction defaults, implementation evidence, and verification. The phase is implemented and browser-verified; physical software-keyboard and safe-area checks remain pending.
 
 ## Open questions (unresolved as of 2026-09-26)
 1. **Ordering** — does Phase 2→7 order match priorities, or should something else be pulled forward/back?

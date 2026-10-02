@@ -76,7 +76,7 @@ function ColorField({
         onClick={() => onSelect(target)}
         type="button"
       >
-        <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-value)] uppercase">
+        <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-label)] uppercase">
           {label}
         </span>
         <TubeText className="min-w-0 flex-1 text-right text-sm text-[var(--color-text-value)] tabular-nums">
@@ -161,7 +161,7 @@ export function ColorFields({
       : editor;
 
   return (
-    <section className="flex flex-col gap-3" aria-label="Selected colors">
+    <section className="flex flex-col gap-4 sm:gap-3" aria-label="Selected colors">
       {background && foreground ? (
         <>
           <ColorField

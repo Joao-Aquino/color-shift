@@ -15,6 +15,8 @@
   --color-text-value: #ededed;
   --color-focus: #ffffff;
   --color-panel-loading: #151515;
+  --color-popover-bg: #202020;
+  --color-theme-selected: #2e2e2e;
   --color-score-good: #0f2e18;
   --color-score-meh: #331b00;
   --color-score-bad: #3c1618;
@@ -38,7 +40,7 @@
   --foreground: var(--color-text-value);
   --card: var(--color-chrome-raised);
   --card-foreground: var(--color-text-value);
-  --popover: #202020;
+  --popover: var(--color-popover-bg);
   --popover-foreground: var(--color-text-value);
   --primary: var(--color-text-value);
   --primary-foreground: var(--color-chrome-bg);
@@ -53,6 +55,39 @@
   --input: var(--color-chrome-border);
   --ring: var(--color-focus);
   --radius: 0.5rem;
+}
+
+:root[data-theme="light"] {
+  --color-chrome-bg: #ffffff;
+  --color-chrome-raised: #f2f2f2;
+  --color-chrome-divider: #ebebeb;
+  --color-chrome-border: #ebebeb;
+  --color-chrome-border-strong: #c9c9c9;
+  --color-text-label: #707070;
+  --color-text-muted: #666666;
+  --color-text-value: #171717;
+  --color-focus: #171717;
+  --color-panel-loading: #f2f2f2;
+  --color-popover-bg: #ffffff;
+  --color-theme-selected: #171717;
+  --color-score-good: #e9f9ec;
+  --color-score-meh: #fff4e5;
+  --color-score-bad: #ffebec;
+  --color-score-good-label: #267d3b;
+  --color-score-meh-label: #a35200;
+  --color-score-bad-label: #c62a32;
+  --color-score-good-border: #c5e8ce;
+  --color-score-meh-border: #f1d7ac;
+  --color-score-bad-border: #f3c8cb;
+  --color-score-good-pill: #d7f3de;
+  --color-score-meh-pill: #ffebcd;
+  --color-score-bad-pill: #ffdadd;
+  --color-score-good-pill-border: #abdcb8;
+  --color-score-meh-pill-border: #e9bf7f;
+  --color-score-bad-pill-border: #eda7ad;
+  --color-score-good-text: #1b542a;
+  --color-score-meh-text: #6b3a0d;
+  --color-score-bad-text: #81232a;
 }
 
 @theme {
@@ -105,6 +140,81 @@
   a {
     -webkit-tap-highlight-color: transparent;
   }
+
+  button {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+.cs-app {
+  display: grid;
+  align-content: start;
+  grid-template-areas: "header" "preview" "controls" "footer";
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  min-height: 100svh;
+  min-width: 0;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(var(--cs-footer-height, 96px) + var(--cs-keyboard-offset, 0px) + 24px) max(24px, env(safe-area-inset-left, 0px));
+  background: var(--color-chrome-bg);
+}
+.cs-header { grid-area: header; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cs-header h1 { font-size: 20px; line-height: 26px; }
+.cs-theme-toggle { display: flex; flex: none; padding: 2px; background: var(--color-chrome-raised); border-radius: 9999px; }
+.cs-theme-option { min-width: 44px; min-height: 44px; padding: 4px 8px; border-radius: 9999px; font-size: 12px; color: var(--color-text-muted); cursor: pointer; }
+[data-theme="light"] [data-theme-choice="light"], [data-theme="dark"] [data-theme-choice="dark"] { background: var(--color-theme-selected); color: #fff; }
+.cs-theme-option:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.cs-controls { grid-area: controls; display: flex; min-width: 0; flex-direction: column; gap: 16px; }
+.cs-preview { grid-area: preview; position: relative; min-width: 0; }
+.cs-preview-panels { display: grid; grid-template-columns: 167fr 183fr; gap: 4px; height: 240px; overflow: hidden; border-radius: 8px; }
+.cs-specimen-type { font-size: 48px; line-height: .84; font-weight: 400; }
+.cs-credit { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px; margin-top: 8px; font-size: 10px; color: var(--color-text-value); }
+.cs-credit a { overflow-wrap: anywhere; }
+.cs-credit-label { color: var(--color-text-label); }
+.cs-footer { grid-area: footer; position: fixed; z-index: 40; bottom: var(--cs-keyboard-offset, 0px); left: 0; right: 0; padding: 24px max(24px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px)); border-top: 1px solid var(--color-chrome-divider); background: var(--color-chrome-bg); }
+.cs-export-controls { display: flex; align-items: flex-end; gap: 4px; }
+.cs-export-photo-actions { order: 2; flex: none; }
+.cs-export-slot { order: 1; flex: 1; min-width: 0; }
+.cs-export-actions { display: flex; gap: 8px; }
+.cs-export-actions button { padding-inline: 8px; font-size: 11px; }
+.cs-inline-actions { display: none; }
+.cs-mobile-actions { position: relative; width: 48px; }
+.cs-mobile-action-list { position: absolute; right: 0; bottom: 52px; width: 48px; max-height: max(48px, var(--cs-action-height, calc(100dvh - 128px - env(safe-area-inset-bottom, 0px)))); overflow-y: auto; overscroll-behavior: contain; }
+.cs-mobile-action-list button { background: var(--color-chrome-raised); }
+.cs-mobile-action-list svg, .cs-mobile-actions > button svg { width: 20px; height: 20px; }
+html { scroll-padding-bottom: calc(var(--cs-footer-height, 96px) + var(--cs-keyboard-offset, 0px) + 24px); -webkit-text-size-adjust: 100%; }
+html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-theme-option) { transition: background-color 200ms, color 200ms, border-color 200ms; }
+@media (max-width: 359px) {
+  .cs-export-actions { flex-direction: column; gap: 4px; }
+  .cs-export-actions button { flex: none; }
+}
+@media (pointer: coarse) {
+  [data-color-editor] input { font-size: 16px; }
+}
+@media (min-width: 640px) {
+  .cs-app { padding: 24px; }
+  .cs-preview-panels { height: 560px; grid-template-columns: 1fr 1fr; border-radius: 12px; }
+  .cs-specimen-type { font-size: 160px; }
+  .cs-credit { position: absolute; right: 16px; bottom: 16px; margin: 0; max-width: calc(50% - 32px); border-radius: 9999px; padding: 4px 8px; background: rgb(0 0 0 / .8); color: #fff; font-size: 12px; }
+  .cs-credit-label { color: #a1a1a1; }
+  .cs-footer { position: static; padding: 0; border: 0; z-index: auto; }
+  .cs-export-controls { flex-direction: column; align-items: stretch; gap: 8px; }
+  .cs-export-photo-actions { order: 0; }
+  .cs-export-slot { flex: none; }
+  .cs-inline-actions { display: block; }
+  .cs-mobile-actions { display: none; }
+  html { scroll-padding-bottom: 24px; }
+}
+@media (min-width: 1180px) {
+  .cs-app { grid-template-areas: "header preview" "controls preview" "footer preview"; grid-template-columns: 320px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; column-gap: 48px; height: 100dvh; min-height: 720px; padding: 40px; overflow: hidden; }
+  .cs-header h1 { font-size: 16px; }
+  .cs-controls { overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; gap: 24px; }
+  .cs-preview-panels { height: 100%; }
+  .cs-specimen-type { font-size: 220px; font-weight: 500; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme-ready] *, html[data-theme-ready] *::before, html[data-theme-ready] *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
 }
 
 /* Osmo number odometer */

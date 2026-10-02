@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Agentation } from "agentation";
 
 import { MotionDevtools } from "@/components/motion-devtools";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { THEME_BOOTSTRAP } from "@/lib/theme";
 
 import "./globals.css";
 
@@ -36,12 +37,25 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  themeColor: "#0a0a0a",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full`}
+      data-theme="dark"
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+      </head>
       <body className="flex min-h-full flex-col antialiased">
         <TooltipProvider>{children}</TooltipProvider>
         {process.env.NODE_ENV === "development" && (

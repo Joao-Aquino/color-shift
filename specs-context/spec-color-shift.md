@@ -52,7 +52,7 @@ Not a 5-color palette generator. Not a color theory teaching tool. Two colors, o
 - **Specimen panel:** Aa specimen. Background color fills the panel. Foreground color renders "Aa" at massive scale, centered. Click/tap toggles between Aa text and a filled circle (same foreground color).
 - **Photo panel:** Unsplash photo, full-bleed within its panel. Credit at bottom-right, "Photographer, Unsplash", both linking out.
 - Panels have page padding and rounded corners (Figma V6).
-- Mobile (Phase 5): the sidebar becomes a bottom sheet.
+- Mobile (Phase 5, implemented): header and side-by-side specimen/photo precede scrolling score and inline editing; a fixed footer holds EXPORT and a floating trigger. Six actions expand vertically above it. See `plan/phase-5-theming-responsive.md` for the confirmed design, browser verification, and pending device checks.
 
 > Numbers and hex values in the Figma mockups are placeholders. The engine is the source of truth.
 
@@ -84,7 +84,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 ### 2. The Specimen
 
 - Left half of the screen. Background color fills the panel edge to edge.
-- "Aa" rendered in the foreground color at massive scale (80px mobile, 200px desktop)
+- "Aa" rendered in the foreground color at massive scale (48px mobile per the confirmed Phase 5 Figma reference; desktop sizing follows the existing implementation)
 - Click toggles between Aa text and a filled circle. GSAP squish on press (scale 0.85), pop on release (scale 1.05), then the active element rotates out and the alternate rotates in with back-ease overshoot.
 
 
@@ -156,9 +156,9 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 
 ### 10. Dark / Light Theme
 
-- Light | Dark segmented toggle in the sidebar header.
+- Light | Dark segmented toggle in the sidebar/mobile header; explicit preference persists locally and resolves before paint.
 - Dark mode (default): black chrome (#000), muted text (#a39f9f), subtle borders (#2B2727)
-- Light mode: planned tinting from active palette (currently functional toggle)
+- Light mode (Phase 5, implemented): white/neutral chrome following Figma; palette tinting is deferred. The guarded `T` shortcut switches themes without resetting current work.
 - Keyboard shortcut: T
 
 
@@ -331,10 +331,10 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | Scrollable layout mode            | Planned        | Vertical gallery of color + photo pairs                                                                             |
 | Photo drag-and-drop (web + macOS) | Planned        | Hidden feature: drop an image onto the photo area to extract colors from your own photo. Discoverable, not labeled. |
 | Camera / photo capture (iOS)      | Planned        | Alternate input to Unsplash: take a photo, extract colors from your own image                                       |
-| Download .MD button               | Handler exists | Not yet wired to file download                                                                                      |
+| Download .MD button               | Implemented    | Real Markdown file download and success reset verified in the browser                                               |
 | Editable Aa text                  | Considered     | Type custom text to test real content                                                                               |
 | Tile/grid photo transitions       | Researched     | 9 animation patterns documented in `transitions.md`                                                                 |
-| Responsive mobile layout          | Planned        | Sidebar becomes a bottom sheet                                                                                      |
+| Responsive mobile layout          | Implemented    | Browser-verified; physical software-keyboard and safe-area checks pending                                            |
 | Vercel deployment                 | Planned        |                                                                                                                     |
 | iOS build                         | Planned        | Full native Swift app                                                                                               |
 | macOS build                       | Planned        | Full native menu bar app                                                                                            |

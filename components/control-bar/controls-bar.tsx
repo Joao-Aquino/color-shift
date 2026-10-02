@@ -10,8 +10,10 @@ import { WrenchIcon } from "@phosphor-icons/react/Wrench";
 import type { ControlBarState } from "@/types/color-shift";
 
 import { IconButton } from "./icon-button";
+import { cn } from "@/lib/utils";
 
 interface ControlsBarProps {
+  vertical?: boolean;
   state?: ControlBarState;
   canGoPrevious: boolean;
   canGoNext: boolean;
@@ -27,6 +29,7 @@ interface ControlsBarProps {
 }
 
 export function ControlsBar({
+  vertical = false,
   state = "default",
   canGoPrevious,
   canGoNext,
@@ -42,45 +45,32 @@ export function ControlsBar({
 }: ControlsBarProps) {
   if (state !== "default") return null;
 
+  const actions = {
+    previous: { icon: ArrowLeftIcon, label: "Previous photo (Left arrow)", disabled: !canGoPrevious, run: onPrevious },
+    undo: { icon: ArrowUUpLeftIcon, label: "Undo color edit (Command or Control + Z)", disabled: !canUndo, run: onUndo },
+    shuffle: { icon: vertical ? ArrowsClockwiseIcon : ArrowsLeftRightIcon, label: "New random photo (Space)", disabled: false, run: onShuffle },
+    swap: { icon: vertical ? ArrowsLeftRightIcon : ArrowsClockwiseIcon, label: "Swap colors (S)", disabled: false, run: onSwap },
+    fix: { icon: WrenchIcon, label: "Fix contrast to selected threshold", disabled: !canFix, run: onFix },
+    next: { icon: ArrowRightIcon, label: "Next photo (Right arrow)", disabled: !canGoNext, run: onNext },
+  };
+  const order: (keyof typeof actions)[] = vertical
+    ? ["undo", "shuffle", "swap", "fix", "previous", "next"]
+    : ["previous", "undo", "shuffle", "swap", "fix", "next"];
+
   return (
-    <div className="grid grid-cols-6 gap-1" aria-label="Photo controls">
-      <IconButton
-        disabled={disabled || !canGoPrevious}
-        icon={ArrowLeftIcon}
-        label="Previous photo (Left arrow)"
-        onClick={onPrevious}
-      />
-      <IconButton
-        disabled={disabled || !canUndo}
-        icon={ArrowUUpLeftIcon}
-        label="Undo color edit (Command or Control + Z)"
-        onClick={onUndo}
-      />
-      <IconButton
-        disabled={disabled}
-        icon={ArrowsLeftRightIcon}
-        label="New random photo (Space)"
-        onClick={onShuffle}
-      />
-      <IconButton
-        disabled={disabled}
-        icon={ArrowsClockwiseIcon}
-        label="Swap colors (S)"
-        onClick={onSwap}
-      />
-      <IconButton
-        data-fix-contrast
-        disabled={disabled || !canFix}
-        icon={WrenchIcon}
-        label="Fix contrast to selected threshold"
-        onClick={onFix}
-      />
-      <IconButton
-        disabled={disabled || !canGoNext}
-        icon={ArrowRightIcon}
-        label="Next photo (Right arrow)"
-        onClick={onNext}
-      />
+    <div className={cn("grid gap-1", vertical ? "grid-cols-1" : "grid-cols-6")} aria-label="Photo controls">
+      {order.map((key) => {
+        const action = actions[key];
+        return <IconButton
+          data-action={key}
+          data-fix-contrast={key === "fix" ? true : undefined}
+          disabled={disabled || action.disabled}
+          icon={action.icon}
+          key={key}
+          label={action.label}
+          onClick={action.run}
+        />;
+      })}
     </div>
   );
 }

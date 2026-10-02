@@ -1,5 +1,31 @@
 # Progress Log
 
+## 2026-10-02 - Session close and Phase 6 handoff
+
+Closing this session with the Phase 5 implementation, its regression tests, and the updated phase/roadmap/product documentation. The checkpoint also includes the parallel photo improvements: randomized abstract queries, 2400px display images at quality 90, the matching Next image quality configuration, and the non-deprecated image preload prop. Existing work from the other chat was preserved.
+
+Final pre-commit checks reran repository-wide lint, TypeScript, the three theme checks, six presence tests, eight responsive-motion tests, and whitespace validation; all passed. The webpack production build and browser integration evidence are recorded in the Phase 5 entry below and were not rerun for this documentation-only closure.
+
+Next session: start from `plan/phase-6-extended-input-layouts.md` after confirming its scope. Before mobile release, verify software keyboard and safe-area behavior on physical iOS/Android devices. Keep the known continuous-resize easing limitation and the observed intermittent Unsplash 403 separate from the completed Phase 5 browser checks. The 2D picker, swipe navigation, and palette-tinted Light chrome remain deferred.
+
+## 2026-10-02 - Phase 5 implemented and browser-verified
+
+Implemented the confirmed mobile Figma layout and neutral Light theme. The accessible header toggle and guarded `T` shortcut persist explicit preference, resolve it before paint, and tolerate blocked browser storage. Semantic tokens cover chrome and all contrast score states; theme changes retain photos, colors, editor state, thresholds, history, and export.
+
+Mobile now keeps the 240px side-by-side preview and 48px Aa above scrolling score/color controls. EXPORT and a 48px floating trigger stay in a fixed, measured footer with safe-area support. The six-action stack preserves the editor target, closes independently on Escape/outside interaction, supports short-viewport scrolling, and restores focus after selection. At 640px it transfers focus to the corresponding inline action. Separating the keyed export slot from the action controls prevents async Shuffle/photo updates from discarding focus. The enlarged 44px theme targets and deferred 2D picker remain intentional differences from the compact Figma reference.
+
+Validation: full `npm run lint`, `npx tsc --noEmit --incremental false`, and `npx next build --webpack` pass. Three theme checks, six presence-hook tests, and eight responsive-motion tests pass. The new production Chrome integration suite verifies widths 320/390/402/639/640/1024/1179/1180/1360, all six actions, active-target Fix/Swap, history, menu/editor coordination, Escape, keyboard focus, persistence/blocked storage, score grades/APCA, actual clipboard and Markdown download, export errors, short viewports, reduced motion, input reachability, and circle geometry. Its photo API is deterministic while image rendering and palette extraction use a real bitmap. Browser console errors: none. Commands and limitations are documented in `tests/README.md`.
+
+A separate coarse-pointer/mobile Chrome check rendered a real Unsplash image with credit and an 8.81:1 AAA pair. The normal initial request first received an upstream 403; a subsequent local API request returned 200, and the live browser smoke used real API responses limited to one photo per request. No Unsplash configuration was changed as part of this phase; the parallel photo-quality/query changes were preserved. Production preview is on port 3001, avoiding development tools that overlap mobile actions on port 3000.
+
+Physical iOS Safari/Android Chrome software-keyboard and notch/safe-area checks are still pending. The existing Turbopack process/port sandbox restriction required the webpack fallback, and continuous-resize animation cancellation remains outside Phase 5. The next implementation milestone is Phase 6; do not interpret browser verification as physical-device certification.
+
+## 2026-10-01 - Phase 5 mobile design and scope verified
+
+Inspected updated Figma frames `3387:311` and `3387:482`, shorter 402 x 874 viewport references, and `ControlMobile` variants `3389:788`. The 96px footer now places EXPORT beside a 48px trigger. The open variant reveals a vertical stack ordered Undo, Shuffle, Swap, Fix, Previous, Next. Preview stays side by side at 240px high with 48px Aa; score and inline editing belong to scrolling page content. Figma has no configured trigger reactions, so dismissal/focus behavior is recorded as implementation defaults.
+
+The user confirmed white/neutral Light chrome and deferring the 2D picker; swipe was already deferred. Rewrote `plan/phase-5-theming-responsive.md` with source nodes, floating actions, editor/export coordination, accessibility, safe-area/keyboard handling, theme defaults, implementation sequence, and verification. Updated roadmap and current product-spec mobile references. This supersedes older handoff references to tinted chrome, a bottom sheet, and original preview proportions. Phase 5 is planned, not implemented; no application files changed and no application tests were rerun for this documentation work.
+
 ## 2026-10-01 - Follow-up: all five lint errors corrected
 
 Corrected the five hook-rule errors recorded at the session handoff: two render-time ref accesses in `color-fields.tsx`, its effect-driven presence and format/hue resets, and the effect-driven threshold presence in `score.tsx`. Editor exit content is now cached in state, and format/hue resets use guarded prop-change state updates. The shared `lib/use-collapsible-presence.ts` hook retains content until the closing grid transition ends, ignores bubbled/unrelated transition events, and subscribes to live reduced-motion preferences through `useSyncExternalStore` instead of synchronous state updates in effects. No lint rules were disabled to accept the application code.

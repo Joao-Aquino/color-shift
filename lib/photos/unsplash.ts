@@ -3,6 +3,14 @@ import "server-only";
 import type { Photo } from "@/types/color-shift";
 
 const UNSPLASH_API_URL = "https://api.unsplash.com/photos/random";
+const PHOTO_QUERIES = [
+  "abstract background",
+  "abstract colorful texture",
+  "abstract art",
+  "vibrant abstract",
+  "creative abstract",
+  "abstract organic shapes",
+];
 const TRACKING_PARAMS = {
   utm_source: "color_shift",
   utm_medium: "referral",
@@ -17,7 +25,6 @@ interface UnsplashPhoto {
   description: string | null;
   urls: {
     raw: string;
-    regular: string;
     small: string;
   };
   links: {
@@ -41,6 +48,15 @@ function withTracking(url: string) {
   return trackedUrl.toString();
 }
 
+function displayImageUrl(rawUrl: string) {
+  const url = new URL(rawUrl);
+  url.searchParams.set("auto", "format");
+  url.searchParams.set("fit", "max");
+  url.searchParams.set("w", "2400");
+  url.searchParams.set("q", "90");
+  return url.toString();
+}
+
 function tinyImageUrl(rawUrl: string) {
   const url = new URL(rawUrl);
   url.searchParams.set("auto", "format");
@@ -54,7 +70,7 @@ function tinyImageUrl(rawUrl: string) {
 function normalizePhoto(photo: UnsplashPhoto): Photo {
   return {
     id: photo.id,
-    url: photo.urls.regular,
+    url: displayImageUrl(photo.urls.raw),
     thumbUrl: photo.urls.small,
     tinyUrl: tinyImageUrl(photo.urls.raw),
     color: photo.color ?? "#202020",
@@ -78,6 +94,8 @@ export async function getRandomPhotos(count: number): Promise<Photo[]> {
   url.searchParams.set("count", String(count));
   url.searchParams.set("orientation", "landscape");
   url.searchParams.set("content_filter", "high");
+  const query = PHOTO_QUERIES[Math.floor(Math.random() * PHOTO_QUERIES.length)];
+  url.searchParams.set("query", query);
 
   const response = await fetch(url, {
     cache: "no-store",

@@ -16,6 +16,7 @@ import {
 import { createFallbackPair, extractColorPair } from "@/lib/color/palette";
 import { fetchPhotos } from "@/lib/photos/client";
 import { useResponsiveLayoutMotion } from "@/lib/use-responsive-layout-motion";
+import { useTheme } from "@/lib/use-theme";
 import type {
   ColorPair,
   ColorTarget,
@@ -46,6 +47,7 @@ function LoadingPanel({ className = "" }: { className?: string }) {
 
 export function ColorShiftApp() {
   const layoutRef = useResponsiveLayoutMotion();
+  const { theme, setTheme } = useTheme();
   const [entries, setEntries] = useState<PhotoEntry[]>([]);
   const [index, setIndex] = useState(0);
   const [showCircle, setShowCircle] = useState(false);
@@ -403,7 +405,7 @@ export function ColorShiftApp() {
       if (!(target instanceof Element)) return;
       if (
         target.closest(
-          "[data-color-editor], [data-color-field], [data-color-field-shell], [data-contrast-score], [data-fix-contrast]",
+          "[data-color-editor], [data-color-field], [data-color-field-shell], [data-contrast-score], [data-fix-contrast], [data-photo-actions], .cs-theme-toggle",
         )
       ) {
         return;
@@ -421,7 +423,7 @@ export function ColorShiftApp() {
     function handleClick(event: MouseEvent) {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      if (target.closest("[data-contrast-score]")) return;
+      if (target.closest("[data-contrast-score], [data-photo-actions], .cs-theme-toggle")) return;
       setScoreExpanded(false);
     }
 
@@ -431,6 +433,7 @@ export function ColorShiftApp() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (event.defaultPrevented) return;
       const target = event.target;
       const isEditable =
         target instanceof HTMLElement &&
@@ -481,12 +484,15 @@ export function ColorShiftApp() {
       } else if (event.key.toLowerCase() === "s") {
         event.preventDefault();
         swapColors();
+      } else if (event.key.toLowerCase() === "t") {
+        event.preventDefault();
+        setTheme(theme === "dark" ? "light" : "dark");
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo]);
+  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo, theme, setTheme]);
 
   const current = entries[index];
   const pair = current?.pair ?? null;
@@ -504,9 +510,108 @@ export function ColorShiftApp() {
     : selectedThreshold;
   const ready = !!current && !!pair;
 
+  const preview = (
+    <div data-responsive-motion="preview" className="cs-preview">
+      <div className="cs-preview-panels">
+        {ready ? (
+          <button
+            aria-label={showCircle ? "Show Aa specimen" : "Show circle specimen"}
+            data-responsive-motion="specimen"
+            className="group flex h-full min-w-0 flex-1 cursor-pointer items-center justify-center overflow-hidden transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current"
+            onClick={() => setShowCircle((currentValue) => !currentValue)}
+            style={{ backgroundColor: pair.background, color: pair.foreground }}
+            type="button"
+          >
+            {showCircle ? (
+              <span
+                aria-hidden
+                data-responsive-motion="circle"
+                className="inline-flex aspect-square w-[min(240px,52%)]"
+              >
+                <span data-responsive-circle-shape className="inline-flex h-full w-full">
+                  <span className="h-full w-full rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95" />
+                </span>
+              </span>
+            ) : (
+              <span data-responsive-motion="type" className="cs-specimen-type inline-flex">
+                <span className="transition-[transform,opacity] duration-200 group-active:scale-95">
+                  Aa
+                </span>
+              </span>
+            )}
+          </button>
+        ) : (
+          <LoadingPanel />
+        )}
+
+        <section
+          aria-label="Source photo"
+          data-responsive-motion="photo"
+          className="relative h-full min-w-0 flex-1 overflow-hidden bg-[var(--color-panel-loading)]"
+        >
+          {ready ? (
+            <>
+              <Image
+                key={current.photo.id}
+                alt={current.photo.alt}
+                blurDataURL={current.photo.tinyUrl}
+                className="object-cover"
+                fill
+                placeholder="blur"
+                preload={index === 0}
+                quality={90}
+                sizes="(min-width: 1180px) 38vw, 50vw"
+                src={current.photo.url}
+              />
+            </>
+          ) : (
+            <LoadingPanel />
+          )}
+
+          {errorMessage ? (
+            <div className="absolute inset-x-4 top-4 z-20 flex items-center justify-between gap-4 rounded-[6px] border border-white/10 bg-black/90 p-3 text-sm text-white shadow-lg">
+              <p>{errorMessage}</p>
+              <CSButton
+                className="h-8 shrink-0 border-white/20 px-3 text-xs text-white hover:bg-white/10"
+                onClick={() => void shuffle()}
+              >
+                Retry
+              </CSButton>
+            </div>
+          ) : null}
+        </section>
+      </div>
+      {ready && (
+        <p className="cs-credit">
+          <span className="cs-credit-label uppercase">Photo</span>
+          <a
+            className="underline-offset-2 hover:underline focus-visible:outline-2"
+            href={current.photo.photographerUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {current.photo.photographer}
+          </a>
+          <span className="cs-credit-label">on</span>
+          <a
+            className="underline-offset-2 hover:underline focus-visible:outline-2"
+            href={current.photo.photoUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Unsplash
+          </a>
+        </p>
+      )}
+    </div>
+  );
+
   return (
-    <main ref={layoutRef} className="flex min-h-svh w-full min-w-0 flex-col gap-6 bg-[var(--color-chrome-bg)] p-4 sm:p-6 desktop:h-screen desktop:min-h-[720px] desktop:flex-row desktop:gap-12 desktop:overflow-hidden desktop:p-10">
+    <main ref={layoutRef} className="cs-app">
       <ControlContainer
+        preview={preview}
+        theme={theme}
+        onThemeChange={setTheme}
         activeTarget={activeColor}
         algorithm={contrastAlgorithm}
         background={pair?.background ?? null}
@@ -545,97 +650,6 @@ export function ColorShiftApp() {
         selectedThreshold={selectedThreshold}
         thresholds={thresholds}
       />
-
-      <div data-responsive-motion="preview" className="flex h-[640px] w-full min-w-0 shrink-0 flex-col gap-1 overflow-hidden rounded-[12px] sm:h-[560px] sm:flex-row desktop:h-auto desktop:min-h-0 desktop:w-auto desktop:flex-1">
-        {ready ? (
-          <button
-            aria-label={showCircle ? "Show Aa specimen" : "Show circle specimen"}
-            data-responsive-motion="specimen"
-            className="group flex h-full min-w-0 flex-1 cursor-pointer items-center justify-center overflow-hidden transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current"
-            onClick={() => setShowCircle((currentValue) => !currentValue)}
-            style={{ backgroundColor: pair.background, color: pair.foreground }}
-            type="button"
-          >
-            {showCircle ? (
-              <span
-                aria-hidden
-                data-responsive-motion="circle"
-                className="inline-flex aspect-square w-[min(240px,52%)]"
-              >
-                <span data-responsive-circle-shape className="inline-flex h-full w-full">
-                  <span className="h-full w-full rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95" />
-                </span>
-              </span>
-            ) : (
-              <span data-responsive-motion="type" className="inline-flex text-[80px] leading-none font-medium sm:text-[160px] desktop:text-[220px]">
-                <span className="transition-[transform,opacity] duration-200 group-active:scale-95">
-                  Aa
-                </span>
-              </span>
-            )}
-          </button>
-        ) : (
-          <LoadingPanel />
-        )}
-
-        <section
-          aria-label="Source photo"
-          data-responsive-motion="photo"
-          className="relative h-full min-w-0 flex-1 overflow-hidden bg-[var(--color-panel-loading)]"
-        >
-          {ready ? (
-            <>
-              <Image
-                key={current.photo.id}
-                alt={current.photo.alt}
-                blurDataURL={current.photo.tinyUrl}
-                className="object-cover"
-                fill
-                placeholder="blur"
-                priority={index === 0}
-                sizes="(min-width: 1180px) 38vw, (min-width: 640px) 50vw, 100vw"
-                src={current.photo.url}
-              />
-              <p className="absolute right-4 bottom-4 left-4 z-10 flex flex-wrap items-center gap-1 rounded-full bg-black/80 px-2 py-1 text-xs backdrop-blur-sm sm:left-auto">
-                <span className="tracking-[0.04em] text-[var(--color-text-label)] uppercase">
-                  Photo
-                </span>
-                <a
-                  className="min-w-0 break-words text-white underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  href={current.photo.photographerUrl}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {current.photo.photographer}
-                </a>
-                <span className="text-[var(--color-text-label)]">on</span>
-                <a
-                  className="text-white underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  href={current.photo.photoUrl}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Unsplash
-                </a>
-              </p>
-            </>
-          ) : (
-            <LoadingPanel />
-          )}
-
-          {errorMessage ? (
-            <div className="absolute inset-x-4 top-4 z-20 flex items-center justify-between gap-4 rounded-[6px] border border-white/10 bg-black/90 p-3 text-sm text-white shadow-lg">
-              <p>{errorMessage}</p>
-              <CSButton
-                className="h-8 shrink-0 border-white/20 px-3 text-xs text-white hover:bg-white/10"
-                onClick={() => void shuffle()}
-              >
-                Retry
-              </CSButton>
-            </div>
-          ) : null}
-        </section>
-      </div>
     </main>
   );
 }
