@@ -295,7 +295,7 @@ export function Score({
         </div>
       </div>
 
-      <p className="min-h-10 text-xs leading-5 text-[var(--color-text-muted)]">
+      <p className="text-xs leading-5 text-[var(--color-text-muted)]">
         {score?.description ?? "Extracting a readable color pair from the photo."}
       </p>
     </section>

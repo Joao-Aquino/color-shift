@@ -2,14 +2,34 @@
 
 import gsap from "gsap";
 
-const defaults = {
+export const ODOMETER_TIMING = {
   duration: 0.22,
-  ease: "power3.out",
   digitStagger: 0.02,
   revealDuration: 0.2,
+};
+
+const defaults = {
+  ...ODOMETER_TIMING,
+  ease: "power3.out",
   revealEase: "power2.out",
   digitCycles: 2,
 };
+
+function getOdometerTiming() {
+  if (process.env.NODE_ENV !== "development") return ODOMETER_TIMING;
+
+  const style = getComputedStyle(document.documentElement);
+  function readTiming(property: string, fallback: number) {
+    const value = Number.parseFloat(style.getPropertyValue(property));
+    return Number.isFinite(value) && value >= 0 ? value : fallback;
+  }
+
+  return {
+    duration: readTiming("--odometer-duration", defaults.duration),
+    digitStagger: readTiming("--odometer-digit-stagger", defaults.digitStagger),
+    revealDuration: readTiming("--odometer-reveal-duration", defaults.revealDuration),
+  };
+}
 
 type Segment = {
   type: "digit" | "static";
@@ -225,6 +245,7 @@ function retargetRollers(
   newText: string,
   duration: number,
   ease: string,
+  digitStagger: number,
 ) {
   if (state.timeline) state.timeline.kill();
 
@@ -273,7 +294,7 @@ function retargetRollers(
         ease,
         force3D: true,
       },
-      reversedIdx * defaults.digitStagger,
+      reversedIdx * digitStagger,
     );
 
     state.rollers[digitIdx]!.targetPos = targetPos;
@@ -306,7 +327,8 @@ export function updateOdometer(
     return;
   }
 
-  const duration = options.duration ?? defaults.duration;
+  const timing = getOdometerTiming();
+  const duration = options.duration ?? timing.duration;
   const ease = options.ease ?? defaults.ease;
   const step = getLineHeightRatio(el);
 
@@ -316,7 +338,7 @@ export function updateOdometer(
     patternKey(currentText) === patternKey(newText);
 
   if (canRetarget && state) {
-    retargetRollers(el, state, newText, duration, ease);
+    retargetRollers(el, state, newText, duration, ease, timing.digitStagger);
     return;
   }
 
@@ -363,7 +385,7 @@ export function updateOdometer(
       el,
       {
         width: newWidthEm + "em",
-        duration: defaults.revealDuration,
+        duration: timing.revealDuration,
         ease: defaults.revealEase,
       },
       0,
@@ -380,7 +402,7 @@ export function updateOdometer(
         revealEl,
         {
           width: widthEm + "em",
-          duration: defaults.revealDuration,
+          duration: timing.revealDuration,
           ease: defaults.revealEase,
         },
         0,
@@ -398,7 +420,7 @@ export function updateOdometer(
         ease,
         force3D: true,
       },
-      reversedIdx * defaults.digitStagger,
+      reversedIdx * timing.digitStagger,
     );
   });
 

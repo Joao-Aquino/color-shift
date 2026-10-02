@@ -73,9 +73,10 @@ export function ControlContainer({
   return (
     <aside
       aria-label="Color Shift controls"
-      className="flex h-full w-[320px] shrink-0 flex-col"
+      data-responsive-motion="controls"
+      className="flex w-full shrink-0 flex-col desktop:h-full desktop:w-[320px]"
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto pr-1">
+      <div className="flex flex-col gap-6 pr-1 desktop:min-h-0 desktop:flex-1 desktop:overflow-y-auto">
         <header className="flex h-6 items-center">
           <h1 className="text-base font-medium text-[var(--color-text-value)] uppercase">
             Color<span className="font-black">Shift</span>
@@ -101,7 +102,7 @@ export function ControlContainer({
           foreground={foreground}
           onSelect={onSelectColor}
         />
-        <div className="min-h-0 flex-1" aria-hidden />
+        <div className="hidden min-h-0 flex-1 desktop:block" aria-hidden />
       </div>
 
       <div className="shrink-0 pt-6">

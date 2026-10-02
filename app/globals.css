@@ -55,6 +55,10 @@
   --radius: 0.5rem;
 }
 
+@theme {
+  --breakpoint-desktop: 73.75rem;
+}
+
 @theme inline {
   --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;

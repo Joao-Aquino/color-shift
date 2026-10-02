@@ -1,5 +1,29 @@
 # Progress Log
 
+## 2026-10-01 - Editor polish, development tools, and Phase 5 handoff
+
+Removed the slider track border that produced a white dot at its starting edge. Removed odometer overlays from all color-editor channel inputs and the format readout; values now remain plain editable text with consistent 12px monospace typography when idle, focused, or typing. The score odometer remains animated. Slider/readout rows now have 8px right padding, and the score description uses its natural height.
+
+Installed Agentation and integrated it into the root layout for development only. It starts automatically with `npm run dev`; feedback is copied into chat, with no automatic MCP feedback synchronization configured. Integrated DialKit and its Motion dependency as development controls for score-odometer duration, digit stagger, and reveal duration. Runtime timing overrides apply only in development; production uses the existing defaults.
+
+Replaced the desktop minimum-width constraint with a basic responsive fallback: controls and preview stack below 1180px, and specimen/photo stack below 640px. Adjusted specimen sizes, photo sizing hints, credit wrapping, and scrolling for narrow screens. This is groundwork, not completion of Phase 5's mobile design.
+
+Added scoped GSAP Flip breakpoint transitions in `lib/use-responsive-layout-motion.ts`: 200ms motion at the 640px/1180px boundaries, translation-only controls, separate specimen press transforms, circle counter-scaling, reduced-motion handling, and owned-style cleanup. **Known limitation, not fixed:** the next same-band resize cancels an active transition, so normal continuous window dragging makes the easing nearly invisible. Retargeting from the visible state needs follow-up; animation plan 006 is marked PARTIAL rather than complete.
+
+Validation at session close: `npx tsc --noEmit --incremental false` passed; ESLint passed on changed TS/TSX files other than `score.tsx`, plus the test harness; all eight deterministic responsive-motion tests passed with `node tests/responsive-layout-motion.test.cjs`. `npm run lint` still reports five pre-existing hook-rule errors in `components/control-bar/color-fields.tsx` (four) and `components/control-bar/score.tsx` (one); these were left unchanged. Earlier live browser checks covered both breakpoints, rapid reversals, circle roundness, editor/content changes, a scrolled crossing, and widths 1360, 1180, 1179, 1024, 640, 639, 390, and 320 without settled horizontal overflow or browser console errors. Reduced-motion changes and unmount cleanup were verified with mocks only. No production build was rerun this session.
+
+**Next chat: Phase 5.** Phases 1-4 remain complete. Start from `plan/phase-5-theming-responsive.md` and confirm the remaining draft details/mobile Figma design before implementation. Remaining work includes the palette-tinted Light/Dark theme, accessible toggle and `T` shortcut, theme crossfade, mobile bottom-sheet controls, and defined mobile editor/score behavior while preserving existing workflows. DialKit and a focused Flip use are already present, but broader Phase 7 photo crossfade, TubeText, specimen motion, and layout polish remain pending. Preserve the editor's non-animated numeric inputs and account for the resize limitation above.
+
+## 2026-09-30 — Control bar motion and contrast chrome completed
+
+Committed the control-bar motion and visual pass in `53a21f8` (`feat: animate the control bar and match contrast chrome`). Color editors now expand inside their active color fields with a consistent shell radius, and GSAP odometers animate the score and editor readouts with short durations, retargeting, and reduced-motion handling. Updated format tabs, sliders, score states, and threshold pills to match the Figma contrast chrome.
+
+Completed animation plans 001–005 in `plans/README.md`: color-field radius consistency, shorter odometer motion, named IconButton transitions with press feedback, a CSS threshold accordion, and export progress/entrance motion. EXPORT now uses a transform-based progress fill and a shorter loading sequence; its button chrome matches the other sidebar controls.
+
+Phases 1–4 remain complete. Phase 7 still owns photo crossfade, TubeText, specimen squish/pop, GSAP Flip, and DialKit. The next roadmap milestone is Phase 5 (`plan/phase-5-theming-responsive.md`): Light/Dark theming and the responsive mobile bottom-sheet layout.
+
+Recorded this entry on 2026-10-01 after checking the commit and completed plan statuses. No application tests or browser checks were rerun for this documentation update; the Phase 4 lint note below describes the state at that earlier milestone.
+
 ## 2026-09-29 — Phase 4 Markdown export completed
 
 Implemented the approved export component from Figma node `3377:327`. The sidebar keeps the six photo controls visible while the full-width EXPORT button moves through the two progress-bar loading states and then replaces itself, in the same slot, with COPY and DOWNLOAD .MD. The local row, progress, and success-label transitions respect reduced-motion preferences; COPY and DOWNLOAD both show their check-mark confirmation for 1.5 seconds before restoring EXPORT.

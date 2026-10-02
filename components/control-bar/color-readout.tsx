@@ -9,8 +9,6 @@ import {
 } from "@/lib/color/editor";
 import type { ColorFormat } from "@/types/color-shift";
 
-import { Odometer } from "./odometer";
-
 interface ColorReadoutProps {
   color: string;
   format: ColorFormat;
@@ -51,16 +49,16 @@ export function ColorReadout({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex h-9 items-center gap-2 rounded-full bg-[var(--color-chrome-raised)] px-3">
+      <div className="flex h-9 items-center gap-2 rounded-full bg-[var(--color-chrome-raised)] pr-2 pl-3">
         <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase">
           {format}
         </span>
-        <div className="relative min-w-0 flex-1 focus-within:[&_[data-odometer-element]]:invisible focus-within:[&_input]:text-[var(--color-text-value)] focus-within:[&_input]:caret-current">
+        <div className="min-w-0 flex-1">
           <Input
             aria-describedby={invalid ? descriptionId : undefined}
             aria-invalid={invalid}
             aria-label={`${format} color value`}
-            className="h-7 w-full rounded-full border-0 bg-transparent px-2 text-right font-mono text-xs text-transparent caret-transparent tabular-nums focus-visible:ring-1"
+            className="h-7 w-full rounded-full border-0 bg-transparent px-2 text-right font-mono text-xs text-[var(--color-text-value)] tabular-nums focus-visible:ring-1 md:text-xs"
             onBlur={() => {
               if (cancelCommit.current) {
                 cancelCommit.current = false;
@@ -97,11 +95,6 @@ export function ColorReadout({
             ref={inputRef}
             spellCheck={false}
             value={draft}
-          />
-          <Odometer
-            className="pointer-events-none absolute inset-0 flex items-center justify-end px-2 text-xs text-[var(--color-text-value)]"
-            key={format}
-            value={displayValue}
           />
         </div>
       </div>

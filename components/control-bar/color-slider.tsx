@@ -10,8 +10,6 @@ import {
   type EditorChannel,
 } from "@/lib/color/editor";
 
-import { Odometer } from "./odometer";
-
 interface ColorSliderProps {
   channel: EditorChannel;
   gradient: string;
@@ -83,7 +81,7 @@ export function ColorSlider({
   }
 
   return (
-    <div className="flex h-9 items-center gap-2 rounded-full bg-[var(--color-chrome-raised)] px-3">
+    <div className="flex h-9 items-center gap-2 rounded-full bg-[var(--color-chrome-raised)] pr-2 pl-3">
       <span
         className="w-[74px] shrink-0 text-xs font-medium text-[var(--color-text-muted)]"
         id={sliderLabelId}
@@ -93,7 +91,7 @@ export function ColorSlider({
       <div className="relative flex min-w-0 flex-1 items-center">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 h-2 rounded-full border border-white/10"
+          className="pointer-events-none absolute inset-x-0 h-2 rounded-full"
           style={{ background: gradient }}
         />
         <Slider
@@ -116,10 +114,10 @@ export function ColorSlider({
           value={[channel.value]}
         />
       </div>
-      <div className="relative h-7 w-14 shrink-0 focus-within:[&_[data-odometer-element]]:invisible focus-within:[&_input]:text-[var(--color-text-value)] focus-within:[&_input]:caret-current">
+      <div className="h-7 w-14 shrink-0">
         <Input
           aria-label={`${channel.label} value`}
-          className="h-7 w-14 rounded-full border-0 bg-black/20 px-2 text-right font-mono text-xs text-transparent caret-transparent tabular-nums focus-visible:ring-1 md:text-xs"
+          className="h-7 w-14 rounded-full border-0 bg-black/20 px-2 text-right font-mono text-xs text-[var(--color-text-value)] tabular-nums focus-visible:ring-1 md:text-xs"
           inputMode={channel.display === "hex" ? "text" : "decimal"}
           onBlur={() => {
             if (cancelCommit.current) {
@@ -144,10 +142,6 @@ export function ColorSlider({
           ref={inputRef}
           spellCheck={false}
           value={draft}
-        />
-        <Odometer
-          className="pointer-events-none absolute inset-0 flex items-center justify-end px-2 text-xs text-[var(--color-text-value)]"
-          value={formatted}
         />
       </div>
     </div>

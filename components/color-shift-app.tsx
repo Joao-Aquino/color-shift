@@ -15,6 +15,7 @@ import {
 } from "@/lib/color/contrast";
 import { createFallbackPair, extractColorPair } from "@/lib/color/palette";
 import { fetchPhotos } from "@/lib/photos/client";
+import { useResponsiveLayoutMotion } from "@/lib/use-responsive-layout-motion";
 import type {
   ColorPair,
   ColorTarget,
@@ -44,6 +45,7 @@ function LoadingPanel({ className = "" }: { className?: string }) {
 }
 
 export function ColorShiftApp() {
+  const layoutRef = useResponsiveLayoutMotion();
   const [entries, setEntries] = useState<PhotoEntry[]>([]);
   const [index, setIndex] = useState(0);
   const [showCircle, setShowCircle] = useState(false);
@@ -503,7 +505,7 @@ export function ColorShiftApp() {
   const ready = !!current && !!pair;
 
   return (
-    <main className="flex h-screen min-h-[720px] min-w-[1180px] gap-12 overflow-hidden bg-[var(--color-chrome-bg)] p-10">
+    <main ref={layoutRef} className="flex min-h-svh w-full min-w-0 flex-col gap-6 bg-[var(--color-chrome-bg)] p-4 sm:p-6 desktop:h-screen desktop:min-h-[720px] desktop:flex-row desktop:gap-12 desktop:overflow-hidden desktop:p-10">
       <ControlContainer
         activeTarget={activeColor}
         algorithm={contrastAlgorithm}
@@ -544,10 +546,11 @@ export function ColorShiftApp() {
         thresholds={thresholds}
       />
 
-      <div className="flex min-w-0 flex-1 gap-1 overflow-hidden rounded-[12px]">
+      <div data-responsive-motion="preview" className="flex h-[640px] w-full min-w-0 shrink-0 flex-col gap-1 overflow-hidden rounded-[12px] sm:h-[560px] sm:flex-row desktop:h-auto desktop:min-h-0 desktop:w-auto desktop:flex-1">
         {ready ? (
           <button
             aria-label={showCircle ? "Show Aa specimen" : "Show circle specimen"}
+            data-responsive-motion="specimen"
             className="group flex h-full min-w-0 flex-1 cursor-pointer items-center justify-center overflow-hidden transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current"
             onClick={() => setShowCircle((currentValue) => !currentValue)}
             style={{ backgroundColor: pair.background, color: pair.foreground }}
@@ -556,11 +559,18 @@ export function ColorShiftApp() {
             {showCircle ? (
               <span
                 aria-hidden
-                className="aspect-square w-[min(240px,52%)] rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95"
-              />
+                data-responsive-motion="circle"
+                className="inline-flex aspect-square w-[min(240px,52%)]"
+              >
+                <span data-responsive-circle-shape className="inline-flex h-full w-full">
+                  <span className="h-full w-full rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95" />
+                </span>
+              </span>
             ) : (
-              <span className="text-[220px] leading-none font-medium transition-[transform,opacity] duration-200 group-active:scale-95">
-                Aa
+              <span data-responsive-motion="type" className="inline-flex text-[80px] leading-none font-medium sm:text-[160px] desktop:text-[220px]">
+                <span className="transition-[transform,opacity] duration-200 group-active:scale-95">
+                  Aa
+                </span>
               </span>
             )}
           </button>
@@ -570,6 +580,7 @@ export function ColorShiftApp() {
 
         <section
           aria-label="Source photo"
+          data-responsive-motion="photo"
           className="relative h-full min-w-0 flex-1 overflow-hidden bg-[var(--color-panel-loading)]"
         >
           {ready ? (
@@ -582,15 +593,15 @@ export function ColorShiftApp() {
                 fill
                 placeholder="blur"
                 priority={index === 0}
-                sizes="(min-width: 1180px) 38vw, 50vw"
+                sizes="(min-width: 1180px) 38vw, (min-width: 640px) 50vw, 100vw"
                 src={current.photo.url}
               />
-              <p className="absolute right-4 bottom-4 z-10 flex items-center gap-1 rounded-full bg-black/80 px-2 py-1 text-xs backdrop-blur-sm">
+              <p className="absolute right-4 bottom-4 left-4 z-10 flex flex-wrap items-center gap-1 rounded-full bg-black/80 px-2 py-1 text-xs backdrop-blur-sm sm:left-auto">
                 <span className="tracking-[0.04em] text-[var(--color-text-label)] uppercase">
                   Photo
                 </span>
                 <a
-                  className="text-white underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="min-w-0 break-words text-white underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   href={current.photo.photographerUrl}
                   rel="noreferrer"
                   target="_blank"
