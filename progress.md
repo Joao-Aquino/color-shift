@@ -1,5 +1,43 @@
 # Progress Log
 
+## 2026-10-03 - Session close and Phase 5 polish checkpoint
+
+Closing the session with the revised mobile action capsule and progressive footer, compact intrinsic theme toggle, shared editor readout alignment, Figma tooltip styling (Dark `ds/gray/100` / `#1A1A1A`, Light unchanged), left-side mobile tooltips and coordinated, interruptible editor reveal. Animation plan 007 is complete. This checkpoint includes the session's implementation, original Figma arrow assets, regression coverage and documentation; the other chat's loading-animation work remains separate.
+
+Final pre-commit checks reran repository-wide lint, TypeScript, three theme tests, six presence tests, eight responsive-motion tests and whitespace validation; all passed. Production builds and both Chrome suites passed during implementation, including the final tooltip checks after returning to `main`; those results remain documented below and were not rerun for this documentation-only closure.
+
+Next session: confirm the scope of `plan/phase-6-extended-input-layouts.md`. Before mobile release, verify software keyboards and safe-area behavior on physical iOS/Android devices. Keep plan 006's continuous-resize limitation separate; the 2D picker, swipe navigation, palette-tinted Light chrome and broader Phase 7 work remain deferred.
+
+## 2026-10-03 - Editor readout alignment and Figma tooltips
+
+The format readout now reserves the same 74px label column as the color sliders, aligning the input start in HEX, RGB, HSL, HSB and OKLCH without changing input behavior. This uses the existing shared editor layout at all breakpoints, not a desktop-only override.
+
+Vertical mobile PhotoActions controls and their disclosure trigger show tooltips on the left; inline desktop controls retain top placement. Figma tooltip component set `3396:988` supplies Dark background `#1A1A1A` (`ds/gray/100`, updated from `ds/gray/300`) / text `#EDEDED` and Light background `#E5E5E5` / text `#171717`, 13px type with 16px line height, 12px horizontal and 8px vertical padding, and 6px corners. Original 14 x 6px arrow SVGs are stored locally and use Radix's side-aware placement; the Dark arrow was refreshed to match the updated token. Informational tooltips do not intercept clicks or use hoverable-content grace areas, preventing obstruction between adjacent controls.
+
+Validation: lint and webpack production build with TypeScript pass. The focused Chrome suite `tests/ui-annotations.browser.cjs` verifies readout alignment in five formats at widths 2520/640/393/320, all six mobile tooltip positions and colors in both themes at 393/320, actual arrow loading/dimensions, neighboring action clicks, preserved desktop top placement, and no console errors. Inspected mobile Dark/Light tooltip and desktop editor screenshots.
+
+## 2026-10-03 - Coordinated mobile editor reveal
+
+Replaced the editor reveal's settle timer and native smooth scroll with cancellable, frame-coalesced instant corrections that follow the existing 200ms opening / 150ms closing CSS morph. Both field shells, natural editor content, footer border geometry and visual viewport changes are observed. Manual wheel/touch interaction and input focus take priority; switching fields, closing and unmounting cancel stale work. Mobile breakpoint reentry and live reduced motion retain their existing state and focus behavior.
+
+Combined original-checkout validation passed: webpack production build with TypeScript, lint, six presence tests, eight responsive-motion tests, three theme tests, the annotation suite and the complete Phase 5 Chrome suite all exited 0. Browser console errors were absent; actual scroll movement began at 57.1ms before shell settlement at 190.5ms. Coverage includes Escape after scrolling starts, unmount cleanup, trusted gesture cancellation, rapid switches, keyboard/reduced-motion behavior, all formats/themes, 320 x 320 top alignment and desktop no-scroll. Combined evidence is preserved in `/tmp/color-shift-007-combined`. Physical keyboard and safe-area checks remain pending.
+
+## 2026-10-02 - Compact theme toggle and mobile editor reveal
+
+Restored 4px vertical padding on the shared Light/Dark options and removed their 44px minimum dimensions at the user's request. The toggle is now an intrinsic-height pill on desktop and mobile; keyboard focus styling remains intact. This supersedes the earlier zero-padding/44px-target decision below.
+
+Opening either color editor below 640px now reveals its expanded shell with automatic scrolling, leaving at least 16px above the measured fixed footer. A debounced ResizeObserver waits for expansion to settle and also handles format-driven height changes. Reduced motion uses instant scrolling, closing cancels pending work, and desktop page scrolling is unchanged. If the panel exceeds the available height, its top is aligned instead of attempting to fit an impossible full-panel view; normal scrolling still reaches the remaining controls. Existing focused-input keyboard handling is preserved.
+
+Validation: repository-wide lint, TypeScript through the webpack production build, six presence tests, whitespace checks, and the expanded Chrome integration suite pass with no console errors. Automatic reveal was checked at 393 x 852 for both targets, all five formats, both themes, and both motion preferences, plus the oversized-panel fallback at 320 x 320 and no desktop page movement at 2520 x 1314. Inspected mobile editor and compact-toggle screenshots. Physical iOS/Android keyboard and safe-area checks remain pending.
+
+## 2026-10-02 - Mobile action capsule and progressive footer updated
+
+Implemented the revised `ControlMobile` component set (`3389:788`) from Figma. Its open state now uses one 48 x 310px capsule with shared theme fill/border, six transparent 46 x 48px controls, and 4px gaps. Action order, disabled states, editor target, Escape/outside dismissal, focus transfer, and short-viewport scrolling remain intact; desktop controls are unchanged.
+
+Applied the two browser annotations through the shared theme-button style: vertical padding is zero while 44px touch targets remain. Inspected Dark/Light footer nodes `3387:343` and `3389:891`; removed the top divider and added the transparent-to-theme gradient and a masked-layer approximation of progressive background blur below 640px. Decorative layers do not intercept input or clip floating actions. Solid chrome is the fallback for unsupported blur/masks and reduced-transparency preference.
+
+Fixed keyboard-open focus timing by focusing after the disclosure content commits, and stopped outside-click editor dismissal from scheduling a competing focus restoration. Escape still restores the editor's field focus. Lint, TypeScript, webpack production build, the six presence tests, and the expanded Chrome integration suite pass. Browser checks include ten widths, exact capsule geometry, all six actions, export, keyboard focus, short viewports, and reduced transparency; console errors: none. Dark/Light screenshots and a separate 393 x 852 touch check were inspected. Physical iOS/Android keyboard and safe-area checks remain pending.
+
 ## 2026-10-02 - Session close and Phase 6 handoff
 
 Closing this session with the Phase 5 implementation, its regression tests, and the updated phase/roadmap/product documentation. The checkpoint also includes the parallel photo improvements: randomized abstract queries, 2400px display images at quality 90, the matching Next image quality configuration, and the non-deprecated image preload prop. Existing work from the other chat was preserved.

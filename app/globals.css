@@ -16,6 +16,7 @@
   --color-focus: #ffffff;
   --color-panel-loading: #151515;
   --color-popover-bg: #202020;
+  --color-tooltip-bg: #1a1a1a;
   --color-theme-selected: #2e2e2e;
   --color-score-good: #0f2e18;
   --color-score-meh: #331b00;
@@ -69,6 +70,7 @@
   --color-focus: #171717;
   --color-panel-loading: #f2f2f2;
   --color-popover-bg: #ffffff;
+  --color-tooltip-bg: #e5e5e5;
   --color-theme-selected: #171717;
   --color-score-good: #e9f9ec;
   --color-score-meh: #fff4e5;
@@ -162,9 +164,12 @@
 .cs-header { grid-area: header; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .cs-header h1 { font-size: 20px; line-height: 26px; }
 .cs-theme-toggle { display: flex; flex: none; padding: 2px; background: var(--color-chrome-raised); border-radius: 9999px; }
-.cs-theme-option { min-width: 44px; min-height: 44px; padding: 4px 8px; border-radius: 9999px; font-size: 12px; color: var(--color-text-muted); cursor: pointer; }
+.cs-theme-option { padding: 4px 8px; border-radius: 9999px; font-size: 12px; line-height: 16px; color: var(--color-text-muted); cursor: pointer; }
 [data-theme="light"] [data-theme-choice="light"], [data-theme="dark"] [data-theme-choice="dark"] { background: var(--color-theme-selected); color: #fff; }
 .cs-theme-option:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.cs-tooltip-arrow-light { display: none; }
+:root[data-theme="light"] .cs-tooltip-arrow-dark { display: none; }
+:root[data-theme="light"] .cs-tooltip-arrow-light { display: block; }
 .cs-controls { grid-area: controls; display: flex; min-width: 0; flex-direction: column; gap: 16px; }
 .cs-preview { grid-area: preview; position: relative; min-width: 0; }
 .cs-preview-panels { display: grid; grid-template-columns: 167fr 183fr; gap: 4px; height: 240px; overflow: hidden; border-radius: 8px; }
@@ -172,7 +177,19 @@
 .cs-credit { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px; margin-top: 8px; font-size: 10px; color: var(--color-text-value); }
 .cs-credit a { overflow-wrap: anywhere; }
 .cs-credit-label { color: var(--color-text-label); }
-.cs-footer { grid-area: footer; position: fixed; z-index: 40; bottom: var(--cs-keyboard-offset, 0px); left: 0; right: 0; padding: 24px max(24px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px)); border-top: 1px solid var(--color-chrome-divider); background: var(--color-chrome-bg); }
+.cs-footer { grid-area: footer; position: fixed; z-index: 40; isolation: isolate; bottom: var(--cs-keyboard-offset, 0px); left: 0; right: 0; padding: 24px max(24px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px)); background: var(--color-chrome-bg); }
+.cs-footer-backdrop { display: none; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.cs-footer-backdrop::after { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, transparent, var(--color-chrome-bg)); }
+.cs-footer-backdrop > span { position: absolute; inset: 0; -webkit-backdrop-filter: blur(var(--cs-blur)); backdrop-filter: blur(var(--cs-blur)); -webkit-mask-image: linear-gradient(to bottom, transparent var(--cs-blur-start), #000 var(--cs-blur-end)); mask-image: linear-gradient(to bottom, transparent var(--cs-blur-start), #000 var(--cs-blur-end)); }
+/* Approximate Figma's progressive blur without filtering the floating controls. */
+.cs-footer-backdrop > span:nth-child(1) { --cs-blur: 2.5px; --cs-blur-start: 5.2083%; --cs-blur-end: 28.9062%; }
+.cs-footer-backdrop > span:nth-child(2) { --cs-blur: 5px; --cs-blur-start: 28.9062%; --cs-blur-end: 52.6042%; }
+.cs-footer-backdrop > span:nth-child(3) { --cs-blur: 10px; --cs-blur-start: 52.6042%; --cs-blur-end: 76.3021%; }
+.cs-footer-backdrop > span:nth-child(4) { --cs-blur: 20px; --cs-blur-start: 76.3021%; --cs-blur-end: 100%; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and ((mask-image: linear-gradient(#000, transparent)) or (-webkit-mask-image: linear-gradient(#000, transparent))) {
+  .cs-footer { background: transparent; }
+  .cs-footer-backdrop { display: block; }
+}
 .cs-export-controls { display: flex; align-items: flex-end; gap: 4px; }
 .cs-export-photo-actions { order: 2; flex: none; }
 .cs-export-slot { order: 1; flex: 1; min-width: 0; }
@@ -180,8 +197,10 @@
 .cs-export-actions button { padding-inline: 8px; font-size: 11px; }
 .cs-inline-actions { display: none; }
 .cs-mobile-actions { position: relative; width: 48px; }
-.cs-mobile-action-list { position: absolute; right: 0; bottom: 52px; width: 48px; max-height: max(48px, var(--cs-action-height, calc(100dvh - 128px - env(safe-area-inset-bottom, 0px)))); overflow-y: auto; overscroll-behavior: contain; }
-.cs-mobile-action-list button { background: var(--color-chrome-raised); }
+.cs-mobile-action-list { position: absolute; right: 0; bottom: 52px; width: 48px; max-height: max(48px, var(--cs-action-height, calc(100dvh - 128px - env(safe-area-inset-bottom, 0px)))); overflow: hidden; overscroll-behavior: contain; border: 1px solid var(--color-chrome-border); border-radius: 9999px; background: var(--color-chrome-raised); }
+.cs-mobile-action-list button { border-width: 0; background: transparent; }
+.cs-mobile-action-list button:hover { background: var(--color-chrome-border); }
+.cs-mobile-action-list button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -4px; }
 .cs-mobile-action-list svg, .cs-mobile-actions > button svg { width: 20px; height: 20px; }
 html { scroll-padding-bottom: calc(var(--cs-footer-height, 96px) + var(--cs-keyboard-offset, 0px) + 24px); -webkit-text-size-adjust: 100%; }
 html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-theme-option) { transition: background-color 200ms, color 200ms, border-color 200ms; }
@@ -199,12 +218,17 @@ html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-t
   .cs-credit { position: absolute; right: 16px; bottom: 16px; margin: 0; max-width: calc(50% - 32px); border-radius: 9999px; padding: 4px 8px; background: rgb(0 0 0 / .8); color: #fff; font-size: 12px; }
   .cs-credit-label { color: #a1a1a1; }
   .cs-footer { position: static; padding: 0; border: 0; z-index: auto; }
+  .cs-footer-backdrop { display: none; }
   .cs-export-controls { flex-direction: column; align-items: stretch; gap: 8px; }
   .cs-export-photo-actions { order: 0; }
   .cs-export-slot { flex: none; }
   .cs-inline-actions { display: block; }
   .cs-mobile-actions { display: none; }
   html { scroll-padding-bottom: 24px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .cs-footer { background: var(--color-chrome-bg); }
+  .cs-footer-backdrop { display: none; }
 }
 @media (min-width: 1180px) {
   .cs-app { grid-template-areas: "header preview" "controls preview" "footer preview"; grid-template-columns: 320px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; column-gap: 48px; height: 100dvh; min-height: 720px; padding: 40px; overflow: hidden; }

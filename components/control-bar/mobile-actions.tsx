@@ -2,7 +2,7 @@
 
 import { ListIcon } from "@phosphor-icons/react/List";
 import { XIcon } from "@phosphor-icons/react/X";
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import { useCollapsiblePresence } from "@/lib/use-collapsible-presence";
 import { IconButton } from "./icon-button";
@@ -11,12 +11,20 @@ export function MobileActions({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const keyboardOpenRef = useRef(false);
   const id = useId();
   const { present, onTransitionEnd } = useCollapsiblePresence(open);
   const close = useCallback((restoreFocus = true) => {
+    keyboardOpenRef.current = false;
     setOpen(false);
     if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
   }, []);
+
+  useLayoutEffect(() => {
+    if (!open || !keyboardOpenRef.current) return;
+    keyboardOpenRef.current = false;
+    rootRef.current?.querySelector<HTMLButtonElement>('.cs-mobile-action-list button:not(:disabled)')?.focus({ preventScroll: true });
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -87,12 +95,11 @@ export function MobileActions({ children }: { children: ReactNode }) {
         className="bg-[var(--color-chrome-raised)] dark:bg-[var(--color-chrome-raised)]"
         icon={open ? XIcon : ListIcon}
         label={open ? "Close photo actions" : "Open photo actions"}
+        tooltipSide="left"
         onClick={(event) => {
           if (open) { close(); return; }
+          keyboardOpenRef.current = event.detail === 0;
           setOpen(true);
-          if (event.detail === 0) {
-            requestAnimationFrame(() => rootRef.current?.querySelector<HTMLButtonElement>('.cs-mobile-action-list button:not(:disabled)')?.focus());
-          }
         }}
         ref={triggerRef}
       />

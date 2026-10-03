@@ -45,5 +45,15 @@ export function ControlFooter({ children }: { children: ReactNode }) {
       ["--cs-keyboard-offset", "--cs-footer-height", "--cs-action-height"].forEach((key) => root.style.removeProperty(key));
     };
   }, []);
-  return <footer className="cs-footer" data-control-footer ref={ref}>{children}</footer>;
+  return (
+    <footer className="cs-footer" data-control-footer ref={ref}>
+      <div aria-hidden="true" className="cs-footer-backdrop">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+      {children}
+    </footer>
+  );
 }

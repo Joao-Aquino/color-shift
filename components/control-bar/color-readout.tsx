@@ -50,7 +50,7 @@ export function ColorReadout({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex h-9 items-center gap-2 rounded-full bg-[var(--color-chrome-raised)] pr-2 pl-3">
-        <span className="text-xs font-medium text-[var(--color-text-muted)] uppercase">
+        <span className="w-[74px] shrink-0 text-xs font-medium text-[var(--color-text-muted)] uppercase">
           {format}
         </span>
         <div className="min-w-0 flex-1">

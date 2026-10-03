@@ -10,6 +10,7 @@ Plans from `improve-animations`. Execute with an agent (`improve-animations exec
 | 004 | Score threshold accordion (CSS interim) | MEDIUM | DONE |
 | 005 | Fix EXPORT trigger progress + entrance motion | HIGH | DONE |
 | 006 | Ease responsive layout changes | MEDIUM | PARTIAL |
+| 007 | Coordinate and interrupt mobile editor reveal | MEDIUM | DONE |
 
 ## Execution order
 
@@ -19,6 +20,7 @@ Plans from `improve-animations`. Execute with an agent (`improve-animations exec
 4. `004-score-threshold-accordion.md` — done (interim; Phase 7 Flip may replace)
 5. `005-export-button-motion.md` — done
 6. `006-responsive-layout-motion.md` - implemented; continuous-drag retargeting needs follow-up
+7. `007-coordinate-mobile-editor-reveal.md` - done; coordinated reveal and interruption verified after integration, preserving the existing CSS editor morph
 
 ## Notes
 

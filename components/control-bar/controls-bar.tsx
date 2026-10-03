@@ -68,6 +68,7 @@ export function ControlsBar({
           icon={action.icon}
           key={key}
           label={action.label}
+          tooltipSide={vertical ? "left" : "top"}
           onClick={action.run}
         />;
       })}

@@ -14,11 +14,13 @@ interface IconButtonProps
   extends Omit<React.ComponentProps<typeof Button>, "children"> {
   icon: Icon;
   label: string;
+  tooltipSide?: React.ComponentProps<typeof TooltipContent>["side"];
 }
 
 export function IconButton({
   icon: IconComponent,
   label,
+  tooltipSide = "top",
   className,
   ...props
 }: IconButtonProps) {
@@ -38,7 +40,7 @@ export function IconButton({
           <IconComponent aria-hidden size={20} weight="regular" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={8}>
+      <TooltipContent side={tooltipSide} sideOffset={8}>
         {label}
       </TooltipContent>
     </Tooltip>

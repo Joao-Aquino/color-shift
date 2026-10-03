@@ -33,7 +33,7 @@ Confirmed with the user on 2026-10-01:
 - Redefine semantic tokens for chrome, borders, labels, values, focus, loading, popovers, and all good/meh/bad score states. Use Figma Light/Dark token modes, including neutral EXPORT/action surfaces; retain palette color only in specimen, swatches, and existing field treatments.
 - Smooth color transition; no remount or reset of photo, colors, editor format, thresholds, undo, or export. Reduced motion switches immediately.
 - Implementation default: Dark on first visit, persist explicit choice locally, resolve before paint, tolerate unavailable storage, and avoid hydration warnings. Automatic system theme is deferred.
-- Accessible selected state and labels. Enlarge the Figma toggle's 65 x 21px geometry and 10px text to provide adequate label scale and touch targets.
+- Accessible selected state and labels. Following the 2026-10-02 revision, use compact theme pills with 12px text and 4px vertical padding; intrinsic sizing replaces the previous 44px minimum targets at the user's request. Keep keyboard focus visible.
 
 ### 2. Responsive layout
 - Engineering default: mobile below 640px; desktop sidebar at 1180px and above. Tablet between these existing boundaries uses preview above full-width controls and inline actions. Figma does not specify breakpoints.
@@ -45,9 +45,9 @@ Confirmed with the user on 2026-10-01:
 - Content determines page height. Reserve measured fixed-footer height plus safe-area inset so the last input/errors can scroll fully above it. Focused fields stay reachable with the software keyboard open.
 
 ### 3. Fixed footer and floating actions
-- At 402px: 96px footer, 24px padding, top divider, opaque theme-matched surface; add bottom safe-area inset without shrinking targets.
+- At 402px: 96px footer and 24px padding; the updated Figma removes the top divider and uses a transparent-to-theme gradient with progressive background blur. Add bottom safe-area inset without shrinking targets. Use solid chrome when blur/masks are unavailable or reduced transparency is requested.
 - EXPORT fills remaining width (302px reference), followed by 4px gap and circular 48 x 48px trigger. Closed icon is a three-line menu; open icon is X. Reuse Phosphor icons and local button patterns.
-- Open stack aligns above/right of trigger. Top-to-bottom: Undo, Shuffle, Swap, Fix, Previous, Next. Six 48px buttons, 20px icons, 4px gaps make a 308px stack with 4px separation from trigger.
+- Open stack aligns above/right of trigger. Top-to-bottom: Undo, Shuffle, Swap, Fix, Previous, Next. Updated `ControlMobile` uses a single 48 x 310px capsule with shared fill, 1px border, and fully rounded ends. Its six borderless controls are 46 x 48px, with 20px icons and 4px gaps; the capsule sits 4px above the trigger.
 - Overlay without reflow; allow footer overflow above, and keep fixed controls outside transformed/clipped responsive-motion ancestors. Constrain/scroll the stack on short viewports or with keyboard open so all actions remain reachable.
 - Share current handlers, disabled/loading states, history, and active-color behavior. Opening must not dismiss editor, collapse thresholds, reset export, or change Fix's color target.
 - Implementation defaults: trigger toggles; an enabled action closes the stack; outside pointer closes it without suppressing the outside action. Escape closes stack first and returns trigger focus; subsequent Escape can dismiss editor/threshold/export. Selection also restores trigger focus.
@@ -88,11 +88,11 @@ Confirmed with the user on 2026-10-01:
 
 ## Implementation evidence
 
-- Neutral Light/Dark tokens, persisted pre-paint theme, accessible 44px theme targets, and guarded `T` are implemented without resetting editing or export.
-- Mobile footer is 97px including its divider, with a measured bottom reservation. Floating actions retain their identity across export resets, photo loading, and color changes; keyboard focus transfers to equivalent inline actions at 640px.
-- Production Chrome checks cover nine widths from 320 to 1360px, all six actions, editor/menu dismissal, real clipboard and Markdown download, blocked storage, score grades/APCA, short-viewport scrolling, reduced motion, and circle geometry. Photo API fixtures use the real local bitmap and palette pipeline, not a static UI mock. See `tests/README.md`.
+- Neutral Light/Dark tokens, persisted pre-paint theme, compact intrinsically sized theme pills, and guarded `T` are implemented without resetting editing or export.
+- Mobile footer is 96px with a measured bottom reservation and decorative masked blur layers behind its content. Floating actions retain their identity across export resets, photo loading, and color changes; keyboard focus transfers to equivalent inline actions at 640px.
+- Production Chrome checks cover ten widths from 320 to 1360px, all six actions, editor/menu dismissal, real clipboard and Markdown download, blocked storage, score grades/APCA, short-viewport scrolling, reduced motion/transparency, and circle geometry. Photo API fixtures use the real local bitmap and palette pipeline, not a static UI mock. See `tests/README.md`.
 - Full lint, TypeScript, webpack production build, three theme tests, six presence tests, and eight responsive-motion tests pass. The environment's Turbopack process/port restriction still requires the existing webpack fallback.
-- The enlarged theme toggle makes the header taller than the compact Figma reference. The five-format editor remains the agreed visual exception; no 2D picker was added.
+- The compact theme toggle uses the requested 4px vertical padding without a fixed height or 44px minimum. The five-format editor remains the agreed visual exception; no 2D picker was added.
 - Browser tests do not prove physical keyboard or notch behavior. Verify iOS Safari/Android Chrome before mobile release. Existing continuous-resize easing cancellation remains outside this phase.
 
 ## Done means

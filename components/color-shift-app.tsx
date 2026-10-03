@@ -182,12 +182,13 @@ export function ColorShiftApp() {
     setActiveColor(target);
   }, []);
 
-  const closeEditor = useCallback(() => {
+  const closeEditor = useCallback((restoreFocus = true) => {
     const target = activeColorRef.current;
     if (!target) return;
 
     activeColorRef.current = null;
     setActiveColor(null);
+    if (!restoreFocus) return;
     window.requestAnimationFrame(() => {
       document
         .querySelector<HTMLButtonElement>(`[data-color-field="${target}"]`)
@@ -410,7 +411,7 @@ export function ColorShiftApp() {
       ) {
         return;
       }
-      closeEditor();
+      closeEditor(false);
     }
 
     document.addEventListener("click", handleClick);

@@ -2,6 +2,7 @@
 const assert = require('node:assert/strict');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
+const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
 
 (async () => {
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
@@ -41,6 +42,26 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
     assert.ok(geometry.footer.height >= 96 && geometry.footer.height <= 98);
     assert.ok(geometry.scrollWidth <= 402);
 
+    const themeStyles = await page.locator('.cs-theme-option').evaluateAll(nodes => nodes.map(n => {
+      const style = getComputedStyle(n);
+      const bounds = n.getBoundingClientRect();
+      return {top:style.paddingTop,bottom:style.paddingBottom,minHeight:style.minHeight,minWidth:style.minWidth,height:bounds.height,width:bounds.width};
+    }));
+    assert.ok(themeStyles.every(n => n.top === '4px' && n.bottom === '4px' && n.minHeight === 'auto' && n.minWidth === 'auto' && n.height === 24 && n.width > n.height));
+    const mobileBackdrop = await page.locator('.cs-footer-backdrop').evaluate(n => ({
+      display:getComputedStyle(n).display,
+      pointer:getComputedStyle(n).pointerEvents,
+      gradient:getComputedStyle(n,'::after').backgroundImage,
+      layers:[...n.children].map(layer => getComputedStyle(layer).backdropFilter),
+      border:getComputedStyle(n.parentElement).borderTopWidth,
+    }));
+    assert.equal(mobileBackdrop.display,'block');
+    assert.equal(mobileBackdrop.pointer,'none');
+    assert.equal(mobileBackdrop.border,'0px');
+    assert.ok(mobileBackdrop.gradient.startsWith('linear-gradient'));
+    assert.deepEqual(mobileBackdrop.layers,['blur(2.5px)','blur(5px)','blur(10px)','blur(20px)']);
+    console.log('PASS compact intrinsic theme pills with 4px vertical padding and mobile progressive backdrop');
+
     await page.locator('[data-color-field="foreground"]').click();
     await page.getByRole('tab', {name: 'HSL', exact: true}).click();
     const targetBefore = await page.locator('[data-color-field="foreground"]').getAttribute('aria-expanded');
@@ -51,6 +72,20 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
     assert.equal(await page.getByRole('tab', {name: 'HSL', exact: true}).getAttribute('data-state'), 'active');
     const order = await page.locator('.cs-mobile-action-list [data-action]').evaluateAll(nodes => nodes.map(n => n.dataset.action));
     assert.deepEqual(order, ['undo', 'shuffle', 'swap', 'fix', 'previous', 'next']);
+    const actionPill = await page.locator('.cs-mobile-action-list').evaluate(n => ({
+      width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height,
+      border:getComputedStyle(n).borderTopWidth,radius:getComputedStyle(n).borderRadius,
+      buttons:[...n.querySelectorAll('button')].map(button => ({
+        width:button.getBoundingClientRect().width,height:button.getBoundingClientRect().height,
+        border:getComputedStyle(button).borderTopWidth,background:getComputedStyle(button).backgroundColor,
+      })),
+    }));
+    assert.equal(actionPill.width,48);
+    assert.equal(actionPill.height,310);
+    assert.equal(actionPill.border,'1px');
+    assert.equal(actionPill.radius,'9999px');
+    assert.ok(actionPill.buttons.every(n => n.width === 46 && n.height === 48 && n.border === '0px' && n.background === 'rgba(0, 0, 0, 0)'));
+    console.log('PASS shared action pill border/background with Figma 48x310 geometry');
     await page.keyboard.press('Escape');
     assert.equal(await page.getByRole('button', {name: 'Open photo actions', exact: true}).getAttribute('aria-expanded'), 'false');
     assert.equal(await page.locator('[data-color-field="foreground"]').getAttribute('aria-expanded'), 'true');
@@ -79,12 +114,13 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
     await page.waitForFunction(() => document.querySelector('[data-export-button]') === document.activeElement);
     console.log('PASS theme persistence and export/menu integration with real clipboard');
 
-    for (const width of [320,390,402,639,640,1024,1179,1180,1360]) {
+    for (const width of [320,390,393,402,639,640,1024,1179,1180,1360]) {
       await page.setViewportSize({width, height: 874});
       await page.waitForTimeout(300);
       const data = await page.evaluate(() => ({width: innerWidth, scroll: document.documentElement.scrollWidth, footer: getComputedStyle(document.querySelector('[data-control-footer]')).position, hidden: [...document.querySelectorAll('[data-responsive-motion]')].filter(n=>!n.getBoundingClientRect().height).map(n=>n.dataset.responsiveMotion)}));
       assert.ok(data.scroll <= width, JSON.stringify(data));
       assert.equal(data.footer, width < 640 ? 'fixed' : 'static');
+      assert.equal(await page.locator('.cs-footer-backdrop').evaluate(n => getComputedStyle(n).display),width < 640 ? 'block' : 'none');
       console.log('PASS layout', width, JSON.stringify(data));
     }
     await page.screenshot({path: '/tmp/color-shift-desktop-light.png', fullPage: true});
@@ -179,7 +215,7 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
     await page.locator('.cs-mobile-action-list [data-action="next"]').scrollIntoViewIfNeeded();
     await page.waitForTimeout(350);
     const shortBounds=await page.locator('.cs-mobile-action-list').boundingBox();
-    assert.ok(shortBounds.y >= 0 && shortBounds.height < 308, JSON.stringify(shortBounds));
+    assert.ok(shortBounds.y >= 0 && shortBounds.height < 310, JSON.stringify(shortBounds));
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('.cs-mobile-action-list button').count(),0);
@@ -232,6 +268,15 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
     await page.waitForSelector('[data-export-button]');
     console.log('PASS clipboard failure remains announced and recoverable');
 
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
+    assert.equal(await page.locator('.cs-footer-backdrop').evaluate(n => getComputedStyle(n).display),'none');
+    const solidFooter = await page.locator('html').getAttribute('data-theme') === 'light' ? 'rgb(255, 255, 255)' : 'rgb(10, 10, 10)';
+    await page.waitForFunction(color => getComputedStyle(document.querySelector('.cs-footer')).backgroundColor === color,solidFooter);
+    await cdp.send('Emulation.setEmulatedMedia',{features:[]});
+    await cdp.detach();
+    console.log('PASS reduced-transparency solid footer fallback');
+
     const blockedContext=await browser.newContext({viewport:{width:402,height:874}});
     const blockedPage=await blockedContext.newPage();
     blockedPage.on('pageerror',e=>errors.push(e.message));
@@ -242,6 +287,51 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
     assert.equal(await blockedPage.locator('html').getAttribute('data-theme'),'light');
     await blockedContext.close();
     console.log('PASS theme switching with blocked browser storage');
+
+    await verifyMobileReveal(browser, baseURL, mockPhotos, errors);
+
+    for (const reducedMotion of ['no-preference', 'reduce']) {
+      const revealContext = await browser.newContext({viewport:{width:393,height:852},hasTouch:true,isMobile:true,reducedMotion});
+      const revealPage = await revealContext.newPage();
+      revealPage.on('pageerror', e => errors.push(e.message));
+      await revealPage.route('**/api/photos?*', mockPhotos);
+      for (const theme of ['Dark', 'Light']) {
+        await revealPage.goto(baseURL, {waitUntil:'domcontentloaded'});
+        await revealPage.getByRole('button', {name:theme,exact:true}).tap();
+        await revealPage.waitForSelector('[data-color-field]');
+        await revealPage.evaluate(() => window.scrollTo(0,0));
+        for (const target of ['background', 'foreground']) {
+          await revealPage.locator(`[data-color-field="${target}"]`).tap();
+          for (const format of ['HEX', 'RGB', 'HSL', 'HSB', 'OKLCH']) {
+            await revealPage.getByRole('tab', {name:format,exact:true}).tap();
+            await revealPage.waitForTimeout(500);
+            await revealPage.waitForFunction(target => {
+              const bounds = document.querySelector(`[data-color-field-shell="${target}"]`).getBoundingClientRect();
+              const footer = document.querySelector('[data-control-footer]').getBoundingClientRect();
+              return bounds.top >= 15 && bounds.bottom <= footer.top - 15;
+            }, target);
+          }
+        }
+        assert.ok(await revealPage.evaluate(() => scrollY > 0));
+        await revealPage.screenshot({path:`/tmp/color-shift-editor-reveal-${theme.toLowerCase()}-${reducedMotion}.png`});
+      }
+      await revealPage.setViewportSize({width:320,height:320});
+      await revealPage.reload({waitUntil:'domcontentloaded'});
+      await revealPage.locator('[data-color-field="foreground"]').tap();
+      await revealPage.getByRole('tab', {name:'HSL',exact:true}).tap();
+      await revealPage.waitForTimeout(700);
+      assert.ok(Math.abs((await revealPage.locator('[data-color-field-shell="foreground"]').boundingBox()).y - 16) < 2);
+      await revealContext.close();
+    }
+    console.log('PASS automatic editor reveal for both targets, all formats/themes, reduced motion and short viewports');
+
+    await page.setViewportSize({width:2520,height:1314});
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('[data-color-field="foreground"]').click();
+    await page.waitForTimeout(700);
+    assert.equal(await page.evaluate(() => scrollY),0);
+    await page.locator('.cs-header').screenshot({path:'/tmp/color-shift-theme-pill-desktop.png'});
+    console.log('PASS desktop editor does not trigger page scrolling');
     console.log('ERRORS', JSON.stringify(errors));
     assert.deepEqual(errors, []);
   } finally {
