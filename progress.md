@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-10-03 - Relocated controls and mobile duplicate removed
+
+Implemented Figma frame `3396:999` with Undo/Swap/Fix on the specimen, Previous/Shuffle/Next on the photo, and EXPORT alone in the sidebar. The same two control groups now remain visible over the 240px mobile preview; the former mobile disclosure menu and the separate full-photo Shuffle overlay are removed. Responsive button sizing, panel alignment, tooltips, keyboard focus, editor coordination, photo navigation, and export behavior remain covered. This checkpoint also includes the concurrent theme refinements to field tint, Light score colors, field labels, and selected threshold text.
+
+Final validation passed: repository-wide lint, TypeScript, webpack production build, three theme checks, six presence checks, eight responsive-motion checks, the complete Phase 5 Chrome suite, and the UI annotation Chrome suite. Browser checks covered widths 320-1440px, all six actions, mobile button count, export/clipboard, editor reveal, focus, and tooltip placement; console errors: none. The final 402px Dark screenshot was inspected. Physical iOS/Android keyboard and safe-area checks remain pending.
+
+Next: confirm Phase 6 scope in `plan/phase-6-extended-input-layouts.md` before implementation. Keep the continuous-resize motion limitation and broader Phase 7 work separate.
+
 ## 2026-10-03 - Session close and Phase 5 polish checkpoint
 
 Closing the session with the revised mobile action capsule and progressive footer, compact intrinsic theme toggle, shared editor readout alignment, Figma tooltip styling (Dark `ds/gray/100` / `#1A1A1A`, Light unchanged), left-side mobile tooltips and coordinated, interruptible editor reveal. Animation plan 007 is complete. This checkpoint includes the session's implementation, original Figma arrow assets, regression coverage and documentation; the other chat's loading-animation work remains separate.

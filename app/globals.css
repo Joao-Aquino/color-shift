@@ -13,6 +13,7 @@
   --color-text-label: #878787;
   --color-text-muted: #a1a1a1;
   --color-text-value: #ededed;
+  --color-field-tint: 15%;
   --color-focus: #ffffff;
   --color-panel-loading: #151515;
   --color-popover-bg: #202020;
@@ -67,29 +68,30 @@
   --color-text-label: #707070;
   --color-text-muted: #666666;
   --color-text-value: #171717;
+  --color-field-tint: 10%;
   --color-focus: #171717;
   --color-panel-loading: #f2f2f2;
   --color-popover-bg: #ffffff;
   --color-tooltip-bg: #e5e5e5;
   --color-theme-selected: #171717;
-  --color-score-good: #e9f9ec;
-  --color-score-meh: #fff4e5;
-  --color-score-bad: #ffebec;
-  --color-score-good-label: #267d3b;
+  --color-score-good: #ebfaeb;
+  --color-score-meh: #fff4d6;
+  --color-score-bad: #ffebeb;
+  --color-score-good-label: #297a3a;
   --color-score-meh-label: #a35200;
-  --color-score-bad-label: #c62a32;
-  --color-score-good-border: #c5e8ce;
-  --color-score-meh-border: #f1d7ac;
-  --color-score-bad-border: #f3c8cb;
-  --color-score-good-pill: #d7f3de;
-  --color-score-meh-pill: #ffebcd;
-  --color-score-bad-pill: #ffdadd;
-  --color-score-good-pill-border: #abdcb8;
-  --color-score-meh-pill-border: #e9bf7f;
-  --color-score-bad-pill-border: #eda7ad;
-  --color-score-good-text: #1b542a;
-  --color-score-meh-text: #6b3a0d;
-  --color-score-bad-text: #81232a;
+  --color-score-bad-label: #cb2a2f;
+  --color-score-good-border: #daf6da;
+  --color-score-meh-border: #fef0cd;
+  --color-score-bad-border: #ffe5e5;
+  --color-score-good-pill: #c6f1c7;
+  --color-score-meh-pill: #ffdd8f;
+  --color-score-bad-pill: #fdd8d8;
+  --color-score-good-pill-border: #99e59e;
+  --color-score-meh-pill-border: #ffc96b;
+  --color-score-bad-pill-border: #f8b9b9;
+  --color-score-good-text: #1b311e;
+  --color-score-meh-text: #4e2009;
+  --color-score-bad-text: #391417;
 }
 
 @theme {
@@ -191,22 +193,21 @@
   .cs-footer-backdrop { display: block; }
 }
 .cs-export-controls { display: flex; align-items: flex-end; gap: 4px; }
-.cs-export-photo-actions { order: 2; flex: none; }
-.cs-export-slot { order: 1; flex: 1; min-width: 0; }
+.cs-export-slot { flex: 1; min-width: 0; }
 .cs-export-actions { display: flex; gap: 8px; }
 .cs-export-actions button { padding-inline: 8px; font-size: 11px; }
-.cs-inline-actions { display: none; }
-.cs-mobile-actions { position: relative; width: 48px; }
-.cs-mobile-action-list { position: absolute; right: 0; bottom: 52px; width: 48px; max-height: max(48px, var(--cs-action-height, calc(100dvh - 128px - env(safe-area-inset-bottom, 0px)))); overflow: hidden; overscroll-behavior: contain; border: 1px solid var(--color-chrome-border); border-radius: 9999px; background: var(--color-chrome-raised); }
-.cs-mobile-action-list button { border-width: 0; background: transparent; }
-.cs-mobile-action-list button:hover { background: var(--color-chrome-border); }
-.cs-mobile-action-list button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -4px; }
-.cs-mobile-action-list svg, .cs-mobile-actions > button svg { width: 20px; height: 20px; }
+.cs-panel-actions { position: absolute; z-index: 20; bottom: 8px; left: 50%; display: flex; gap: 4px; transform: translateX(-50%); }
+.cs-panel-action { width: 44px; height: 44px; flex: none; border-color: #2e2e2e; background: #1a1a1a; color: #ededed; }
+.cs-panel-action:hover { border-color: #4a4a4a; background: #292929; }
 html { scroll-padding-bottom: calc(var(--cs-footer-height, 96px) + var(--cs-keyboard-offset, 0px) + 24px); -webkit-text-size-adjust: 100%; }
 html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-theme-option) { transition: background-color 200ms, color 200ms, border-color 200ms; }
 @media (max-width: 359px) {
   .cs-export-actions { flex-direction: column; gap: 4px; }
   .cs-export-actions button { flex: none; }
+  .cs-panel-action { width: 40px; height: 40px; }
+}
+@media (min-width: 400px) and (max-width: 639px) {
+  .cs-panel-actions { gap: 8px; }
 }
 @media (pointer: coarse) {
   [data-color-editor] input { font-size: 16px; }
@@ -215,15 +216,14 @@ html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-t
   .cs-app { padding: 24px; }
   .cs-preview-panels { height: 560px; grid-template-columns: 1fr 1fr; border-radius: 12px; }
   .cs-specimen-type { font-size: 160px; }
-  .cs-credit { position: absolute; right: 16px; bottom: 16px; margin: 0; max-width: calc(50% - 32px); border-radius: 9999px; padding: 4px 8px; background: rgb(0 0 0 / .8); color: #fff; font-size: 12px; }
+  .cs-credit { position: absolute; z-index: 10; right: 16px; top: 16px; margin: 0; max-width: calc(50% - 32px); border-radius: 9999px; padding: 4px 8px; background: rgb(0 0 0 / .8); color: #fff; font-size: 12px; }
   .cs-credit-label { color: #a1a1a1; }
   .cs-footer { position: static; padding: 0; border: 0; z-index: auto; }
   .cs-footer-backdrop { display: none; }
   .cs-export-controls { flex-direction: column; align-items: stretch; gap: 8px; }
-  .cs-export-photo-actions { order: 0; }
   .cs-export-slot { flex: none; }
-  .cs-inline-actions { display: block; }
-  .cs-mobile-actions { display: none; }
+  .cs-panel-actions { bottom: 16px; gap: 8px; }
+  .cs-panel-action { width: 48px; height: 48px; }
   html { scroll-padding-bottom: 24px; }
 }
 @media (prefers-reduced-transparency: reduce) {

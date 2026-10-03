@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ColorEditor } from "@/components/control-bar/color-editor";
 import { ControlContainer } from "@/components/control-bar/control-container";
+import { ControlsBar } from "@/components/control-bar/controls-bar";
 import { CSButton } from "@/components/control-bar/cs-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -433,6 +434,24 @@ export function ColorShiftApp() {
   }, [scoreExpanded]);
 
   useEffect(() => {
+    function handleActionEscape(event: KeyboardEvent) {
+      if (
+        event.key !== "Escape" ||
+        !(event.target instanceof Element) ||
+        !event.target.closest(".cs-panel-actions") ||
+        (!activeColorRef.current && !scoreExpanded)
+      ) return;
+
+      event.preventDefault();
+      if (activeColorRef.current) closeEditor();
+      if (scoreExpanded) setScoreExpanded(false);
+    }
+
+    window.addEventListener("keydown", handleActionEscape, true);
+    return () => window.removeEventListener("keydown", handleActionEscape, true);
+  }, [closeEditor, scoreExpanded]);
+
+  useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.defaultPrevented) return;
       const target = event.target;
@@ -510,40 +529,56 @@ export function ColorShiftApp() {
       )
     : selectedThreshold;
   const ready = !!current && !!pair;
+  const actions = {
+    canFix: !!score && score.value < selectedThreshold,
+    canGoNext: index < entries.length - 1,
+    canGoPrevious: index > 0,
+    canUndo: history.length > 0,
+    disabled: !ready || isRequesting,
+    onFix: fixContrast,
+    onNext: goNext,
+    onPrevious: goPrevious,
+    onShuffle: () => void shuffle(),
+    onSwap: swapColors,
+    onUndo: undo,
+  };
 
   const preview = (
     <div data-responsive-motion="preview" className="cs-preview">
       <div className="cs-preview-panels">
-        {ready ? (
-          <button
-            aria-label={showCircle ? "Show Aa specimen" : "Show circle specimen"}
-            data-responsive-motion="specimen"
-            className="group flex h-full min-w-0 flex-1 cursor-pointer items-center justify-center overflow-hidden transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current"
-            onClick={() => setShowCircle((currentValue) => !currentValue)}
-            style={{ backgroundColor: pair.background, color: pair.foreground }}
-            type="button"
-          >
-            {showCircle ? (
-              <span
-                aria-hidden
-                data-responsive-motion="circle"
-                className="inline-flex aspect-square w-[min(240px,52%)]"
-              >
-                <span data-responsive-circle-shape className="inline-flex h-full w-full">
-                  <span className="h-full w-full rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95" />
+        <div className="cs-specimen-panel relative min-w-0">
+          {ready ? (
+            <button
+              aria-label={showCircle ? "Show Aa specimen" : "Show circle specimen"}
+              data-responsive-motion="specimen"
+              className="group flex h-full w-full cursor-pointer items-center justify-center overflow-hidden transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current"
+              onClick={() => setShowCircle((currentValue) => !currentValue)}
+              style={{ backgroundColor: pair.background, color: pair.foreground }}
+              type="button"
+            >
+              {showCircle ? (
+                <span
+                  aria-hidden
+                  data-responsive-motion="circle"
+                  className="inline-flex aspect-square w-[min(240px,52%)]"
+                >
+                  <span data-responsive-circle-shape className="inline-flex h-full w-full">
+                    <span className="h-full w-full rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95" />
+                  </span>
                 </span>
-              </span>
-            ) : (
-              <span data-responsive-motion="type" className="cs-specimen-type inline-flex">
-                <span className="transition-[transform,opacity] duration-200 group-active:scale-95">
-                  Aa
+              ) : (
+                <span data-responsive-motion="type" className="cs-specimen-type inline-flex">
+                  <span className="transition-[transform,opacity] duration-200 group-active:scale-95">
+                    Aa
+                  </span>
                 </span>
-              </span>
-            )}
-          </button>
-        ) : (
-          <LoadingPanel />
-        )}
+              )}
+            </button>
+          ) : (
+            <LoadingPanel />
+          )}
+          <ControlsBar {...actions} group="specimen" />
+        </div>
 
         <section
           aria-label="Source photo"
@@ -580,6 +615,7 @@ export function ColorShiftApp() {
               </CSButton>
             </div>
           ) : null}
+          <ControlsBar {...actions} group="photo" />
         </section>
       </div>
       {ready && (
@@ -616,11 +652,7 @@ export function ColorShiftApp() {
         activeTarget={activeColor}
         algorithm={contrastAlgorithm}
         background={pair?.background ?? null}
-        canFix={!!score && score.value < selectedThreshold}
-        canGoNext={index < entries.length - 1}
-        canGoPrevious={index > 0}
-        canUndo={history.length > 0}
-        disabled={!ready || isRequesting}
+        disabled={actions.disabled}
         editor={
           activeColor && pair ? (
             <ColorEditor
@@ -636,15 +668,9 @@ export function ColorShiftApp() {
         foreground={pair?.foreground ?? null}
         nearestThreshold={nearestThreshold}
         onAlgorithmChange={setContrastAlgorithm}
-        onFix={fixContrast}
-        onNext={goNext}
-        onPrevious={goPrevious}
         onSelectColor={selectColor}
         onScoreExpandedChange={setScoreExpanded}
-        onShuffle={() => void shuffle()}
-        onSwap={swapColors}
         onThresholdSelect={selectThreshold}
-        onUndo={undo}
         photo={current?.photo ?? null}
         score={score}
         scoreExpanded={scoreExpanded}

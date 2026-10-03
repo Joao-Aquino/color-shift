@@ -158,7 +158,7 @@ function ColorField({
           "--field-ease": EASE_OUT,
           backgroundColor: active
             ? "var(--color-chrome-bg)"
-            : `color-mix(in srgb, ${color} 15%, transparent)`,
+            : `color-mix(in srgb, ${color} var(--color-field-tint), transparent)`,
         } as CSSProperties
       }
     >
@@ -175,7 +175,7 @@ function ColorField({
         onClick={() => onSelect(target)}
         type="button"
       >
-        <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-label)] uppercase">
+        <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-muted)] uppercase">
           {label}
         </span>
         <TubeText className="min-w-0 flex-1 text-right text-sm text-[var(--color-text-value)] tabular-nums">

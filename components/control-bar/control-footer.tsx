@@ -17,7 +17,6 @@ export function ControlFooter({ children }: { children: ReactNode }) {
         : 0;
       root.style.setProperty("--cs-keyboard-offset", `${offset}px`);
       root.style.setProperty("--cs-footer-height", `${footer!.getBoundingClientRect().height}px`);
-      root.style.setProperty("--cs-action-height", `${Math.max(48, footer!.getBoundingClientRect().top - (viewport?.offsetTop ?? 0) - 16)}px`);
       const active = document.activeElement;
       if (mobile.matches && active instanceof HTMLInputElement && active.closest("[data-color-editor]")) {
         const delta = active.getBoundingClientRect().bottom - footer!.getBoundingClientRect().top + 16;
@@ -42,7 +41,6 @@ export function ControlFooter({ children }: { children: ReactNode }) {
       window.visualViewport?.removeEventListener("resize", schedule);
       window.visualViewport?.removeEventListener("scroll", schedule);
       document.removeEventListener("focusin", schedule);
-      ["--cs-keyboard-offset", "--cs-footer-height", "--cs-action-height"].forEach((key) => root.style.removeProperty(key));
     };
   }, []);
   return (

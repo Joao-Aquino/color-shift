@@ -25,6 +25,8 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await page.route('**/api/photos?*', mockPhotos);
     await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('[data-color-field]');
+    assert.equal(await page.locator('[data-responsive-motion="photo"] button').count(), 3);
+    assert.equal(await page.getByRole('button', {name:'Load a new Unsplash photo'}).count(), 0);
     await page.locator('[data-responsive-motion="photo"] img').evaluate(img => img.decode());
     await page.waitForTimeout(350);
     console.log('PASS loads and renders a real bitmap with deterministic photo API');
@@ -62,36 +64,61 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     assert.deepEqual(mobileBackdrop.layers,['blur(2.5px)','blur(5px)','blur(10px)','blur(20px)']);
     console.log('PASS compact intrinsic theme pills with 4px vertical padding and mobile progressive backdrop');
 
+    await page.setViewportSize({width:1440,height:980});
+    await page.waitForTimeout(300);
+    const desktopActions = await page.evaluate(() => {
+      const specimen = document.querySelector('.cs-specimen-panel').getBoundingClientRect();
+      const photo = document.querySelector('[data-responsive-motion="photo"]').getBoundingClientRect();
+      const credit = document.querySelector('.cs-credit').getBoundingClientRect();
+      return ['specimen','photo'].map((group, index) => {
+        const panel = index === 0 ? specimen : photo;
+        const root = document.querySelector(`.cs-panel-actions[aria-label="${index === 0 ? 'Color actions' : 'Photo controls'}"]`);
+        const bounds = root.getBoundingClientRect();
+        return {
+          group,
+          actions:[...root.querySelectorAll('[data-action]')].map(button => ({
+            name:button.dataset.action,
+            width:button.getBoundingClientRect().width,
+            height:button.getBoundingClientRect().height,
+            background:getComputedStyle(button).backgroundColor,
+            iconWidth:button.querySelector('svg').getBoundingClientRect().width,
+          })),
+          centered:Math.abs((bounds.left+bounds.right)/2-(panel.left+panel.right)/2)<1,
+          bottom:Math.abs(panel.bottom-bounds.bottom),
+          creditAbove:credit.bottom < bounds.top,
+        };
+      });
+    });
+    assert.deepEqual(desktopActions.map(group => group.actions.map(action => action.name)),[['undo','swap','fix'],['previous','shuffle','next']]);
+    assert.ok(desktopActions.every(group => group.centered && group.bottom === 16 && group.creditAbove),JSON.stringify(desktopActions));
+    assert.ok(desktopActions.every(group => group.actions.every(action => action.width === 48 && action.height === 48 && action.iconWidth === 16 && action.background === 'rgb(26, 26, 26)')),JSON.stringify(desktopActions));
+    await page.screenshot({path:'/tmp/color-shift-relocated-desktop.png'});
+    const specimenLabel = await page.locator('[data-responsive-motion="specimen"]').getAttribute('aria-label');
+    const originalColors = await page.locator('[data-color-field]').evaluateAll(nodes => nodes.map(node => node.textContent.match(/#[0-9A-F]{6}/i)[0]));
+    await page.locator('.cs-panel-actions [data-action="swap"]').click();
+    assert.deepEqual(await page.locator('[data-color-field]').evaluateAll(nodes => nodes.map(node => node.textContent.match(/#[0-9A-F]{6}/i)[0])),[...originalColors].reverse());
+    assert.equal(await page.locator('[data-responsive-motion="specimen"]').getAttribute('aria-label'),specimenLabel);
+    await page.locator('.cs-panel-actions [data-action="undo"]').click();
+    assert.deepEqual(await page.locator('[data-color-field]').evaluateAll(nodes => nodes.map(node => node.textContent.match(/#[0-9A-F]{6}/i)[0])),originalColors);
+    await page.locator('.cs-panel-actions [data-action="next"]').click();
+    assert.ok(await page.locator('.cs-panel-actions [data-action="previous"]').isEnabled());
+    await page.locator('.cs-panel-actions [data-action="previous"]').click();
+    assert.ok(await page.locator('.cs-panel-actions [data-action="previous"]').isDisabled());
+    await page.setViewportSize({width:402,height:874});
+    console.log('PASS Figma desktop action placement, specimen click isolation, undo, and photo navigation');
+
     await page.locator('[data-color-field="foreground"]').click();
     await page.getByRole('tab', {name: 'HSL', exact: true}).click();
     const targetBefore = await page.locator('[data-color-field="foreground"]').getAttribute('aria-expanded');
-    await page.getByRole('button', {name: 'Open photo actions', exact: true}).click();
-    await page.waitForTimeout(350);
+    await page.locator('.cs-panel-actions [data-action="next"]').focus();
     assert.equal(await page.locator('[data-color-field="foreground"]').getAttribute('aria-expanded'), targetBefore);
     assert.equal(await page.locator('.cs-preview-panels').evaluate(n => n.getBoundingClientRect().top + scrollY), geometry.previewPageTop);
     assert.equal(await page.getByRole('tab', {name: 'HSL', exact: true}).getAttribute('data-state'), 'active');
-    const order = await page.locator('.cs-mobile-action-list [data-action]').evaluateAll(nodes => nodes.map(n => n.dataset.action));
-    assert.deepEqual(order, ['undo', 'shuffle', 'swap', 'fix', 'previous', 'next']);
-    const actionPill = await page.locator('.cs-mobile-action-list').evaluate(n => ({
-      width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height,
-      border:getComputedStyle(n).borderTopWidth,radius:getComputedStyle(n).borderRadius,
-      buttons:[...n.querySelectorAll('button')].map(button => ({
-        width:button.getBoundingClientRect().width,height:button.getBoundingClientRect().height,
-        border:getComputedStyle(button).borderTopWidth,background:getComputedStyle(button).backgroundColor,
-      })),
-    }));
-    assert.equal(actionPill.width,48);
-    assert.equal(actionPill.height,310);
-    assert.equal(actionPill.border,'1px');
-    assert.equal(actionPill.radius,'9999px');
-    assert.ok(actionPill.buttons.every(n => n.width === 46 && n.height === 48 && n.border === '0px' && n.background === 'rgba(0, 0, 0, 0)'));
-    console.log('PASS shared action pill border/background with Figma 48x310 geometry');
-    await page.keyboard.press('Escape');
-    assert.equal(await page.getByRole('button', {name: 'Open photo actions', exact: true}).getAttribute('aria-expanded'), 'false');
-    assert.equal(await page.locator('[data-color-field="foreground"]').getAttribute('aria-expanded'), 'true');
+    assert.deepEqual(await page.locator('.cs-panel-actions').evaluateAll(groups => groups.map(group => [...group.querySelectorAll('[data-action]')].map(button => button.dataset.action))),[['undo','swap','fix'],['previous','shuffle','next']]);
+    assert.equal(await page.locator('.cs-panel-actions [data-action="next"]').evaluate(node => node === document.activeElement),true);
+    console.log('PASS visible mobile action groups preserve editor state and focus');
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('[data-color-field="foreground"]').getAttribute('aria-expanded'), 'false');
-    console.log('PASS action order, editor preservation, Escape priority and focus');
 
     await page.getByRole('button', {name: 'Light', exact: true}).click();
     assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
@@ -99,28 +126,36 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await page.reload({waitUntil: 'domcontentloaded'});
     await page.waitForSelector('[data-color-field]');
     assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
-    await page.getByRole('button', {name: 'Open photo actions', exact: true}).click();
     await page.locator('[data-color-field="foreground"]').click();
-    await page.getByRole('button', {name: 'Open photo actions', exact: true}).click();
     await page.waitForTimeout(350);
-    await page.screenshot({path: '/tmp/color-shift-mobile-light-open.png', fullPage: true});
+    await page.screenshot({path: '/tmp/color-shift-mobile-light-actions.png', fullPage: true});
     await page.locator('[data-export-button]').click();
     await page.waitForSelector('#export-actions');
-    assert.equal(await page.getByRole('button', {name: 'Open photo actions', exact: true}).getAttribute('aria-expanded'), 'false');
+    assert.ok(await page.locator('.cs-panel-actions [data-action="next"]').isVisible());
     assert.ok(await page.getByRole('button', {name: 'COPY', exact: true}).isVisible());
     await page.getByRole('button', {name: 'COPY', exact: true}).click();
     await page.waitForSelector('[data-export-button]');
     assert.ok((await page.evaluate(() => navigator.clipboard.readText())).includes('Color Shift'));
     await page.waitForFunction(() => document.querySelector('[data-export-button]') === document.activeElement);
-    console.log('PASS theme persistence and export/menu integration with real clipboard');
+    console.log('PASS theme persistence, visible actions, and export with real clipboard');
 
     for (const width of [320,390,393,402,639,640,1024,1179,1180,1360]) {
       await page.setViewportSize({width, height: 874});
       await page.waitForTimeout(300);
-      const data = await page.evaluate(() => ({width: innerWidth, scroll: document.documentElement.scrollWidth, footer: getComputedStyle(document.querySelector('[data-control-footer]')).position, hidden: [...document.querySelectorAll('[data-responsive-motion]')].filter(n=>!n.getBoundingClientRect().height).map(n=>n.dataset.responsiveMotion)}));
+      const data = await page.evaluate(() => ({
+        width:innerWidth,
+        scroll:document.documentElement.scrollWidth,
+        footer:getComputedStyle(document.querySelector('[data-control-footer]')).position,
+        hidden:[...document.querySelectorAll('[data-responsive-motion]')].filter(n=>!n.getBoundingClientRect().height).map(n=>n.dataset.responsiveMotion),
+        groups:[...document.querySelectorAll('.cs-panel-actions')].map(group => {
+          const panel=group.parentElement.getBoundingClientRect(), bounds=group.getBoundingClientRect();
+          return {fit:bounds.left>=panel.left-1 && bounds.right<=panel.right+1,centered:Math.abs((bounds.left+bounds.right)/2-(panel.left+panel.right)/2)<1,bottom:Math.round(panel.bottom-bounds.bottom),sizes:[...group.querySelectorAll('button')].map(button=>Math.round(button.getBoundingClientRect().width))};
+        }),
+      }));
       assert.ok(data.scroll <= width, JSON.stringify(data));
       assert.equal(data.footer, width < 640 ? 'fixed' : 'static');
       assert.equal(await page.locator('.cs-footer-backdrop').evaluate(n => getComputedStyle(n).display),width < 640 ? 'block' : 'none');
+      assert.ok(data.groups.every(group=>group.fit && group.centered && group.bottom===(width<640?8:16) && group.sizes.every(size=>size===(width<360?40:width<640?44:48))),JSON.stringify(data));
       console.log('PASS layout', width, JSON.stringify(data));
     }
     await page.screenshot({path: '/tmp/color-shift-desktop-light.png', fullPage: true});
@@ -130,9 +165,6 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     const state = await page.evaluate(() => ({footerHeight:document.querySelector('[data-control-footer]').getBoundingClientRect().height,reserved:parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cs-footer-height')),buttons:[...document.querySelectorAll('#export-actions button')].map(n=>({width:n.clientWidth,scroll:n.scrollWidth,height:n.clientHeight}))}));
     assert.ok(state.footerHeight >= 148, JSON.stringify(state));
     assert.ok(state.buttons.every(n=>n.width>=n.scroll && n.height>=46),JSON.stringify(state));
-    await page.getByRole('button',{name:'Open photo actions',exact:true}).click();
-    await page.keyboard.press('Escape');
-    assert.ok(await page.locator('#export-actions').isVisible());
     await page.keyboard.press('Escape');
     await page.waitForSelector('[data-export-button]');
     console.log('PASS narrow export sizing and Escape with export open');
@@ -144,11 +176,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
       await page.getByRole('textbox',{name:'HEX color value',exact:true}).fill(value);
       await page.getByRole('textbox',{name:'HEX color value',exact:true}).press('Enter');
     };
-    const action = async key => {
-      if (await page.getByRole('button',{name:'Open photo actions',exact:true}).isVisible()) await page.getByRole('button',{name:'Open photo actions',exact:true}).click();
-      await page.locator(`.cs-mobile-action-list [data-action="${key}"]`).click();
-      await page.waitForFunction(() => document.querySelector('[data-mobile-actions] > button') === document.activeElement);
-    };
+    const action = async key => page.locator(`.cs-panel-actions [data-action="${key}"]`).click();
     await page.setViewportSize({width:402,height:874});
     await edit('foreground','#888888');
     await edit('background','#888888');
@@ -168,9 +196,8 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await action('undo');
     assert.deepEqual(await fields(), beforeSwap);
     await action('next');
-    await page.getByRole('button',{name:'Open photo actions',exact:true}).click();
-    assert.ok(await page.locator('.cs-mobile-action-list [data-action="undo"]').isDisabled());
-    await page.locator('.cs-mobile-action-list [data-action="previous"]').click();
+    assert.ok(await page.locator('.cs-panel-actions [data-action="undo"]').isDisabled());
+    await action('previous');
     assert.deepEqual(await fields(), beforeSwap);
     await action('shuffle');
     await page.waitForFunction(()=>document.querySelector('[data-color-field]') && !document.querySelector('[data-export-button]').disabled);
@@ -200,26 +227,22 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     assert.notEqual(await page.locator('html').getAttribute('data-theme'),themeBefore);
     console.log('PASS T shortcut with editable-control isolation');
 
-    await page.getByRole('button',{name:'Open photo actions',exact:true}).focus();
-    await page.keyboard.press('Enter');
-    await page.waitForFunction(() => document.querySelector('.cs-mobile-action-list button:not(:disabled)') === document.activeElement);
-    assert.ok(await page.locator('.cs-mobile-action-list button:not(:disabled)').first().evaluate(n=>n===document.activeElement));
-    await page.locator('.cs-mobile-action-list [data-action="next"]').focus();
+    await page.locator('.cs-panel-actions [data-action="next"]').focus();
     await page.setViewportSize({width:640,height:874});
     await page.waitForTimeout(350);
-    assert.ok(await page.locator('.cs-inline-actions [data-action="next"]').evaluate(n=>n===document.activeElement));
-    console.log('PASS keyboard opening and corresponding focus on breakpoint crossing');
+    assert.ok(await page.locator('.cs-panel-actions [data-action="next"]').evaluate(n=>n===document.activeElement));
+    await page.setViewportSize({width:402,height:874});
+    assert.ok(await page.locator('.cs-panel-actions [data-action="next"]').evaluate(n=>n===document.activeElement));
+    console.log('PASS action focus persists across mobile and desktop breakpoints');
 
     await page.setViewportSize({width:320,height:320});
-    await page.getByRole('button',{name:'Open photo actions',exact:true}).click();
-    await page.locator('.cs-mobile-action-list [data-action="next"]').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(350);
-    const shortBounds=await page.locator('.cs-mobile-action-list').boundingBox();
-    assert.ok(shortBounds.y >= 0 && shortBounds.height < 310, JSON.stringify(shortBounds));
+    await page.evaluate(() => window.scrollBy(0,120));
+    const shortBounds=await page.locator('.cs-panel-actions [data-action="next"]').boundingBox();
+    const shortFooter=await page.locator('[data-control-footer]').boundingBox();
+    assert.ok(shortBounds.y>=0 && shortBounds.y+shortBounds.height<=shortFooter.y,JSON.stringify({shortBounds,shortFooter}));
     await page.emulateMedia({reducedMotion:'reduce'});
-    await page.keyboard.press('Escape');
-    assert.equal(await page.locator('.cs-mobile-action-list button').count(),0);
-    console.log('PASS short-viewport menu scrolling and reduced-motion dismissal');
+    await page.locator('.cs-panel-actions [data-action="next"]').click();
+    console.log('PASS short-viewport actions remain reachable above the fixed footer');
 
     await page.setViewportSize({width:402,height:874});
     const beforeTheme = await fields();

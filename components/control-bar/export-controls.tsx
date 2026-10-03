@@ -14,7 +14,6 @@ type ExportSuccess = "copy" | "download" | null;
 
 interface ExportControlsProps {
   background: string | null;
-  children: React.ReactNode;
   disabled?: boolean;
   foreground: string | null;
   photo: Photo | null;
@@ -69,7 +68,7 @@ function ExportSlot({
   disabled,
   foreground,
   photo,
-}: Omit<ExportControlsProps, "children">) {
+}: ExportControlsProps) {
   const [phase, setPhase] = useState<ExportPhase>("closed");
   const [progress, setProgress] = useState(0);
   const [payload, setPayload] = useState<ColorShiftExport | null>(null);
@@ -260,10 +259,9 @@ function ExportSlot({
   );
 }
 
-export function ExportControls({ children, ...props }: ExportControlsProps) {
+export function ExportControls(props: ExportControlsProps) {
   return (
     <div className="cs-export-controls" data-export-controls>
-      <div className="cs-export-photo-actions" data-photo-actions>{children}</div>
       <ExportSlot
         {...props}
         key={`${props.photo?.id ?? "empty"}-${props.background}-${props.foreground}`}

@@ -50,7 +50,7 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
 
     // Enable all actions, including Previous, Undo and Fix, before checking them.
     await page.setViewportSize({width:2520,height:1314});
-    await page.locator('.cs-inline-actions [data-action="next"]').click();
+    await page.locator('.cs-panel-actions [data-action="next"]').click();
     for (const target of ['background','foreground']) {
       await page.locator(`[data-color-field="${target}"]`).click();
       const input = page.getByRole('textbox',{name:'HEX color value',exact:true});
@@ -61,15 +61,10 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
 
     for (const width of [393,320]) {
       await page.setViewportSize({width,height:852});
-      await page.getByRole('button',{name:'Open photo actions',exact:true}).click();
       for (const theme of ['Dark','Light']) {
-        // Theme interaction closes the menu; reopen before inspecting its buttons.
         await page.getByRole('button',{name:theme,exact:true}).click();
-        if (await page.getByRole('button',{name:'Open photo actions',exact:true}).count()) {
-          await page.getByRole('button',{name:'Open photo actions',exact:true}).click();
-        }
         for (const action of ['undo','shuffle','swap','fix','previous','next']) {
-          const button = page.locator(`.cs-mobile-action-list [data-action="${action}"]`);
+          const button = page.locator(`.cs-panel-actions [data-action="${action}"]`);
           assert.ok(await button.isEnabled(),action);
           await button.hover();
           const tooltip = page.locator('[data-slot="tooltip-content"]').filter({hasText:await button.getAttribute('aria-label')});
@@ -86,8 +81,8 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
             })),
           }));
           const buttonBox = await button.boundingBox();
-          assert.equal(state.side,'left',JSON.stringify(state));
-          assert.ok(state.bounds.right < buttonBox.x && state.bounds.left >= 0,JSON.stringify(state));
+          assert.equal(state.side,'top',JSON.stringify(state));
+          assert.ok(state.bounds.bottom <= buttonBox.y && state.bounds.left >= 0 && state.bounds.right <= width,JSON.stringify(state));
           assert.equal(state.pointer,'none');
           assert.equal(state.background,theme === 'Dark' ? 'rgb(26, 26, 26)' : 'rgb(229, 229, 229)');
           assert.equal(state.color,theme === 'Dark' ? 'rgb(237, 237, 237)' : 'rgb(23, 23, 23)');
@@ -95,24 +90,21 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
           assert.equal(state.lineHeight,'16px');
           assert.equal(state.padding,'8px 12px');
           assert.deepEqual(state.arrows,[{src:`/figma/tooltip-arrow-${theme.toLowerCase()}.svg`,loaded:true,width:14,height:6}]);
-          if (action === 'swap' && width === 393) await page.screenshot({path:`/tmp/color-shift-tooltip-left-${theme.toLowerCase()}.png`});
+          if (action === 'swap' && width === 393) await page.screenshot({path:`/tmp/color-shift-tooltip-mobile-${theme.toLowerCase()}.png`});
         }
       }
-      await page.keyboard.press('Escape');
     }
-    console.log('PASS all mobile action tooltips appear left with exact Figma theme colors and original 14x6 arrows');
+    console.log('PASS mobile action tooltips appear above both panels in both themes');
 
     await page.setViewportSize({width:393,height:852});
-    await page.getByRole('button',{name:'Open photo actions',exact:true}).click();
-    await page.locator('.cs-mobile-action-list [data-action="next"]').hover();
+    await page.mouse.move(1,1);
+    await page.locator('.cs-panel-actions [data-action="next"]').hover();
     const activeTooltip = page.locator('[data-slot="tooltip-content"]:not([data-state="closed"])');
-    await activeTooltip.waitFor({state:'visible'});
-    const previousBox = await page.locator('.cs-mobile-action-list [data-action="previous"]').boundingBox();
+    const previousBox = await page.locator('.cs-panel-actions [data-action="previous"]').boundingBox();
     await page.mouse.click(previousBox.x+previousBox.width/2,previousBox.y+previousBox.height/2);
-    await page.getByRole('button',{name:'Open photo actions',exact:true}).waitFor();
+    assert.ok(await page.locator('.cs-panel-actions [data-action="previous"]').isDisabled());
     await page.setViewportSize({width:2520,height:1314});
-    assert.ok(await page.locator('.cs-inline-actions [data-action="previous"]').isDisabled());
-    await page.locator('.cs-inline-actions [data-action="shuffle"]').hover();
+    await page.locator('.cs-panel-actions [data-action="shuffle"]').hover();
     await activeTooltip.waitFor({state:'visible'});
     assert.equal(await activeTooltip.getAttribute('data-side'),'top');
     assert.deepEqual(errors,[]);

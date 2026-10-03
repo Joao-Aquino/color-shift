@@ -29,8 +29,8 @@ overlays do not intercept the mobile controls.
 
 The browser test supplies deterministic photo API responses but loads a real
 local bitmap through the app's image and palette pipeline. It checks themes,
-storage failure, ten widths, theme padding/progressive footer, shared action-pill
-geometry, menu/editor coordination, six actions, focus,
+storage failure, ten widths, theme padding/progressive footer, responsive
+action groups on the specimen and photo, six actions, focus,
 clipboard, Markdown download, short viewports, reduced motion, and circle
 geometry and reduced transparency. Screenshots are written to `/tmp/color-shift-*.png`.
 
@@ -39,7 +39,7 @@ in both themes and motion preferences, the oversized-panel fallback at 320 x 320
 and unchanged desktop page scroll at 2520 x 1314.
 
 The annotation suite checks the shared 74px editor label column in all five
-formats at widths 2520/640/393/320, left-side mobile action tooltips at 393/320,
+formats at widths 2520/640/393/320, mobile action tooltips at 393/320,
 Figma colors and original arrow assets in both themes, neighboring button clicks,
 and preserved desktop tooltip placement. It uses the same runtime/preview
 environment variables and writes screenshots under `/tmp/color-shift-*.png`.

@@ -39,7 +39,7 @@ export function ThresholdButtons({
             className={cn(
               "relative flex h-8 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-full border font-mono text-xs tracking-[-0.48px] tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current",
               isSelected
-                ? "border-[var(--score-pill-border)] bg-[var(--score-pill)] text-current"
+                ? "border-[var(--score-pill-border)] bg-[var(--score-pill)] text-[var(--score-text)]"
                 : "border-[var(--score-border)] bg-transparent text-[var(--score-text)]",
             )}
             key={threshold}

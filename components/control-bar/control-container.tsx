@@ -1,9 +1,7 @@
 import { ColorFields } from "./color-fields";
-import { ControlsBar } from "./controls-bar";
 import { ExportControls } from "./export-controls";
 import { Score } from "./score";
 import { ControlFooter } from "./control-footer";
-import { MobileActions } from "./mobile-actions";
 import { ThemeToggle } from "./theme-toggle";
 import type { Theme } from "@/lib/theme";
 import type {
@@ -28,21 +26,11 @@ interface ControlContainerProps {
   foreground: string | null;
   photo: Photo | null;
   editor: React.ReactNode;
-  canGoPrevious: boolean;
-  canGoNext: boolean;
-  canUndo: boolean;
-  canFix: boolean;
   disabled?: boolean;
   onSelectColor: (target: ColorTarget) => void;
   onAlgorithmChange: (algorithm: ContrastAlgorithm) => void;
   onScoreExpandedChange: (expanded: boolean) => void;
   onThresholdSelect: (threshold: number) => void;
-  onPrevious: () => void;
-  onUndo: () => void;
-  onShuffle: () => void;
-  onSwap: () => void;
-  onFix: () => void;
-  onNext: () => void;
 }
 
 function Divider() {
@@ -64,26 +52,12 @@ export function ControlContainer({
   foreground,
   photo,
   editor,
-  canGoPrevious,
-  canGoNext,
-  canUndo,
-  canFix,
   disabled,
   onSelectColor,
   onAlgorithmChange,
   onScoreExpandedChange,
   onThresholdSelect,
-  onPrevious,
-  onUndo,
-  onShuffle,
-  onSwap,
-  onFix,
-  onNext,
 }: ControlContainerProps) {
-  const actions = {
-    canFix, canGoNext, canGoPrevious, canUndo, disabled,
-    onFix, onNext, onPrevious, onUndo, onShuffle, onSwap,
-  };
   return (
     <>
       <header className="cs-header">
@@ -125,12 +99,7 @@ export function ControlContainer({
           disabled={disabled}
           foreground={foreground}
           photo={photo}
-        >
-          <div className="cs-inline-actions"><ControlsBar {...actions} /></div>
-          <MobileActions>
-            <ControlsBar {...actions} vertical />
-          </MobileActions>
-        </ExportControls>
+        />
       </ControlFooter>
     </>
   );

@@ -13,12 +13,14 @@ import { cn } from "@/lib/utils";
 interface IconButtonProps
   extends Omit<React.ComponentProps<typeof Button>, "children"> {
   icon: Icon;
+  iconSize?: number;
   label: string;
   tooltipSide?: React.ComponentProps<typeof TooltipContent>["side"];
 }
 
 export function IconButton({
   icon: IconComponent,
+  iconSize = 20,
   label,
   tooltipSide = "top",
   className,
@@ -37,7 +39,7 @@ export function IconButton({
           variant="outline"
           {...props}
         >
-          <IconComponent aria-hidden size={20} weight="regular" />
+          <IconComponent aria-hidden size={iconSize} weight="regular" />
         </Button>
       </TooltipTrigger>
       <TooltipContent side={tooltipSide} sideOffset={8}>
