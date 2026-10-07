@@ -33,7 +33,8 @@ local bitmap through the app's image and palette pipeline. It checks themes,
 storage failure, ten widths, theme padding/progressive footer, responsive
 action groups on the specimen and photo, six actions, focus,
 clipboard, Markdown download, short viewports, reduced motion, and circle
-geometry and reduced transparency. Screenshots are written to `/tmp/color-shift-*.png`.
+geometry, reduced transparency, and recovery after an initial photo API failure.
+Screenshots are written to `/tmp/color-shift-*.png`.
 
 `phase6-browser.test.cjs` verifies the Figma drag state, interruptible entry/exit motion, reduced motion, local image extraction, navigation, export, invalid-file errors, and recovery when the initial photo API fails. It also checks custom specimen text across photos and the Aa/circle toggle.
 
@@ -47,8 +48,9 @@ Figma colors and original arrow assets in both themes, neighboring button clicks
 and preserved desktop tooltip placement. It uses the same runtime/preview
 environment variables and writes screenshots under `/tmp/color-shift-*.png`.
 
-These checks do not emulate a physical software keyboard or device safe-area
-insets. Confirm those on iOS Safari and Android Chrome before mobile release.
+These automated checks do not emulate a physical software keyboard or device
+safe-area insets. On 2026-10-03, the user reported that physical-device checks
+passed; the device, OS, and browser matrix was not recorded here.
 
 ## Coordinated editor reveal (2026-10-03)
 
@@ -66,4 +68,5 @@ directory. Combined original-checkout validation passed: webpack build with
 TypeScript, lint, all deterministic tests, the annotation suite and the complete
 Phase 5 suite exited 0 with no browser console errors. The combined reveal trace
 shows movement at 57.1ms before settlement at 190.5ms; evidence is preserved in
-`/tmp/color-shift-007-combined`. Physical keyboard and safe-area checks remain pending.
+`/tmp/color-shift-007-combined`. Physical keyboard and safe-area checks were
+pending at that checkpoint; see the later user-reported result above.

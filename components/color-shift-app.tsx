@@ -430,7 +430,7 @@ export function ColorShiftApp() {
       const [photo] = await fetchPhotos(1);
       if (!photo) throw new Error("No photo was returned.");
 
-      const nextIndex = indexRef.current + 1;
+      const nextIndex = Math.min(indexRef.current + 1, entriesRef.current.length);
       updateEntries((current) => {
         const next = [...current];
         next.splice(nextIndex, 0, { photo, pair: null });
