@@ -37,6 +37,7 @@
   --color-score-good-text: #e5fbea;
   --color-score-meh-text: #fef3dc;
   --color-score-bad-text: #feecee;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   --background: var(--color-chrome-bg);
   --foreground: var(--color-text-value);
@@ -175,7 +176,28 @@
 .cs-controls { grid-area: controls; display: flex; min-width: 0; flex-direction: column; gap: 16px; }
 .cs-preview { grid-area: preview; position: relative; min-width: 0; }
 .cs-preview-panels { display: grid; grid-template-columns: 167fr 183fr; gap: 4px; height: 240px; overflow: hidden; border-radius: 8px; }
-.cs-specimen-type { font-size: 48px; line-height: .84; font-weight: 400; }
+.cs-specimen-type { max-width: 88%; max-height: 70%; overflow: hidden; font-size: 48px; line-height: .84; font-weight: 400; text-align: center; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cs-specimen-type[data-custom-text="true"] { font-size: clamp(24px, 8vw, 48px); line-height: 1.05; }
+.cs-specimen-edit { position: absolute; z-index: 10; top: 8px; right: 8px; border: 1px solid currentColor; border-radius: 9999px; padding: 6px 10px; background: rgb(0 0 0 / .8); color: #fff; font-size: 11px; line-height: 16px; }
+.cs-specimen-edit:hover { background: #292929; }
+.cs-specimen-edit:focus-visible, .cs-import-error button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.cs-specimen-input { width: 88%; max-height: 65%; min-height: 2.5em; resize: none; border: 0; border-radius: 6px; padding: 8px; background: transparent; color: inherit; font: inherit; font-size: clamp(24px, 8vw, 48px); line-height: 1.05; text-align: center; overflow-wrap: anywhere; }
+.cs-specimen-input:focus-visible { outline: 2px dashed currentColor; outline-offset: 4px; }
+.cs-specimen-input::placeholder { color: currentColor; opacity: .55; }
+.cs-photo-drop { position: absolute; z-index: 30; inset: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; border: 1px dashed #878787; border-radius: 8px; padding: 12px; background: rgb(10 10 10 / .6); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); color: #fff; pointer-events: none; text-align: center; opacity: 0; transform: scale(.97); visibility: hidden; transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out), visibility 0s linear 150ms; }
+.cs-photo-drop[data-active="true"] { opacity: 1; transform: scale(1); visibility: visible; transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), visibility 0s; }
+.cs-photo-drop-icon { display: block; flex: none; width: 32px; height: 32px; background: url("/figma/icon-upload.svg") center / 32px 32px no-repeat; }
+.cs-photo-drop-icon, .cs-photo-drop-copy { opacity: 0; transform: translateY(8px); transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out); }
+.cs-photo-drop[data-active="true"] .cs-photo-drop-icon { opacity: 1; transform: translateY(0); transition-duration: 180ms; transition-delay: 30ms; }
+.cs-photo-drop[data-active="true"] .cs-photo-drop-copy { opacity: 1; transform: translateY(0); transition-duration: 200ms; transition-delay: 60ms; }
+.cs-photo-drop-copy { display: flex; flex-direction: column; align-items: center; gap: 4px; max-width: 100%; }
+.cs-photo-drop-title { font-size: 12px; line-height: 1.35; font-weight: 400; }
+.cs-photo-drop-formats { color: #ededed; font-size: 9px; line-height: 1.35; font-weight: 400; }
+.cs-photo-drop-formats strong { font-weight: 700; }
+.cs-preview [aria-label="Photo controls"], .cs-preview .cs-credit { transition: opacity 150ms var(--ease-out), visibility 0s; }
+[data-dragging="true"] [aria-label="Photo controls"], [data-dragging="true"] .cs-credit { opacity: 0; visibility: hidden; transition: opacity 100ms var(--ease-out), visibility 0s linear 100ms; }
+.cs-import-error { position: absolute; z-index: 25; inset-inline: 8px; top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-radius: 6px; padding: 8px 12px; background: #1a1a1a; color: #fff; font-size: 12px; }
+.cs-import-error button { flex: none; font-size: 20px; line-height: 1; }
 .cs-credit { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px; margin-top: 8px; font-size: 10px; color: var(--color-text-value); }
 .cs-credit a { overflow-wrap: anywhere; }
 .cs-credit-label { color: var(--color-text-label); }
@@ -216,6 +238,11 @@ html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-t
   .cs-app { padding: 24px; }
   .cs-preview-panels { height: 560px; grid-template-columns: 1fr 1fr; border-radius: 12px; }
   .cs-specimen-type { font-size: 160px; }
+  .cs-specimen-type[data-custom-text="true"], .cs-specimen-input { font-size: clamp(40px, 6vw, 96px); }
+  .cs-specimen-edit { top: 16px; right: 16px; }
+  .cs-photo-drop { inset: 16px; gap: 24px; border-radius: 12px; padding: 32px; }
+  .cs-photo-drop-title { font-size: 16px; line-height: normal; }
+  .cs-photo-drop-formats { font-size: 12px; line-height: normal; }
   .cs-credit { position: absolute; z-index: 10; right: 16px; top: 16px; margin: 0; max-width: calc(50% - 32px); border-radius: 9999px; padding: 4px 8px; background: rgb(0 0 0 / .8); color: #fff; font-size: 12px; }
   .cs-credit-label { color: #a1a1a1; }
   .cs-footer { position: static; padding: 0; border: 0; z-index: auto; }
@@ -236,9 +263,13 @@ html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-t
   .cs-controls { overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; gap: 24px; }
   .cs-preview-panels { height: 100%; }
   .cs-specimen-type { font-size: 220px; font-weight: 500; }
+  .cs-specimen-type[data-custom-text="true"], .cs-specimen-input { font-size: clamp(48px, 5vw, 104px); }
 }
 @media (prefers-reduced-motion: reduce) {
   html[data-theme-ready] *, html[data-theme-ready] *::before, html[data-theme-ready] *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
+  html[data-theme-ready] .cs-photo-drop { transform: none !important; transition: opacity 150ms var(--ease-out), visibility 0s linear 150ms !important; }
+  html[data-theme-ready] .cs-photo-drop[data-active="true"] { transition: opacity 150ms var(--ease-out), visibility 0s !important; }
+  html[data-theme-ready] .cs-photo-drop-icon, html[data-theme-ready] .cs-photo-drop-copy { opacity: 1 !important; transform: none !important; }
 }
 
 /* Osmo number odometer */

@@ -13,6 +13,8 @@ export type ColorFormat = "HEX" | "RGB" | "HSL" | "HSB" | "OKLCH";
 
 export interface Photo {
   id: string;
+  source?: "local";
+  fileName?: string;
   url: string;
   thumbUrl: string;
   tinyUrl: string;

@@ -47,7 +47,9 @@ export function createColorShiftExport({
     "",
     "## Photo",
     "",
-    `Photo by [${photo.photographer}](${photo.photographerUrl}) on [Unsplash](${photo.photoUrl}).`,
+    photo.source === "local"
+      ? `Personal photo: ${photo.fileName ?? "Imported image"}.`
+      : `Photo by [${photo.photographer}](${photo.photographerUrl}) on [Unsplash](${photo.photoUrl}).`,
     "",
   ].join("\n");
 

@@ -12,12 +12,14 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 | 3 | `phase-3-dual-scoring-thresholds.md` | Dual scoring (APCA) + threshold bumping | Complete |
 | 4 | `phase-4-export.md` | Export (copy + download) | Complete |
 | 5 | `phase-5-theming-responsive.md` | Theming (light mode) + responsive mobile | Implemented/browser-verified 2026-10-02; device checks pending |
-| 6 | `phase-6-extended-input-layouts.md` | Extended input & layout modes | Draft |
+| 6 | `phase-6-extended-input-layouts.md` | Personal photo input + editable specimen text | Implemented/browser-verified 2026-10-06 |
 | 7 | `phase-7-animation-polish.md` | Animation polish (GSAP, TubeText, DialKit) | Draft |
 | 8 | `phase-8-native-platforms.md` | Native platforms (iOS + macOS) | Draft |
 | — | `stretch.md` | Figma MCP export | Stretch, unscheduled |
 
 *Animation Polish was moved from Phase 5 to Phase 7 on 2026-09-27, so it lands after all other web-feature phases are stable instead of in the middle of them.*
+
+The scrollable gallery layout and rotating specimen fonts were removed from Phase 6 on 2026-10-06; neither is scheduled in this roadmap.
 
 ## Layout revision (2026-09-29)
 The bottom control bar with a slide-up slider panel was replaced by a **left sidebar** (Figma "Controls V6"): logo + theme toggle, score tile (WCAG | APCA), BACKGROUND/FOREGROUND rows, an editor panel (format tabs + sliders + readout), an action row (prev · undo · shuffle · swap · fix · next), and EXPORT. Specs and Phases 1–5 were updated accordingly. Feature placement by phase:

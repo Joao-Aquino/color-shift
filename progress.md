@@ -1,5 +1,23 @@
 # Progress Log
 
+## 2026-10-06 - Drag-state motion polish
+
+Changed the Figma drop target from an instant mount/unmount to an interruptible CSS transition. The card fades and scales from 97% over 200ms on entry and leaves in 150ms; the upload icon and guidance follow with 30ms/60ms delays. Photo credit and actions crossfade out while dragging. Reduced-motion mode removes all transforms and keeps a short opacity cue. The card stays mounted so rapid drag exits and reentries retarget from the visible state.
+
+Validation: lint, TypeScript, webpack production build, the Phase 6 Chrome suite, and the complete Phase 5 Chrome regression suite pass with no console errors. The Phase 6 suite covers rapid reversal, retained DOM identity, reduced motion, photo import, export, and errors. Inspected the settled desktop drop state against the Figma frame.
+
+## 2026-10-06 - Figma drag-and-drop state
+
+Matched Source Photograph variant `3409:1053`: the active drop target is inset from the photo, with a dashed gray border, dark translucent 5px blur, the original 32px upload SVG, and centered guidance listing accepted formats and the 20 MB limit. The photo credit and photo navigation controls hide while dragging and return on exit or drop. Mobile uses tighter spacing and type to fit its 240px preview.
+
+Validation: lint, TypeScript, webpack production build, and the Phase 6 Chrome suite pass. The suite checks the original SVG slot, blur, copy, desktop inset/icon geometry, hidden/returned controls, import, navigation, export, invalid-file handling, and initial API failure recovery. Inspected mobile and desktop drag-state screenshots against the Figma frame.
+
+## 2026-10-06 - Phase 6 personal photo and specimen text
+
+Implemented photo drag-and-drop in the existing photo panel. Supported local images are decoded and run through the browser palette extractor before insertion into photo history; invalid images receive a dismissible error. Personal photos display a local credit and export without Unsplash links. Object URLs are revoked when the app unmounts. Added inline specimen-text editing with Escape/focus handling and preserved text across photo navigation and circle toggling.
+
+Validation: repository lint, TypeScript, webpack production build, and the focused Phase 6 Chrome suite passed. The complete Phase 5 Chrome regression suite passed on rerun; its first run hit a short-viewport timing assertion during rapid resize and passed that check on rerun. The current Phase 6 scope is complete for the web app; macOS support belongs to the native Phase 8 app.
+
 ## 2026-10-03 - Relocated controls and mobile duplicate removed
 
 Implemented Figma frame `3396:999` with Undo/Swap/Fix on the specimen, Previous/Shuffle/Next on the photo, and EXPORT alone in the sidebar. The same two control groups now remain visible over the 240px mobile preview; the former mobile disclosure menu and the separate full-photo Shuffle overlay are removed. Responsive button sizing, panel alignment, tooltips, keyboard focus, editor coordination, photo navigation, and export behavior remain covered. This checkpoint also includes the concurrent theme refinements to field tint, Light score colors, field labels, and selected threshold text.
