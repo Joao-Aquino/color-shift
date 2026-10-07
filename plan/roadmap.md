@@ -14,10 +14,13 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 | 5 | `phase-5-theming-responsive.md` | Theming (light mode) + responsive mobile | Implemented/browser-verified 2026-10-02; device checks pending |
 | 6 | `phase-6-extended-input-layouts.md` | Personal photo input + editable specimen text | Implemented/browser-verified 2026-10-06 |
 | 7 | `phase-7-animation-polish.md` | Animation polish (GSAP, TubeText, DialKit) | Draft |
-| 8 | `phase-8-native-platforms.md` | Native platforms (iOS + macOS) | Draft |
+| 8 | `phase-8-loose-ends-hardening.md` | Loose ends & hardening (CI, deps, docs, fixes) | Proposed / Not Started |
+| 9 | `phase-9-native-platforms.md` | Native platforms (iOS + macOS) | Draft |
 | — | `stretch.md` | Figma MCP export | Stretch, unscheduled |
 
 *Animation Polish was moved from Phase 5 to Phase 7 on 2026-09-27, so it lands after all other web-feature phases are stable instead of in the middle of them.*
+
+*Phase 8 (Loose Ends & Hardening) was inserted on 2026-10-07 to address infrastructure gaps, documentation, and deferred fixes before release. The native platforms phase was renumbered from Phase 8 to Phase 9. Phase 8 can run in parallel with or before Phase 7, depending on priorities.*
 
 The scrollable gallery layout and rotating specimen fonts were removed from Phase 6 on 2026-10-06; neither is scheduled in this roadmap.
 
@@ -38,9 +41,9 @@ Mockup numbers and hex values are placeholders; the engine is the source of trut
 Phase 5 follows mobile frames `3387:311` (Dark) and `3387:482` (Light), plus `ControlMobile` variants `3389:788`. Mobile uses a side-by-side specimen/photo above scrolling score and color controls. A fixed footer places EXPORT beside a 48px trigger; opening it reveals six vertically stacked actions. This supersedes the bottom-sheet proposal. The user confirmed white/neutral Light chrome, deferred the 2D picker, and deferred swipe navigation. See `phase-5-theming-responsive.md` for measurements, interaction defaults, implementation evidence, and verification. The phase is implemented and browser-verified; physical software-keyboard and safe-area checks remain pending.
 
 ## Open questions (unresolved as of 2026-09-26)
-1. **Ordering** — does Phase 2→7 order match priorities, or should something else be pulled forward/back?
+1. **Ordering** — does Phase 2→9 order match priorities, or should something else be pulled forward/back? Specifically: should Phase 8 (loose ends & hardening) run before or after Phase 7 (animation polish), or in parallel? Phase 8 focuses on infrastructure and stability; Phase 7 is creative polish. They have minimal dependencies.
 2. **Doc granularity** — keep all phases fully detailed now, or only flesh out the next phase in detail once we're about to start it (earlier phases stay as lighter sketches until then)?
-3. **Native platforms** — should Phase 8 (iOS/macOS) stay tracked in this repo's `plan/` folder at all, or is it a separate project/repo to track elsewhere? Right now it's included for completeness but flagged as likely-separate.
+3. **Native platforms** — should Phase 9 (iOS/macOS) stay tracked in this repo's `plan/` folder at all, or is it a separate project/repo to track elsewhere? Right now it's included for completeness but flagged as likely-separate.
 4. **Figma source** — Phase 1 used the project-level file link and exported V6 assets. Later phases should still get node-specific frame references when available for tighter pixel-level comparison.
 5. **Animation skills** — Phase 7 now specifies using the [emilkowalski/skills](https://github.com/emilkowalski/skills) animation skill set (`animate`, `emil-design-eng`, `animation-vocabulary`, `find-animation-opportunities`, `improve-animations`) alongside GSAP; see `phase-7-animation-polish.md` for how they're meant to be applied.
 

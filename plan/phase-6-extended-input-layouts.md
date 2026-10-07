@@ -11,13 +11,13 @@ Add ways to use a personal photo and test custom text in the existing specimen.
 
 ### 1. Photo drag-and-drop
 - Hidden/discoverable feature (not labeled in UI): drop an image onto the photo area to extract colors from your own photo, same node-vibrant pipeline as Unsplash photos.
-- Web in Phase 6; carry this input forward to the native macOS app in Phase 8.
+- Web in Phase 6; carry this input forward to the native macOS app in Phase 9.
 
 ### 2. Editable Aa text
 - Type custom text into the specimen to test real content instead of the default "Aa".
 
 ## Explicitly out of scope for Phase 6
-- Native camera capture (iOS-specific, Phase 8)
+- Native camera capture (iOS-specific, Phase 9)
 - Figma MCP export (stretch, see `stretch.md`)
 
 ## Done means

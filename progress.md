@@ -1,5 +1,11 @@
 # Progress Log
 
+## 2026-10-07 - Roadmap restructure: Phase 8 loose ends inserted
+
+Inserted a new Phase 8 (Loose Ends & Hardening) and renumbered the native Swift phase from Phase 8 to Phase 9. The new phase collects deferred infrastructure work: CI (GitHub Actions running lint, typegen, tsc, build, and deterministic tests), Unsplash 403 investigation, dependency updates (`npm audit` reports 13 vulnerabilities), completing or dropping Plan 006 (responsive resize easing), README rewrite (currently create-next-app boilerplate), repository housekeeping (listing four merged branches for deletion and the dead homepage link for John to fix), device/browser testing documentation, and spec drift fixes (local fonts, URL typo, contrast-algorithm description, APCA grading labels).
+
+Phase 8 can run in parallel with or before Phase 7 (animation polish) — the ordering is left open for John to decide. All cross-references updated: `roadmap.md`, `progress.md`, `specs-context/spec-color-shift.md`, `phase-6-extended-input-layouts.md`, and `phase-9-native-platforms.md`. No code changes.
+
 ## 2026-10-06 - Drag-state motion polish
 
 Changed the Figma drop target from an instant mount/unmount to an interruptible CSS transition. The card fades and scales from 97% over 200ms on entry and leaves in 150ms; the upload icon and guidance follow with 30ms/60ms delays. Photo credit and actions crossfade out while dragging. Reduced-motion mode removes all transforms and keeps a short opacity cue. The card stays mounted so rapid drag exits and reentries retarget from the visible state.
@@ -16,7 +22,7 @@ Validation: lint, TypeScript, webpack production build, and the Phase 6 Chrome s
 
 Implemented photo drag-and-drop in the existing photo panel. Supported local images are decoded and run through the browser palette extractor before insertion into photo history; invalid images receive a dismissible error. Personal photos display a local credit and export without Unsplash links. Object URLs are revoked when the app unmounts. Added inline specimen-text editing with Escape/focus handling and preserved text across photo navigation and circle toggling.
 
-Validation: repository lint, TypeScript, webpack production build, and the focused Phase 6 Chrome suite passed. The complete Phase 5 Chrome regression suite passed on rerun; its first run hit a short-viewport timing assertion during rapid resize and passed that check on rerun. The current Phase 6 scope is complete for the web app; macOS support belongs to the native Phase 8 app.
+Validation: repository lint, TypeScript, webpack production build, and the focused Phase 6 Chrome suite passed. The complete Phase 5 Chrome regression suite passed on rerun; its first run hit a short-viewport timing assertion during rapid resize and passed that check on rerun. The current Phase 6 scope is complete for the web app; macOS support belongs to the native Phase 9 app.
 
 ## 2026-10-03 - Initial photo Retry recovery
 
@@ -166,7 +172,7 @@ Audited whether Phase 1 sets up everything later phases depend on, and found thr
 
 ## 2026-09-27 — Moved Animation Polish to the end of the web phases
 
-Reordered the roadmap so Animation Polish comes after all other web-feature phases (Color Editing, Dual Scoring, Export, Theming/Responsive, Extended Input & Layout Modes) instead of sitting in the middle at old Phase 5. Reasoning unchanged from the original doc — animation shouldn't be fought for while interactions are still taking shape — but the user wanted it pushed further out, past theming and extended input too, so it's now Phase 7 (Native Platforms stays Phase 8, still a separate Swift/SwiftUI track). Renamed/renumbered `phase-5-animation-polish.md` → `phase-7-animation-polish.md`, shifted the old Phase 6 (theming) and Phase 7 (extended input) down to 5 and 6, and fixed every cross-reference in `phase-2` through `phase-4`, `phase-6`, `phase-8`, and `roadmap.md`.
+Reordered the roadmap so Animation Polish comes after all other web-feature phases (Color Editing, Dual Scoring, Export, Theming/Responsive, Extended Input & Layout Modes) instead of sitting in the middle at old Phase 5. Reasoning unchanged from the original doc — animation shouldn't be fought for while interactions are still taking shape — but the user wanted it pushed further out, past theming and extended input too, so it's now Phase 7 (Native Platforms stays Phase 8, now renumbered to Phase 9 after Phase 8 became loose ends & hardening on 2026-10-07, still a separate Swift/SwiftUI track). Renamed/renumbered `phase-5-animation-polish.md` → `phase-7-animation-polish.md`, shifted the old Phase 6 (theming) and Phase 7 (extended input) down to 5 and 6, and fixed every cross-reference in `phase-2` through `phase-4`, `phase-6`, `phase-8`, and `roadmap.md`.
 
 Also added a requirement to the animation phase: implement it using the animation skill set from [emilkowalski/skills](https://github.com/emilkowalski/skills) that the user just added to their account (`animate`, `emil-design-eng`, `animation-vocabulary`, `find-animation-opportunities`, `improve-animations`) — these guide *how* to build each animation well, layered on top of the GSAP tool choice the original spec already locked in, not replacing it.
 
