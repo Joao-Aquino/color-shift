@@ -36,7 +36,13 @@ clipboard, Markdown download, short viewports, reduced motion, and circle
 geometry, reduced transparency, and recovery after an initial photo API failure.
 Screenshots are written to `/tmp/color-shift-*.png`.
 
-`phase6-browser.test.cjs` verifies the Figma drag state, interruptible entry/exit motion, reduced motion, local image extraction, navigation, export, invalid-file errors, and recovery when the initial photo API fails. It also checks custom specimen text across photos and the Aa/circle toggle.
+`phase6-browser.test.cjs` checks the Figma drag state at mobile and desktop widths, including the original upload asset, inset, blur, guidance, and temporarily hidden credit/actions. It drops a real local bitmap through the photo panel,
+checks palette readiness, navigation, personal-photo export, invalid-file
+errors, and recovery when the initial photo API fails. It also checks custom
+specimen text, shortcut isolation, Aa/circle behavior, and mobile/desktop
+rendering.
+It also checks rapid drag exit/reentry without remounting the target and the
+opacity-only reduced-motion behavior.
 
 Editor reveal checks cover both color fields and all five formats at 393 x 852
 in both themes and motion preferences, the oversized-panel fallback at 320 x 320,
