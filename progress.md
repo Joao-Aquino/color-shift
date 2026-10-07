@@ -4,7 +4,9 @@
 
 Inserted a new Phase 8 (Loose Ends & Hardening) and renumbered the native Swift phase from Phase 8 to Phase 9. The new phase collects deferred infrastructure work: CI (GitHub Actions running lint, typegen, tsc, build, and deterministic tests), Unsplash production access (implement download tracking via `links.download_location`, apply for production approval per API guidelines — prerequisite for App Store release), dependency updates (`npm audit` reports 13 vulnerabilities), completing or dropping Plan 006 (responsive resize easing), README rewrite (currently create-next-app boilerplate), repository housekeeping (listing four merged branches for deletion and the dead homepage link for John to fix), device/browser testing documentation, and spec drift fixes (local fonts, URL typo, contrast-algorithm description, APCA grading labels).
 
-Phase 8 can run in parallel with or before Phase 7 (animation polish) — the ordering is left open for John to decide. All cross-references updated: `roadmap.md`, `progress.md`, `specs-context/spec-color-shift.md`, `phase-6-extended-input-layouts.md`, and `phase-9-native-platforms.md`. No code changes.
+Added Phase 10 (App Store Launch) covering iOS (and optional macOS) App Store submission: Apple Developer Program enrollment (individual vs CO-OP Studio organization as open question), App Store Connect configuration, app metadata/screenshots/privacy policy, Unsplash attribution compliance, App Review guidelines risk check, TestFlight beta, submission/review/phased release, and post-launch operations (crash reporting, ratings prompt, versioning, support URL). Depends on Phase 9 (native app) and Phase 8 (Unsplash production access).
+
+Phase 8 can run in parallel with or before Phase 7 (animation polish) — the ordering is left open for John to decide. All cross-references updated: `roadmap.md`, `progress.md`, `specs-context/spec-color-shift.md`, `phase-6-extended-input-layouts.md`, `phase-9-native-platforms.md`, and the new `phase-10-app-store-launch.md`. No code changes.
 
 ## 2026-10-06 - Drag-state motion polish
 

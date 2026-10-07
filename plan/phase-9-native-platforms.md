@@ -25,7 +25,7 @@ Bring the same two-color specimen + WCAG/APCA scoring experience to native platf
 
 ## App Store and Unsplash Production Access
 
-**Goal:** Ship the iOS app to the App Store for public distribution.
+**Goal:** Ship the iOS app to the App Store for public distribution (see Phase 10 for the full App Store submission process).
 
 **Prerequisite:** Unsplash production access (addressed in Phase 8). The native app must follow the Unsplash API guidelines: proxy all API calls through the web server route (never embed the access key in the native app), track photo downloads via `links.download_location`, and display photographer/Unsplash attribution with UTM links. Production access approval covers both web and native apps.
 
@@ -36,6 +36,9 @@ Bring the same two-color specimen + WCAG/APCA scoring experience to native platf
 
 ## Explicitly out of scope for Phase 9
 - Feature parity with every web phase on day one — start with the core specimen + scoring experience, camera/screen-picker input, matching Phase 1's scope.
+- App Store submission and launch logistics — handled in Phase 10.
 
 ## Done means
 (To be defined once repo/architecture questions above are resolved.)
+
+Phase 10 covers App Store enrollment, metadata, privacy policy, TestFlight, submission, and release.

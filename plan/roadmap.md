@@ -16,11 +16,14 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 | 7 | `phase-7-animation-polish.md` | Animation polish (GSAP, TubeText, DialKit) | Draft |
 | 8 | `phase-8-loose-ends-hardening.md` | Loose ends & hardening (CI, deps, docs, fixes) | Proposed / Not Started |
 | 9 | `phase-9-native-platforms.md` | Native platforms (iOS + macOS) | Draft |
+| 10 | `phase-10-app-store-launch.md` | App Store launch (iOS, optional macOS) | Draft |
 | — | `stretch.md` | Figma MCP export | Stretch, unscheduled |
 
 *Animation Polish was moved from Phase 5 to Phase 7 on 2026-09-27, so it lands after all other web-feature phases are stable instead of in the middle of them.*
 
 *Phase 8 (Loose Ends & Hardening) was inserted on 2026-10-07 to address infrastructure gaps, documentation, and deferred fixes before release. The native platforms phase was renumbered from Phase 8 to Phase 9. Phase 8 can run in parallel with or before Phase 7, depending on priorities.*
+
+*Phase 10 (App Store Launch) was added on 2026-10-07 to cover iOS (and optional macOS) App Store submission, review, and release. It depends on Phase 9 (native app implementation) and Phase 8's Unsplash production access approval.*
 
 The scrollable gallery layout and rotating specimen fonts were removed from Phase 6 on 2026-10-06; neither is scheduled in this roadmap.
 
