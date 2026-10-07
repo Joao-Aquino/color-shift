@@ -18,6 +18,12 @@ Implemented photo drag-and-drop in the existing photo panel. Supported local ima
 
 Validation: repository lint, TypeScript, webpack production build, and the focused Phase 6 Chrome suite passed. The complete Phase 5 Chrome regression suite passed on rerun; its first run hit a short-viewport timing assertion during rapid resize and passed that check on rerun. The current Phase 6 scope is complete for the web app; macOS support belongs to the native Phase 8 app.
 
+## 2026-10-03 - Initial photo Retry recovery
+
+Fixed the empty-buffer Retry path: Shuffle now selects the actual insertion index, so a successful retry after the initial photo request fails displays the recovered photo and resumes normal buffer refill. Added a deterministic Chrome regression that fails the first photo request and confirms the photo, credit, enabled controls, and error dismissal after Retry.
+
+Validation passed: repository-wide lint, TypeScript, webpack production build, and the complete Phase 5 Chrome suite with no browser console errors. The user confirmed that the physical-device checks passed; device, OS, and browser details were not provided, so this is user-reported rather than automated-suite evidence. This supersedes the pending physical-device notes in earlier checkpoints.
+
 ## 2026-10-03 - Relocated controls and mobile duplicate removed
 
 Implemented Figma frame `3396:999` with Undo/Swap/Fix on the specimen, Previous/Shuffle/Next on the photo, and EXPORT alone in the sidebar. The same two control groups now remain visible over the 240px mobile preview; the former mobile disclosure menu and the separate full-photo Shuffle overlay are removed. Responsive button sizing, panel alignment, tooltips, keyboard focus, editor coordination, photo navigation, and export behavior remain covered. This checkpoint also includes the concurrent theme refinements to field tint, Light score colors, field labels, and selected threshold text.

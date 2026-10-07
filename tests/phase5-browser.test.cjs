@@ -311,6 +311,29 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await blockedContext.close();
     console.log('PASS theme switching with blocked browser storage');
 
+    const retryContext=await browser.newContext({viewport:{width:402,height:874}});
+    const retryPage=await retryContext.newPage();
+    retryPage.on('pageerror',e=>errors.push(e.message));
+    let failInitialLoad=true;
+    await retryPage.route('**/api/photos?*',async route=>{
+      if(failInitialLoad){
+        failInitialLoad=false;
+        await route.fulfill({status:502,json:{error:'Temporary photo failure'}});
+      } else {
+        await mockPhotos(route);
+      }
+    });
+    await retryPage.goto(baseURL,{waitUntil:'domcontentloaded'});
+    await retryPage.getByRole('button',{name:'Retry'}).click();
+    await retryPage.waitForSelector('[data-color-field]');
+    assert.equal(await retryPage.locator('[data-responsive-motion="photo"] img').count(),1);
+    assert.equal(await retryPage.locator('.cs-credit').count(),1);
+    assert.ok(await retryPage.locator('[data-action="shuffle"]').isEnabled());
+    await retryPage.waitForFunction(()=>!document.querySelector('[data-action="next"]').disabled);
+    assert.equal(await retryPage.getByRole('button',{name:'Retry'}).count(),0);
+    await retryContext.close();
+    console.log('PASS initial photo failure recovers after Retry');
+
     await verifyMobileReveal(browser, baseURL, mockPhotos, errors);
 
     for (const reducedMotion of ['no-preference', 'reduce']) {
