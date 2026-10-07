@@ -21,17 +21,22 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 
 **Note:** `tsc` currently requires `next typegen` to run first; the workflow must preserve this order.
 
-### 2. Unsplash 403 Investigation
-**Why:** Intermittent 403 responses have been observed and noted in `progress.md`. The root cause is unverified; one hypothesis is that the access key is on Unsplash's demo-tier hourly rate limit.
+### 2. Unsplash Production Access
+**Why:** The Unsplash API is currently in demo mode (50 requests/hour). Intermittent 403 responses noted in `progress.md` are likely rate-limit failures. Production access raises the limit and is required before public release — John intends to ship the iOS app to the App Store, which requires production Unsplash access.
 
 **Scope:**
-- Investigate the 403 pattern: frequency, timing, response headers, rate-limit headers.
-- Verify the current Unsplash access tier and its documented limits.
-- If demo-tier limits are confirmed as the cause, apply for production access through Unsplash's official process.
-- Improve client-side handling: better retry logic, user-facing error messages that distinguish rate-limit failures from other API errors.
-- Consider response caching strategies to reduce API call volume during development and testing.
+- Confirm the current access tier and 403 root cause (demo-tier rate limits).
+- Implement missing API guideline requirements per https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines:
+  - **Hotlinking images** — already done.
+  - **Attribution with UTM links** — already done in `lib/photos/unsplash.ts`.
+  - **Download tracking** — **not yet implemented.** When a user effectively uses a photo (likely when a color pair is exported, copied, or downloaded — implementer should verify the best trigger against the guidelines), call the photo's `links.download_location` endpoint server-side via the API route to keep the access key private. This is scoped as a standalone task within this item.
+- Apply for production access with accurate app title, description, and screenshots showing attribution/hotlinking in action.
+- Improve client-side error handling: better retry logic, user-facing messages distinguishing rate-limit failures from other API errors.
+- Consider response caching to reduce API call volume during development.
 
-**Done when:** 403 root cause is identified and documented; production access is applied for (if applicable); improved error handling and caching (if appropriate) are implemented and verified.
+**Done when:** Download tracking is implemented and verified; production access is applied for with complete guideline compliance; improved error handling is in place.
+
+**Note:** The native iOS/macOS app (Phase 9) must follow the same guidelines: proxy API calls through the server route (never embed the key in the native app), track downloads, and show attribution. Production access approval covers both web and native apps.
 
 ### 3. Dependency Updates & Security
 **Why:** `npm audit` reports 13 vulnerabilities (8 high severity), mostly via `node-vibrant`'s transitive dependencies (`sharp`, `jimp`, `braces`, `source-map-js`). Minor package updates are also available (Next.js 16.4.0, React 19.3.0, Radix UI 1.7.0, and others).
