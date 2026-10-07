@@ -13,10 +13,10 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 **Why:** Required to distribute apps on the App Store and access signing/provisioning infrastructure.
 
 **Scope:**
-- Enroll in the Apple Developer Program (US$99/year).
-- **Open question:** Individual account vs Organization account for CO-OP Studio. Organization provides team management and consistent brand identity but requires D-U-N-S number and verification. Decision needed before enrollment.
+- Enroll in the Apple Developer Program as an **individual** (João Aquino, not CO-OP Studio organization) at US$99/year. Individual enrollment allows reusing the developer profile across multiple personal apps without organization constraints.
+- **Decision made:** Individual account. The App Store will list João Aquino's personal name as the seller. No D-U-N-S number or organizational verification is required for individual enrollment.
 
-**Done when:** Apple Developer Program membership is active; account type decision is made and enrollment is complete.
+**Done when:** Apple Developer Program membership is active under João Aquino's individual account.
 
 ### 2. App Store Connect Configuration
 **Why:** App Store Connect is the portal for managing app metadata, builds, and releases.
