@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-10-07 - Roadmap restructure: Phase 8 loose ends inserted
+
+Inserted a new Phase 8 (Loose Ends & Hardening) and renumbered the native Swift phase from Phase 8 to Phase 9. The new phase collects deferred infrastructure work: CI (GitHub Actions running lint, typegen, tsc, build, and deterministic tests), Unsplash production access (implement download tracking via `links.download_location`, apply for production approval per API guidelines — prerequisite for App Store release), dependency updates (`npm audit` reports 13 vulnerabilities), completing or dropping Plan 006 (responsive resize easing), README rewrite (currently create-next-app boilerplate), repository housekeeping (listing four merged branches for deletion and the dead homepage link for John to fix), device/browser testing documentation, and spec drift fixes (local fonts, URL typo, contrast-algorithm description, APCA grading labels).
+
+Added Phase 10 (App Store Launch) covering iOS (and optional macOS) App Store submission: Apple Developer Program enrollment (individual vs CO-OP Studio organization as open question), App Store Connect configuration, app metadata/screenshots/privacy policy, Unsplash attribution compliance, App Review guidelines risk check, TestFlight beta, submission/review/phased release, and post-launch operations (crash reporting, ratings prompt, versioning, support URL). Depends on Phase 9 (native app) and Phase 8 (Unsplash production access).
+
+Phase 8 can run in parallel with or before Phase 7 (animation polish) — the ordering is left open for John to decide. All cross-references updated: `roadmap.md`, `progress.md`, `specs-context/spec-color-shift.md`, `phase-6-extended-input-layouts.md`, `phase-9-native-platforms.md`, and the new `phase-10-app-store-launch.md`. No code changes.
+
 ## 2026-10-06 - Drag-state motion polish
 
 Changed the Figma drop target from an instant mount/unmount to an interruptible CSS transition. The card fades and scales from 97% over 200ms on entry and leaves in 150ms; the upload icon and guidance follow with 30ms/60ms delays. Photo credit and actions crossfade out while dragging. Reduced-motion mode removes all transforms and keeps a short opacity cue. The card stays mounted so rapid drag exits and reentries retarget from the visible state.
@@ -16,7 +24,7 @@ Validation: lint, TypeScript, webpack production build, and the Phase 6 Chrome s
 
 Implemented photo drag-and-drop in the existing photo panel. Supported local images are decoded and run through the browser palette extractor before insertion into photo history; invalid images receive a dismissible error. Personal photos display a local credit and export without Unsplash links. Object URLs are revoked when the app unmounts. Added inline specimen-text editing with Escape/focus handling and preserved text across photo navigation and circle toggling.
 
-Validation: repository lint, TypeScript, webpack production build, and the focused Phase 6 Chrome suite passed. The complete Phase 5 Chrome regression suite passed on rerun; its first run hit a short-viewport timing assertion during rapid resize and passed that check on rerun. The current Phase 6 scope is complete for the web app; macOS support belongs to the native Phase 8 app.
+Validation: repository lint, TypeScript, webpack production build, and the focused Phase 6 Chrome suite passed. The complete Phase 5 Chrome regression suite passed on rerun; its first run hit a short-viewport timing assertion during rapid resize and passed that check on rerun. The current Phase 6 scope is complete for the web app; macOS support belongs to the native Phase 9 app.
 
 ## 2026-10-03 - Initial photo Retry recovery
 

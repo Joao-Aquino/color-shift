@@ -329,7 +329,7 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | Feature                           | Status         | Notes                                                                                                               |
 | --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Scrollable layout mode            | Planned        | Vertical gallery of color + photo pairs                                                                             |
-| Photo drag-and-drop (web)         | Implemented    | Drop an image onto the photo area to extract colors locally. macOS follows with the native app in Phase 8.          |
+| Photo drag-and-drop (web)         | Implemented    | Drop an image onto the photo area to extract colors locally. macOS follows with the native app in Phase 9.          |
 | Camera / photo capture (iOS)      | Planned        | Alternate input to Unsplash: take a photo, extract colors from your own image                                       |
 | Download .MD button               | Implemented    | Real Markdown file download and success reset verified in the browser                                               |
 | Editable Aa text                  | Implemented    | Type custom text to test real content; the text persists across photo navigation                                   |
