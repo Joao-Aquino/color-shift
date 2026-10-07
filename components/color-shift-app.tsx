@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 
 import { ColorEditor } from "@/components/control-bar/color-editor";
 import { ControlContainer } from "@/components/control-bar/control-container";
@@ -27,6 +27,8 @@ import type {
 
 const INITIAL_BUFFER_SIZE = 10;
 const REFILL_THRESHOLD = 3;
+const MAX_IMPORT_BYTES = 20 * 1024 * 1024;
+const SUPPORTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"]);
 
 interface PhotoEntry {
   photo: Photo;
@@ -52,6 +54,10 @@ export function ColorShiftApp() {
   const [entries, setEntries] = useState<PhotoEntry[]>([]);
   const [index, setIndex] = useState(0);
   const [showCircle, setShowCircle] = useState(false);
+  const [specimenText, setSpecimenText] = useState("Aa");
+  const [isEditingSpecimen, setIsEditingSpecimen] = useState(false);
+  const [isDraggingPhoto, setIsDraggingPhoto] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
   const [activeColor, setActiveColor] = useState<ColorTarget | null>(null);
@@ -69,6 +75,20 @@ export function ColorShiftApp() {
   const gestureStartRef = useRef<ColorSnapshot | null>(null);
   const refillInFlight = useRef(false);
   const requestInFlight = useRef(false);
+  const importInFlight = useRef(false);
+  const dragDepth = useRef(0);
+  const localPhotoUrls = useRef<string[]>([]);
+  const specimenInputRef = useRef<HTMLTextAreaElement>(null);
+  const specimenEditButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const urls = localPhotoUrls.current;
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, []);
+
+  useEffect(() => {
+    if (isEditingSpecimen) specimenInputRef.current?.focus();
+  }, [isEditingSpecimen]);
 
   const updateEntries = useCallback(
     (updater: (current: PhotoEntry[]) => PhotoEntry[]) => {
@@ -224,6 +244,86 @@ export function ColorShiftApp() {
     [processPhoto],
   );
 
+  const importPhoto = useCallback(async (file: File) => {
+    if (importInFlight.current) return;
+    setImportError(null);
+    if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
+      setImportError("Use a JPEG, PNG, WebP, AVIF, or GIF image.");
+      return;
+    }
+    if (file.size > MAX_IMPORT_BYTES) {
+      setImportError("Choose an image smaller than 20 MB.");
+      return;
+    }
+
+    importInFlight.current = true;
+    const url = URL.createObjectURL(file);
+    try {
+      const image = new window.Image();
+      image.src = url;
+      await image.decode();
+      const pair = await extractColorPair(url);
+      const photo: Photo = {
+        id: `local-${crypto.randomUUID()}`,
+        source: "local",
+        fileName: file.name,
+        url,
+        thumbUrl: url,
+        tinyUrl: url,
+        color: pair.background,
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+        alt: `Your photo: ${file.name}`,
+        photographer: "You",
+        photographerUrl: "",
+        photoUrl: "",
+      };
+      const nextIndex = Math.min(indexRef.current + 1, entriesRef.current.length);
+      updateEntries((current) => {
+        const next = [...current];
+        next.splice(nextIndex, 0, { photo, pair });
+        return next;
+      });
+      localPhotoUrls.current.push(url);
+      indexRef.current = nextIndex;
+      setIndex(nextIndex);
+      resetHistory();
+      setErrorMessage(null);
+    } catch {
+      URL.revokeObjectURL(url);
+      setImportError("This image could not be opened or its colors could not be extracted.");
+    } finally {
+      importInFlight.current = false;
+    }
+  }, [resetHistory, updateEntries]);
+
+  const onPhotoDragEnter = useCallback((event: DragEvent<HTMLElement>) => {
+    if (!event.dataTransfer.types.includes("Files")) return;
+    event.preventDefault();
+    dragDepth.current += 1;
+    setIsDraggingPhoto(true);
+  }, []);
+
+  const onPhotoDragLeave = useCallback((event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (dragDepth.current === 0) setIsDraggingPhoto(false);
+  }, []);
+
+  const onPhotoDrop = useCallback((event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    dragDepth.current = 0;
+    setIsDraggingPhoto(false);
+    const file = event.dataTransfer.files[0];
+    if (file) void importPhoto(file);
+  }, [importPhoto]);
+
+  const onPhotoDragOver = useCallback((event: DragEvent<HTMLElement>) => {
+    if (!event.dataTransfer.types.includes("Files")) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+  }, []);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -233,6 +333,11 @@ export function ColorShiftApp() {
         if (controller.signal.aborted) return;
 
         const initialEntries = photos.map((photo) => ({ photo, pair: null }));
+        if (entriesRef.current.length > 0) {
+          updateEntries((current) => [...current, ...initialEntries]);
+          processPhotos(photos);
+          return;
+        }
         entriesRef.current = initialEntries;
         setEntries(initialEntries);
         setErrorMessage(null);
@@ -247,7 +352,7 @@ export function ColorShiftApp() {
 
     void loadInitialBuffer();
     return () => controller.abort();
-  }, [processPhotos]);
+  }, [processPhotos, updateEntries]);
 
   useEffect(() => {
     const remaining = entries.length - index - 1;
@@ -544,36 +649,76 @@ export function ColorShiftApp() {
   };
 
   const preview = (
-    <div data-responsive-motion="preview" className="cs-preview">
+    <div data-responsive-motion="preview" data-dragging={isDraggingPhoto} className="cs-preview">
       <div className="cs-preview-panels">
         <div className="cs-specimen-panel relative min-w-0">
           {ready ? (
-            <button
-              aria-label={showCircle ? "Show Aa specimen" : "Show circle specimen"}
-              data-responsive-motion="specimen"
-              className="group flex h-full w-full cursor-pointer items-center justify-center overflow-hidden transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current"
-              onClick={() => setShowCircle((currentValue) => !currentValue)}
-              style={{ backgroundColor: pair.background, color: pair.foreground }}
-              type="button"
-            >
-              {showCircle ? (
-                <span
-                  aria-hidden
-                  data-responsive-motion="circle"
-                  className="inline-flex aspect-square w-[min(240px,52%)]"
+            <>
+              {isEditingSpecimen ? (
+                <div
+                  data-responsive-motion="specimen"
+                  className="flex h-full w-full items-center justify-center"
+                  style={{ backgroundColor: pair.background, color: pair.foreground }}
                 >
-                  <span data-responsive-circle-shape className="inline-flex h-full w-full">
-                    <span className="h-full w-full rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95" />
-                  </span>
-                </span>
+                  <textarea
+                    ref={specimenInputRef}
+                    aria-label="Specimen text"
+                    className="cs-specimen-input"
+                    maxLength={120}
+                    onBlur={() => setIsEditingSpecimen(false)}
+                    onChange={(event) => setSpecimenText(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Escape") return;
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setIsEditingSpecimen(false);
+                      window.requestAnimationFrame(() => specimenEditButtonRef.current?.focus());
+                    }}
+                    placeholder="Aa"
+                    value={specimenText}
+                  />
+                </div>
               ) : (
-                <span data-responsive-motion="type" className="cs-specimen-type inline-flex">
-                  <span className="transition-[transform,opacity] duration-200 group-active:scale-95">
-                    Aa
-                  </span>
-                </span>
+                <button
+                  aria-label={showCircle ? "Show Aa specimen" : "Show circle specimen"}
+                  data-responsive-motion="specimen"
+                  className="group flex h-full w-full cursor-pointer items-center justify-center overflow-hidden transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current"
+                  onClick={() => setShowCircle((currentValue) => !currentValue)}
+                  style={{ backgroundColor: pair.background, color: pair.foreground }}
+                  type="button"
+                >
+                  {showCircle ? (
+                    <span
+                      aria-hidden
+                      data-responsive-motion="circle"
+                      className="inline-flex aspect-square w-[min(240px,52%)]"
+                    >
+                      <span data-responsive-circle-shape className="inline-flex h-full w-full">
+                        <span className="h-full w-full rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95" />
+                      </span>
+                    </span>
+                  ) : (
+                    <span data-responsive-motion="type" className="cs-specimen-type inline-flex" data-custom-text={specimenText !== "Aa"}>
+                      <span className="transition-[transform,opacity] duration-200 group-active:scale-95">
+                        {specimenText || "Aa"}
+                      </span>
+                    </span>
+                  )}
+                </button>
               )}
-            </button>
+              <button
+                ref={specimenEditButtonRef}
+                aria-label="Edit specimen text"
+                className="cs-specimen-edit"
+                onClick={() => {
+                  setShowCircle(false);
+                  setIsEditingSpecimen(true);
+                }}
+                type="button"
+              >
+                Edit text
+              </button>
+            </>
           ) : (
             <LoadingPanel />
           )}
@@ -584,6 +729,10 @@ export function ColorShiftApp() {
           aria-label="Source photo"
           data-responsive-motion="photo"
           className="relative h-full min-w-0 flex-1 overflow-hidden bg-[var(--color-panel-loading)]"
+          onDragEnter={onPhotoDragEnter}
+          onDragLeave={onPhotoDragLeave}
+          onDragOver={onPhotoDragOver}
+          onDrop={onPhotoDrop}
         >
           {ready ? (
             <>
@@ -598,13 +747,31 @@ export function ColorShiftApp() {
                 quality={90}
                 sizes="(min-width: 1180px) 38vw, 50vw"
                 src={current.photo.url}
+                unoptimized={current.photo.source === "local"}
               />
             </>
           ) : (
             <LoadingPanel />
           )}
 
-          {errorMessage ? (
+          <div className="cs-photo-drop" aria-hidden={!isDraggingPhoto} data-active={isDraggingPhoto}>
+            <span className="cs-photo-drop-icon" />
+            <div className="cs-photo-drop-copy">
+              <p className="cs-photo-drop-title">Drag your image to extract the colors</p>
+              <p className="cs-photo-drop-formats">
+                <strong>JPEG, PNG, WebP, AVIF</strong> and <strong>GIF</strong> up to <strong>20 MB</strong>
+              </p>
+            </div>
+          </div>
+
+          {importError ? (
+            <div role="alert" className="cs-import-error">
+              <span>{importError}</span>
+              <button aria-label="Dismiss image error" onClick={() => setImportError(null)} type="button">×</button>
+            </div>
+          ) : null}
+
+          {errorMessage && current?.photo.source !== "local" ? (
             <div className="absolute inset-x-4 top-4 z-20 flex items-center justify-between gap-4 rounded-[6px] border border-white/10 bg-black/90 p-3 text-sm text-white shadow-lg">
               <p>{errorMessage}</p>
               <CSButton
@@ -618,7 +785,9 @@ export function ColorShiftApp() {
           <ControlsBar {...actions} group="photo" />
         </section>
       </div>
-      {ready && (
+      {ready && (current.photo.source === "local" ? (
+        <p className="cs-credit">Your photo · {current.photo.fileName}</p>
+      ) : (
         <p className="cs-credit">
           <span className="cs-credit-label uppercase">Photo</span>
           <a
@@ -639,7 +808,7 @@ export function ColorShiftApp() {
             Unsplash
           </a>
         </p>
-      )}
+      ))}
     </div>
   );
 

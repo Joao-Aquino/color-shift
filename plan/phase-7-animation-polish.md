@@ -5,7 +5,7 @@
 
 ## Goal
 
-Layer GSAP-driven motion polish onto the now-feature-complete tool (Phases 1–6), matching the "buttery smooth... this is a Shift Nudge product" design philosophy. Deliberately sequenced last among all the web-feature phases (after Color Editing, Dual Scoring, Export, Theming/Responsive, and Extended Input & Layout Modes) so animation isn't fought for while the underlying interactions are still changing shape.
+Layer GSAP-driven motion polish onto the now-feature-complete tool (Phases 1–6), matching the "buttery smooth... this is a Shift Nudge product" design philosophy. Deliberately sequenced last among all the web-feature phases (after Color Editing, Dual Scoring, Export, Theming/Responsive, and personal photo/text input) so animation isn't fought for while the underlying interactions are still changing shape.
 
 ## Animation skill requirement
 

@@ -19,6 +19,7 @@ In another terminal, with Playwright available and Google Chrome installed:
 
 ```sh
 node tests/phase5-browser.test.cjs
+node tests/phase6-browser.test.cjs
 node tests/ui-annotations.browser.cjs
 ```
 
@@ -33,6 +34,8 @@ storage failure, ten widths, theme padding/progressive footer, responsive
 action groups on the specimen and photo, six actions, focus,
 clipboard, Markdown download, short viewports, reduced motion, and circle
 geometry and reduced transparency. Screenshots are written to `/tmp/color-shift-*.png`.
+
+`phase6-browser.test.cjs` verifies the Figma drag state, interruptible entry/exit motion, reduced motion, local image extraction, navigation, export, invalid-file errors, and recovery when the initial photo API fails. It also checks custom specimen text across photos and the Aa/circle toggle.
 
 Editor reveal checks cover both color fields and all five formats at 393 x 852
 in both themes and motion preferences, the oversized-panel fallback at 320 x 320,
