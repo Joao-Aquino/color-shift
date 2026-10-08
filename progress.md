@@ -1,5 +1,27 @@
 # Progress Log
 
+## 2026-10-08 - Boxed shortcut tooltips, Fix/Export shortcuts and editor colors
+
+Applied Figma 3396:988 to shortcut tooltips: 1px bordered boxes, 4px radius, 2px padding, Geist 13px/16px and 16px Phosphor Command/Control/arrows. Undo and Export adapt modifiers to the platform; keys and modifiers share one box. Preserved accessible button labels and added aria-keyshortcuts.
+
+Added F for available Fix contrast and Cmd/Ctrl+S to open export using existing action/motion paths. Repeats do not re-trigger the action. F is protected while typing; modified S preserves the specimen text and focuses COPY, including from text editing. Channel/readout inputs now have transparent backgrounds. Light selected format uses #2E2E2E and ds/gray/1000 (#171717, verified via Figma variables); Dark selected-format styling is preserved.
+
+Validation: lint and webpack production build with TypeScript pass. Seven Chrome suites exit 0: action-shortcuts, ui-annotations, theme-wipe, phase7-browser, phase5-browser, score-description and specimen-caret. Covered keyboard/click parity, platform modifier icons, exact tooltip/color tokens, native text replacement/selection, responsive geometry/mobile reveal, animation interruption, reduced motion and API/storage fallbacks. Screenshots in /tmp/color-shift-tooltip-*, /tmp/color-shift-editor-light.png and /tmp/color-shift-specimen-caret. Physical IME/device behavior is not part of this simulated browser validation.
+
+## 2026-10-08 - Description wrapping, keyboard animation parity and shortcuts
+
+The user requested smooth one/two-line score-description changes, the same animations for keyboard and pointer actions, a theme tooltip advertising T, and the complete shortcut list. Added a measured 200ms description-height transition with shared States easing, interruption/cleanup, reduced-motion settling and mobile reveal frame notifications. Development DialKit exposes Score Description → Duration Ms.
+
+Removed the theme-specific keyboard animation bypass. T and keyboard activation of the theme pills now use the same directional wipe as clicking; T also works with theme controls focused and ignores repeat keydown events. Text-field and browser-modifier protection remain. Other action shortcuts already use their common click/action handlers. Added the tooltip, aria-keyshortcuts and specs-context/keyboard-shortcuts.md. The explicit keyboard preference supersedes the animation skills’ keyboard rule and the earlier motion-review recommendation.
+
+## 2026-10-08 - Figma specimen caret and final motion opportunities
+
+The user requested an insertion point at the end when entering specimen editing and a wider caret matching Figma 3416:366. Retained native textarea input/selection and added a decorative caret measured in an identical hidden text layout. Width and height use the Figma 14/240 and 202/240 font-size ratios. First activation/focus moves to the end; subsequent placement, range selection and navigation remain native. Composition/forced-colors use the native caret; reduced motion disables blinking. Empty focused text no longer shows the Aa placeholder behind the caret.
+
+The Phase 7 PR had already been merged, including the real-resize ColorField update (#9). This follow-up starts from current main on codex/phase-7-specimen-caret. A read-only animation sweep proposes subtle image error-banner entry/exit; the initial motion review flagged keyboard-initiated sidebar motion; the user’s subsequent request supersedes that recommendation. No additional effect was implemented from these proposals. Details are in plan/phase-7-motion-review.md.
+
+Validation: lint and TypeScript/webpack build; dedicated Chrome caret regression across desktop/tablet/mobile sizes, selection, wrapping/emoji/empty text, synthetic composition, forced colors and reduced motion. Saved screenshots in /tmp/color-shift-specimen-caret.
+
 ## 2026-10-07 - Destination-specific theme wipe and restored sidebar scale
 
 The user requested Dark left → right and Light right → left, restored scale on both ColorFields and score, and an editable easing selector in DialKit. The wipe now derives its direction from the destination theme. Sidebar Flip/presence is restored with easeInOutQuart (GSAP power3.inOut), leaving export easing unchanged. Development States → Easing selects easeInOutQuart, easeInOutCubic, easeOutQuart, easeOutExpo or linear through --sidebar-easing. Existing enter/exit duration controls still apply.

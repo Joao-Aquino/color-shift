@@ -113,3 +113,35 @@ persistence. Production suites check interrupted scale cleanup and mobile reveal
 
 Theme wipe directions are destination-specific: Dark reveals left → right;
 Light reveals right → left.
+
+## Specimen caret
+
+`specimen-caret.browser.cjs` verifies first-click/focus-at-end behavior, free
+subsequent caret placement, native selection and text navigation, proportional
+Figma caret dimensions and alignment during automatic font fitting. It covers
+empty/wrapped/trailing-newline/emoji text at desktop, tablet and mobile widths,
+synthetic composition fallback, forced colors and reduced motion. Screenshots
+are written to `/tmp/color-shift-specimen-caret`. Use the Chrome runtime and
+`COLOR_SHIFT_TEST_URL` settings above.
+
+## Score description wrapping
+
+`score-description.browser.cjs` samples one/two-line wrapping to verify measured
+height progression, unchanged text scale and continuous movement of following
+controls. It covers reversal cleanup and live reduced motion. The theme-wipe
+suite now verifies T/Enter animation parity, rapid keyboard reversal, repeat
+protection and the shortcut tooltip.
+
+## Boxed shortcut tooltips
+
+`ui-annotations.browser.cjs` checks Figma shortcut box dimensions, typography,
+Dark/Light borders and spacing, Phosphor icons, Command/Control platform
+selection, theme T and mobile tooltip bounds at 393/320px. Screenshots include
+`/tmp/color-shift-tooltip-command-dark.png`, its Light counterpart and
+`/tmp/color-shift-tooltip-theme.png`. The caret suite also protects explicit
+selection/replacement when focusing an unfocused textarea.
+
+`action-shortcuts.browser.cjs` checks F correction/click parity, typing protection,
+repeat/disabled state, Undo and Cmd/Ctrl+S export opening, focus, Escape, repeat
+and reduced-motion behavior. The annotation suite additionally verifies
+transparent numeric inputs and Light selected-format tokens in all formats.

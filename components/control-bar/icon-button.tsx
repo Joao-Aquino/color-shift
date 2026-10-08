@@ -3,6 +3,7 @@
 import type { Icon } from "@phosphor-icons/react/lib";
 
 import { Button } from "@/components/ui/button";
+import { ShortcutKey, type Shortcut } from "@/components/ui/shortcut-key";
 import {
   Tooltip,
   TooltipContent,
@@ -15,6 +16,8 @@ interface IconButtonProps
   icon: Icon;
   iconSize?: number;
   label: string;
+  tooltipLabel?: string;
+  shortcut?: Shortcut;
   tooltipSide?: React.ComponentProps<typeof TooltipContent>["side"];
 }
 
@@ -22,6 +25,8 @@ export function IconButton({
   icon: IconComponent,
   iconSize = 20,
   label,
+  tooltipLabel = label,
+  shortcut,
   tooltipSide = "top",
   className,
   ...props
@@ -42,8 +47,9 @@ export function IconButton({
           <IconComponent aria-hidden size={iconSize} weight="regular" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side={tooltipSide} sideOffset={8}>
-        {label}
+      <TooltipContent className={shortcut ? "cs-shortcut-tooltip" : undefined} side={tooltipSide} sideOffset={8}>
+        <span>{tooltipLabel}</span>
+        {shortcut && <ShortcutKey shortcut={shortcut} />}
       </TooltipContent>
     </Tooltip>
   );

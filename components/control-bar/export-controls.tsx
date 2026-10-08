@@ -3,7 +3,9 @@
 import { CheckIcon } from "@phosphor-icons/react/Check";
 import { CopyIcon } from "@phosphor-icons/react/Copy";
 import { DownloadSimpleIcon } from "@phosphor-icons/react/DownloadSimple";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ShortcutKey } from "@/components/ui/shortcut-key";
 
 import { createColorShiftExport, type ColorShiftExport } from "@/lib/export";
 import { cn } from "@/lib/utils";
@@ -80,6 +82,7 @@ function ExportSlot({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const timersRef = useRef<number[]>([]);
   const focusActionsRef = useRef(false);
+  const shortcutFocusRef = useRef<Element | null>(null);
   const restoreFocusRef = useRef(false);
   const slotRef = useRef<HTMLDivElement>(null);
   const prepareMotion = useFlipLayoutMotion(slotRef, phase, Number(phase === "open"));
@@ -95,6 +98,7 @@ function ExportSlot({
     const returnFocus = (focused instanceof HTMLElement && !!focused.closest("[data-export-slot]")) ||
       (restoreFocusRef.current && focused === document.body);
     focusActionsRef.current = false;
+    shortcutFocusRef.current = null;
     restoreFocusRef.current = false;
     clearTimers();
     if (returnFocus) timersRef.current.push(window.setTimeout(() => {
@@ -132,9 +136,10 @@ function ExportSlot({
     timersRef.current.push(window.setTimeout(callback, delay));
   }
 
-  function openExport() {
+  function openExport(focusActions = false) {
     if (!background || !foreground || !photo || disabled) return;
-    focusActionsRef.current = document.activeElement?.hasAttribute("data-export-button") ?? false;
+    focusActionsRef.current = focusActions || (document.activeElement?.hasAttribute("data-export-button") ?? false);
+    shortcutFocusRef.current = focusActions ? document.activeElement : null;
 
     clearTimers();
     setErrorMessage(null);
@@ -158,6 +163,21 @@ function ExportSlot({
       setPhase("open");
     }, 260);
   }
+
+  const openFromShortcut = useEffectEvent(() => {
+    if (phase === "closed") openExport(true);
+  });
+
+  useEffect(() => {
+    function handleExportShortcut(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.altKey || event.shiftKey ||
+        !(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "s") return;
+      event.preventDefault();
+      if (!event.repeat) openFromShortcut();
+    }
+    window.addEventListener("keydown", handleExportShortcut);
+    return () => window.removeEventListener("keydown", handleExportShortcut);
+  }, []);
 
   function completeAction(kind: Exclude<ExportSuccess, null>) {
     clearTimers();
@@ -210,10 +230,14 @@ function ExportSlot({
   const exportOpen = phase === "open";
   useLayoutEffect(() => {
     if (phase === "open" && focusActionsRef.current &&
-      (document.activeElement === document.body || document.activeElement?.hasAttribute("data-export-button"))) {
-      document.querySelector<HTMLButtonElement>('[data-export-slot] button:not(:disabled)')?.focus({ preventScroll: true });
+      (document.activeElement === document.body || document.activeElement?.hasAttribute("data-export-button") ||
+        document.activeElement === shortcutFocusRef.current)) {
+      slotRef.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
     }
-    if (phase === "open") focusActionsRef.current = false;
+    if (phase === "open") {
+      focusActionsRef.current = false;
+      shortcutFocusRef.current = null;
+    }
   }, [phase]);
   return (
     <div ref={slotRef} className="cs-export-slot" data-export-slot data-state={phase}>
@@ -241,28 +265,36 @@ function ExportSlot({
             />
           </div>
         ) : null}
-          <button
-            data-export-button
-            data-layout-item
-            data-open={!exportOpen}
-            aria-controls="export-actions"
-            className={cn(
-              "cs-layout-content relative flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-[var(--color-export-border)] bg-[var(--color-export-bg)] px-2 text-sm leading-5 font-medium text-[var(--color-export-text)] transition-[border-color,background-color,opacity,transform] duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[var(--color-chrome-border-strong)] hover:bg-[var(--color-export-bg)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] motion-safe:active:scale-[0.97] disabled:cursor-wait",
-              disabled && "cursor-not-allowed opacity-30",
-            )}
-            disabled={disabled || phase === "loading"}
-            onClick={openExport}
-            type="button"
-          >
-            <span
-              aria-hidden
-              className="absolute inset-y-0 left-0 w-full origin-left bg-[var(--color-chrome-divider)] transition-transform duration-200 ease-linear motion-reduce:transition-none"
-              style={{
-                transform: `scaleX(${phase === "loading" ? progress / 100 : 0})`,
-              }}
-            />
-            <span className="relative">EXPORT</span>
-          </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              data-export-button
+              data-layout-item
+              data-open={!exportOpen}
+              aria-controls="export-actions"
+              aria-keyshortcuts="Meta+S Control+S"
+              className={cn(
+                "cs-layout-content relative flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-[var(--color-export-border)] bg-[var(--color-export-bg)] px-2 text-sm leading-5 font-medium text-[var(--color-export-text)] transition-[border-color,background-color,opacity,transform] duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[var(--color-chrome-border-strong)] hover:bg-[var(--color-export-bg)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] motion-safe:active:scale-[0.97] disabled:cursor-wait",
+                disabled && "cursor-not-allowed opacity-30",
+              )}
+              disabled={disabled || phase === "loading"}
+              onClick={() => openExport()}
+              type="button"
+            >
+              <span
+                aria-hidden
+                className="absolute inset-y-0 left-0 w-full origin-left bg-[var(--color-chrome-divider)] transition-transform duration-200 ease-linear motion-reduce:transition-none"
+                style={{
+                  transform: `scaleX(${phase === "loading" ? progress / 100 : 0})`,
+                }}
+              />
+              <span className="relative">EXPORT</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="cs-shortcut-tooltip" side="top" sideOffset={8}>
+            <span>Export colors</span><ShortcutKey shortcut="Export" />
+          </TooltipContent>
+        </Tooltip>
       <p aria-live="polite" className="sr-only" role="status">
         {errorMessage ??
           (phase === "loading"

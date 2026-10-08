@@ -14,7 +14,7 @@ import type {
 interface ControlContainerProps {
   preview: React.ReactNode;
   theme: Theme;
-  onThemeChange: (theme: Theme, animate?: boolean) => void;
+  onThemeChange: (theme: Theme) => void;
   activeTarget: ColorTarget | null;
   algorithm: ContrastAlgorithm;
   scoreExpanded: boolean;

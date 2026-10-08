@@ -1,6 +1,7 @@
 "use client";
 
 import { InfoIcon } from "@phosphor-icons/react/Info";
+import { ScoreDescription } from "./score-description";
 import { type CSSProperties } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -270,9 +271,9 @@ export function Score({
         </div>
       </div>
 
-      <p className="text-xs leading-5 text-[var(--color-text-muted)]">
+      <ScoreDescription>
         {score?.description ?? "Extracting a readable color pair from the photo."}
-      </p>
+      </ScoreDescription>
     </section>
   );
 }

@@ -170,7 +170,7 @@ export function ColorSlider({
       <div className="h-7 w-14 shrink-0">
         <Input
           aria-label={`${channel.label} value`}
-          className="h-7 w-14 rounded-full border-0 bg-black/20 px-2 text-right font-mono text-xs text-[var(--color-text-value)] tabular-nums focus-visible:ring-1 md:text-xs"
+          className="h-7 w-14 rounded-full border-0 bg-transparent px-2 text-right font-mono text-xs text-[var(--color-text-value)] tabular-nums focus-visible:ring-1 md:text-xs dark:bg-transparent"
           inputMode={channel.display === "hex" ? "text" : "decimal"}
           onBlur={() => {
             if (cancelCommit.current) {

@@ -34,27 +34,27 @@ Use the animation skills installed from [emilkowalski/skills](https://github.com
 ### 4. Sidebar state transitions
 - GSAP Flip animates EXPORT ↔ COPY/DOWNLOAD in the existing export slot.
 - Exit 150ms, entrance 200ms, ease-out-quint.
-- Score threshold expansion and ColorField opening, switching and closing use GSAP Flip scale with easeInOutQuart (power3.inOut). DialKit States → Easing selects the curve for both. Mobile reveal follows animation frames and respects footer geometry and manual scrolling.
+- Score threshold expansion and ColorField opening, switching and closing animate real box dimensions with easeOutQuart (power3.out), following the merged real-resize update (#9). DialKit States → Easing selects the curve for both. Mobile reveal follows animation frames and respects footer geometry and manual scrolling.
 
 ### 5. Slider easing
 - GSAP animates slider handle position when the underlying color changes programmatically (e.g. photo navigation, threshold bump) — power4.inOut.
 - Manual drag kills any running animation and updates instantly (no fighting the user's input).
 
 ### 6. DialKit integration
-- All motion parameters exposed as CSS custom properties on `:root`: `--color-duration`, `--photo-duration`, `--photo-opacity`, `--theme-wipe-duration`, `--exit-duration`, `--enter-duration`, `--sidebar-easing`.
+- All motion parameters exposed as CSS custom properties on `:root`: `--color-duration`, `--photo-duration`, `--photo-opacity`, `--theme-wipe-duration`, `--exit-duration`, `--enter-duration`, `--sidebar-easing`, `--score-description-duration`.
 - DialKit live-tunes these during development/demonstration.
-- Removed specimen squish/pop controls. Sidebar scale is restored in the subsequent review, with a shared easing selector.
+- Removed specimen squish/pop controls. Sidebar box resizing uses a shared easing selector.
 
 ## Explicitly out of scope for Phase 7
-- New features beyond the approved browser-review change to direct specimen editing.
+- Features beyond the explicitly approved browser-review and final-polish requests documented below.
 
 ## Done means
-Photo navigation, WCAG/APCA numerals, export states and programmatic slider changes have the agreed motion. Score/ColorField layout uses tunable scale; specimen typing is immediate. Remaining motion parameters are DialKit-tunable in development.
+Photo navigation, WCAG/APCA numerals, export states and programmatic slider changes have the agreed motion. Score/ColorField layout uses tunable box resizing; specimen typing is immediate. Remaining motion parameters are DialKit-tunable in development.
 
 ## Current implementation (browser review, 2026-10-07)
 
 - Specimen is a persistent transparent textarea with native caret, no border/outline/background, mirrored text measurement and automatic font fitting. Escape blurs it; custom text persists through photo navigation/imports. Removed the Aa/circle toggle and separate Edit text button.
-- Restored sidebar Flip and delayed presence for Score and ColorFields with easeInOutQuart. Color/border transitions remain. Mobile reveal follows layout-motion frames and cancels on manual touch/wheel gestures or editor input focus.
+- Sidebar dimensions and delayed presence for Score and ColorFields use easeOutQuart; glyphs and borders are not scaled. Color/border transitions remain. Mobile reveal follows layout-motion frames and cancels on manual touch/wheel gestures or editor input focus.
 - Photo layers retain the previous blend under a pixelated tiny placeholder until the next photo is ready. Incoming layers crossfade over 200ms and interrupted layers are cleaned up.
 - Export retains interruptible Flip enter/exit motion and inert decorative exit copies, with cleanup for resize, reduced motion and unmount.
 - Slider thumb easing uses `power4.inOut` over 200ms for programmatic changes; manual pointer/keyboard/typed changes remain immediate.
@@ -67,12 +67,38 @@ The initial Phase 7 implementation included specimen squish/pop and Aa/circle ro
 
 ### Verification
 
-Lint, TypeScript and webpack production build pass. Chrome covers direct text editing/caret/font fit, photo transitions, ColorField/score scale states, Figma Light colors, export cleanup, local-photo import/navigation/export, responsive layouts and mobile reveal. Physical-device feel has not been rechecked for this phase.
+Lint, TypeScript and webpack production build pass. Chrome covers direct text editing/caret/font fit, photo transitions, ColorField/score resize states, Figma Light colors, export cleanup, local-photo import/navigation/export, responsive layouts and mobile reveal. Physical-device feel has not been rechecked for this phase.
 
 ### Theme transition revisions (2026-10-07)
 
 The first supplied 21st.dev animation used a vertical curtain with 550ms fall/rise stages. After validation, the user requested that version be saved separately for reuse. Its complete implementation and browser suite are archived locally in **`codex/theme-curtain`**, commit **`4ac7b422a326`**, including `components/ui/curtain-theme-toggle.tsx` and `tests/theme-curtain.browser.cjs`.
 
-The active `codex/phase-7` checkout now uses the second supplied animation: `components/ui/theme-wipe-toggle.tsx` reveals the new theme horizontally with the native View Transition API. Dark reveals left → right; Light reveals right → left. Duration is 700ms and the supplied ease-in-out curve. The existing Light/Dark pills and persisted theme state remain the controls. Snapshot styles disable the browser's default fade/blending; a synchronous theme event lets React finish updating selected controls before capture.
+The active implementation uses the second supplied animation: `components/ui/theme-wipe-toggle.tsx` reveals the new theme horizontally with the native View Transition API. Dark reveals left → right; Light reveals right → left. Duration is 700ms and the supplied ease-in-out curve. The existing Light/Dark pills and persisted theme state remain the controls. Snapshot styles disable the browser's default fade/blending; a synchronous theme event lets React finish updating selected controls before capture.
 
-Development DialKit exposes **Theme Wipe → Duration Ms** through `--theme-wipe-duration`. Rapid requests invalidate skipped snapshot callbacks and cancel earlier animations. Keyboard activation/T, reduced motion and unavailable APIs switch immediately; resize, visibility and storage changes clean up pending snapshots. No extra icon or animation dependencies are needed for the existing controls.
+Development DialKit exposes **Theme Wipe → Duration Ms** through `--theme-wipe-duration`. Rapid requests invalidate skipped snapshot callbacks and cancel earlier animations. Keyboard activation/T shares the pointer wipe; reduced motion and unavailable APIs switch immediately; resize, visibility and storage changes clean up pending snapshots. No extra icon or animation dependencies are needed for the existing controls.
+
+## Final specimen caret / motion sweep (2026-10-08)
+
+The editing caret follows Figma `3416:366`: first activation/focus starts at the
+end, subsequent selection remains native, and a foreground-colored decorative
+caret uses 14/240 width and 202/240 height relative to the fitted font. Native
+composition/forced-colors fallback and a stationary reduced-motion caret are
+included. See [final motion review](phase-7-motion-review.md) for measured
+validation and separate animation proposals.
+
+## Description wrapping and shortcut parity (2026-10-08)
+
+The score description measures its natural text height and animates one/two-line
+changes over 200ms without glyph scaling. Interrupted changes resume from the
+rendered height, emit mobile-reveal frames, and settle immediately under reduced
+motion. DialKit exposes Score Description → Duration Ms; easing uses States.
+
+Per the user’s explicit request, action shortcuts share pointer animations.
+Theme T/Enter/Space now triggers the same wipe, including T with a theme button
+focused. Text-input protection remains; key repeats do not continuously toggle
+the theme. Both theme pills expose a Toggle theme T tooltip. See the complete
+[shortcut reference](../specs-context/keyboard-shortcuts.md).
+
+## Shortcut tooltip design (2026-10-08)
+
+Figma `3396:988` defines the shared boxed shortcut treatment. Theme and action tooltips render the key separately from the label, with a 1px border, 4px radius and 2px padding. Shortcut typography remains Geist 13px/16px. Command/Control and arrow icons use Phosphor at 16px; the undo modifier adapts to the platform and shares one box with Z. Dark label-to-box spacing is 4px; Light is 8px. Existing accessible button names and tooltip arrows remain. Fix contrast shows F; Export shows Command/Control + S. Both shortcuts call the same action and motion paths as clicking, ignore repeats, and respect unavailable state. F remains a typed character in editors; modified S opens export while preserving the text and focuses COPY.

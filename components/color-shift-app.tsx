@@ -595,13 +595,20 @@ export function ColorShiftApp() {
       }
 
       if (
-        isInteractive ||
+        isEditable ||
         event.metaKey ||
         event.ctrlKey ||
         event.altKey
       ) {
         return;
       }
+
+      if (event.key.toLowerCase() === "t") {
+        event.preventDefault();
+        if (!event.repeat) changeTheme(theme === "dark" ? "light" : "dark");
+        return;
+      }
+      if (isInteractive) return;
 
       if (event.key === "ArrowLeft") {
         event.preventDefault();
@@ -615,15 +622,19 @@ export function ColorShiftApp() {
       } else if (event.key.toLowerCase() === "s") {
         event.preventDefault();
         swapColors();
-      } else if (event.key.toLowerCase() === "t") {
+      } else if (event.key.toLowerCase() === "f") {
         event.preventDefault();
-        changeTheme(theme === "dark" ? "light" : "dark", false);
+        if (event.repeat || isRequesting) return;
+        const pair = entriesRef.current[indexRef.current]?.pair;
+        if (pair && getContrastScore(pair.foreground, pair.background, contrastAlgorithm).value < selectedThresholds[contrastAlgorithm]) {
+          fixContrast();
+        }
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo, theme, changeTheme, changeScoreExpanded]);
+  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo, theme, changeTheme, changeScoreExpanded, isRequesting, contrastAlgorithm, selectedThresholds, fixContrast]);
 
   const current = entries[index];
   const pair = current?.pair ?? null;
