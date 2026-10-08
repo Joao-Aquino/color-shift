@@ -3,7 +3,7 @@ export const MOTION_DEFAULTS = {
   "--theme-wipe-duration": 0.7,
   "--photo-duration": 0.2,
   "--photo-opacity": 0,
-  "--exit-duration": 0.15,
+  "--exit-duration": 0.25,
   "--enter-duration": 0.3,
 } as const;
 

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useFlipPresence } from "@/lib/use-flip-presence";
-import { useShapeMotion } from "@/lib/use-shape-motion";
+import { useClipRevealMotion } from "@/lib/use-shape-motion";
 import type {
   ContrastAlgorithm,
   ContrastScore,
@@ -113,8 +113,10 @@ export function Score({
   const shellRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Animate the shell's real height while content fades in/out
-  useShapeMotion(shellRef, contentRef, expanded && !!score);
+  // Option B: Clip-path reveal for score panel (uses same closed height calculation)
+  // The score panel header is taller, so we calculate based on button height
+  const closedHeight = 120; // Approximate height of collapsed score panel
+  useClipRevealMotion(shellRef, contentRef, expanded && !!score, closedHeight);
 
   return (
     <section
@@ -185,6 +187,7 @@ export function Score({
             scoreLabel,
           )}
           id="contrast-score-panel"
+          data-sidebar-layout
           role="tabpanel"
         >
           <button
@@ -204,6 +207,7 @@ export function Score({
                 : "pb-8",
             )}
             disabled={!score}
+            data-sidebar-layout
             onClick={() => onExpandedChange(!expanded)}
             type="button"
           >
@@ -245,6 +249,7 @@ export function Score({
               className="cs-layout-content px-6 pb-6"
               inert={!expanded ? true : undefined}
               data-open={expanded && !!score}
+              data-sidebar-layout
               style={{ display: expanded && score ? "" : "none" }}
             >
               <div

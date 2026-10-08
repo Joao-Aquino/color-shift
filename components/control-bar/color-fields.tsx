@@ -13,7 +13,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useFlipPresence } from "@/lib/use-flip-presence";
-import { useShapeMotion } from "@/lib/use-shape-motion";
+import { useClipRevealMotion } from "@/lib/use-shape-motion";
 import type { ColorFormat, ColorTarget } from "@/types/color-shift";
 
 import { Swatch } from "./swatch";
@@ -41,8 +41,8 @@ function ColorField({
   const contentRef = useRef<HTMLDivElement>(null);
   const showEditor = useFlipPresence(active);
 
-  // Animate the shell's real height while content fades in/out
-  useShapeMotion(shellRef, contentRef, active);
+  // Option B: Clip-path reveal with content at full size
+  useClipRevealMotion(shellRef, contentRef, active);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
@@ -152,9 +152,10 @@ function ColorField({
         "flex w-full flex-col overflow-hidden rounded-[24px] border transition-[background-color,border-color] ease-[var(--ease-out)]",
         active
           ? "gap-4 border-[var(--color-chrome-border)] p-2 duration-[var(--enter-duration)]"
-          : "border-transparent duration-[var(--exit-duration)] hover:border-[var(--color-chrome-border)]",
+          : "h-12 border-transparent duration-[var(--exit-duration)] hover:border-[var(--color-chrome-border)]",
       )}
       data-color-field-shell={target}
+      data-sidebar-layout
       ref={shellRef}
       style={{
         backgroundColor: active
@@ -173,6 +174,7 @@ function ColorField({
             : "h-12 py-2 pr-2 pl-4",
         )}
         data-color-field={target}
+        data-sidebar-layout
         onClick={() => onSelect(target)}
         type="button"
       >
@@ -185,7 +187,7 @@ function ColorField({
         <span className="inline-flex shrink-0"><Swatch color={color} /></span>
       </button>
 
-      {/* Editor content - keep mounted but hidden when closing */}
+      {/* Editor content - always mounted when showEditor, visible when active */}
       {showEditor ? (
         <div
           ref={contentRef}
@@ -194,6 +196,7 @@ function ColorField({
           id={active ? "color-editor" : undefined}
           inert={!active ? true : undefined}
           data-open={active}
+          data-sidebar-layout
           style={{ display: active ? "" : "none" }}
         >
           {editorContent}
