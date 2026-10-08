@@ -19,7 +19,7 @@ import {
 import { createFallbackPair, extractColorPair } from "@/lib/color/palette";
 import { fetchPhotos } from "@/lib/photos/client";
 import { useResponsiveLayoutMotion } from "@/lib/use-responsive-layout-motion";
-import { useFlipLayoutMotion } from "@/lib/use-flip-layout-motion";
+import { useRealResizeMotion } from "@/lib/use-real-resize-motion";
 import { useTheme } from "@/lib/use-theme";
 import type {
   ColorPair,
@@ -80,9 +80,9 @@ export function ColorShiftApp() {
   const importInFlight = useRef(false);
   const dragDepth = useRef(0);
   const localPhotoUrls = useRef<string[]>([]);
-  const settleSidebarLayout = useFlipLayoutMotion(layoutRef,
+  const settleSidebarLayout = useRealResizeMotion(layoutRef,
     `${activeColor ?? "closed"}:${scoreExpanded}`,
-    Number(activeColor !== null) + Number(scoreExpanded), "[data-sidebar-layout]", true);
+    Number(activeColor !== null) + Number(scoreExpanded));
   const changeScoreExpanded = useCallback((expanded: boolean) => {
     settleSidebarLayout();
     setScoreExpanded(expanded);

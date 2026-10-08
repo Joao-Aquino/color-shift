@@ -10,10 +10,10 @@ export const MOTION_DEFAULTS = {
 export type MotionProperty = keyof typeof MOTION_DEFAULTS;
 
 export const SIDEBAR_EASES = {
-  easeInOutQuart: "power3.inOut",
-  easeInOutCubic: "power2.inOut",
   easeOutQuart: "power3.out",
   easeOutExpo: "expo.out",
+  easeInOutQuart: "power3.inOut",
+  easeInOutCubic: "power2.inOut",
   linear: "none",
 } as const;
 

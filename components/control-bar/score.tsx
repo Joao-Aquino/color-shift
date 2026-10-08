@@ -177,7 +177,6 @@ export function Score({
             scoreLabel,
           )}
           id="contrast-score-panel"
-          data-sidebar-layout
           role="tabpanel"
         >
           <button
@@ -192,12 +191,12 @@ export function Score({
             }
             className={cn(
               "flex w-full items-end gap-3 px-6 pt-8 text-left focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current",
+              "transition-[padding-bottom] ease-[var(--ease-out)]",
               expanded && score
-                ? "pb-4"
-                : "pb-8",
+                ? "pb-4 duration-[var(--enter-duration)]"
+                : "pb-8 duration-[var(--exit-duration)]",
             )}
             disabled={!score}
-            data-sidebar-layout
             onClick={() => onExpandedChange(!expanded)}
             type="button"
           >
@@ -234,10 +233,10 @@ export function Score({
 
           <div
             className={cn(
-              "grid",
+              "grid transition-[grid-template-rows] ease-[var(--ease-out)]",
               expanded && score
-                ? "grid-rows-[1fr]"
-                : "grid-rows-[0fr]",
+                ? "grid-rows-[1fr] duration-[var(--enter-duration)]"
+                : "grid-rows-[0fr] duration-[var(--exit-duration)]",
             )}
             id="contrast-thresholds"
           >
@@ -248,7 +247,6 @@ export function Score({
                   className="cs-layout-content px-6 pb-6"
                   inert={!expanded ? true : undefined}
                   data-open={expanded && !!score}
-                  data-sidebar-layout
                 >
                   <div
                     aria-hidden

@@ -145,13 +145,13 @@ function ColorField({
   return (
     <div
       className={cn(
-        "flex w-full flex-col overflow-hidden rounded-[24px] border transition-[background-color,border-color] ease-[var(--ease-out)]",
+        "flex w-full flex-col overflow-hidden rounded-[24px] border ease-[var(--ease-out)]",
+        "transition-[background-color,border-color,gap,padding]",
         active
           ? "gap-4 border-[var(--color-chrome-border)] p-2 duration-[var(--enter-duration)]"
           : "border-transparent duration-[var(--exit-duration)] hover:border-[var(--color-chrome-border)]",
       )}
       data-color-field-shell={target}
-      data-sidebar-layout
       ref={shellRef}
       style={
         {
@@ -166,12 +166,12 @@ function ColorField({
         aria-expanded={active}
         className={cn(
           "flex w-full items-center gap-2 text-left focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none",
+          "transition-[height,padding] ease-[var(--ease-out)]",
           active
-            ? "h-8 pl-2"
-            : "h-12 py-2 pr-2 pl-4",
+            ? "h-8 pl-2 duration-[var(--enter-duration)]"
+            : "h-12 py-2 pr-2 pl-4 duration-[var(--exit-duration)]",
         )}
         data-color-field={target}
-        data-sidebar-layout
         onClick={() => onSelect(target)}
         type="button"
       >
@@ -186,10 +186,10 @@ function ColorField({
 
       <div
         className={cn(
-          "grid",
+          "grid transition-[grid-template-rows] ease-[var(--ease-out)]",
           active
-            ? "grid-rows-[1fr]"
-            : "grid-rows-[0fr]",
+            ? "grid-rows-[1fr] duration-[var(--enter-duration)]"
+            : "grid-rows-[0fr] duration-[var(--exit-duration)]",
         )}
       >
         <div className="cs-layout-clip min-h-0 overflow-hidden">
@@ -200,7 +200,6 @@ function ColorField({
               id={active ? "color-editor" : undefined}
               inert={!active ? true : undefined}
               data-open={active}
-              data-sidebar-layout
               ref={contentRef}
             >
               {editorContent}

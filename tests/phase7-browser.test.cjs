@@ -48,25 +48,32 @@ fs.mkdirSync(output, { recursive: true });
       });
     }
     await reset();
-    async function assertSidebarScale(action) {
+    async function assertSidebarNoDistortion(action) {
       await page.evaluate(() => {
-        window.fieldScaleSamples = [];
+        window.distortionSamples = [];
         const start = performance.now();
         function sample() {
+          // Check scale transforms on all sidebar elements
           document.querySelectorAll('[data-color-field-shell] *, [data-color-field-shell], #contrast-score-panel, #contrast-score-panel > button').forEach(node => {
             if (!node.getClientRects().length) return;
             const matrix = new DOMMatrix(getComputedStyle(node).transform);
-            window.fieldScaleSamples.push({ x: matrix.a, y: matrix.d });
+            window.distortionSamples.push({ 
+              tag: node.tagName,
+              scaleX: matrix.a, 
+              scaleY: matrix.d 
+            });
           });
-          if (performance.now() - start < 300) requestAnimationFrame(sample);
+          if (performance.now() - start < 350) requestAnimationFrame(sample);
         }
         requestAnimationFrame(sample);
       });
       await action();
-      await page.waitForTimeout(320);
-      const samples = await page.evaluate(() => window.fieldScaleSamples);
+      await page.waitForTimeout(380);
+      const samples = await page.evaluate(() => window.distortionSamples);
       assert.ok(samples.length > 0);
-      assert.ok(samples.some(scale => Math.abs(scale.y - 1) > 0.01), 'Sidebar layout should animate through scale');
+      // Variant A: real resize should never scale (all scales should be 1 or none)
+      const scaledElements = samples.filter(s => Math.abs(s.scaleX - 1) > 0.01 || Math.abs(s.scaleY - 1) > 0.01);
+      assert.equal(scaledElements.length, 0, `Elements should not be scaled during animation, found ${scaledElements.length} scaled elements: ${JSON.stringify(scaledElements.slice(0, 3))}`);
       assert.equal(await page.locator('[data-layout-moving]').count(), 0);
       assert.equal(await page.locator('[data-motion-ghost]').count(), 0);
     }
@@ -133,11 +140,11 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await page.locator('[data-photo-placeholder]').evaluate(node => getComputedStyle(node).imageRendering), 'pixelated');
     console.log('PASS photo crossfade preserves the previous blend, uses a pixelated placeholder and cleans up interrupted layers');
 
-    await assertSidebarScale(() => page.locator('[data-color-field="background"]').click());
-    await assertSidebarScale(() => page.locator('[data-color-field="foreground"]').click());
-    await assertSidebarScale(() => page.keyboard.press('Escape'));
-    await assertSidebarScale(() => page.locator('[data-color-field="background"]').click());
-    console.log('PASS ColorField scale opens, switches and closes with complete cleanup');
+    await assertSidebarNoDistortion(() => page.locator('[data-color-field="background"]').click());
+    await assertSidebarNoDistortion(() => page.locator('[data-color-field="foreground"]').click());
+    await assertSidebarNoDistortion(() => page.keyboard.press('Escape'));
+    await assertSidebarNoDistortion(() => page.locator('[data-color-field="background"]').click());
+    console.log('PASS ColorField real resize opens, switches and closes with no distortion and complete cleanup');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(250);
     await page.locator('[data-color-field="background"]').click();
@@ -149,9 +156,9 @@ fs.mkdirSync(output, { recursive: true });
     }));
     assert.ok(Math.abs(settled.height - settled.finalHeight) < 1, JSON.stringify(settled));
     assert.equal(settled.transform, 'none');
-    console.log('PASS ColorField scale restores natural editor geometry');
+    console.log('PASS ColorField real resize restores natural editor geometry');
     const slider = page.locator('[data-color-slider]').first();
-    await assertSidebarScale(() => page.locator('#contrast-score-panel > button').click());
+    await assertSidebarNoDistortion(() => page.locator('#contrast-score-panel > button').click());
     await page.waitForTimeout(250);
     await page.getByRole('button', { name: 'Set WCAG contrast to 1.5', exact: true }).click();
     await page.waitForTimeout(60);
