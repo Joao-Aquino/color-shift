@@ -48,25 +48,38 @@ fs.mkdirSync(output, { recursive: true });
       });
     }
     await reset();
-    async function assertSidebarScale(action) {
+    async function assertShapeScale(action) {
       await page.evaluate(() => {
-        window.fieldScaleSamples = [];
+        window.shapeScaleSamples = [];
+        window.contentScaleSamples = [];
         const start = performance.now();
         function sample() {
-          document.querySelectorAll('[data-color-field-shell] *, [data-color-field-shell], #contrast-score-panel, #contrast-score-panel > button').forEach(node => {
-            if (!node.getClientRects().length) return;
-            const matrix = new DOMMatrix(getComputedStyle(node).transform);
-            window.fieldScaleSamples.push({ x: matrix.a, y: matrix.d });
+          // Check the background shape (should scale)
+          document.querySelectorAll('[data-color-field-shell] > div:first-child, #contrast-score-panel > div:first-child').forEach(bg => {
+            if (!bg.getClientRects().length) return;
+            const matrix = new DOMMatrix(getComputedStyle(bg).transform);
+            window.shapeScaleSamples.push({ x: matrix.a, y: matrix.d });
           });
+          
+          // Check actual content elements (should NOT scale)
+          document.querySelectorAll('[data-color-field-shell] button, #contrast-score-panel button, [data-color-editor]').forEach(content => {
+            if (!content.getClientRects().length) return;
+            const matrix = new DOMMatrix(getComputedStyle(content).transform);
+            window.contentScaleSamples.push({ x: matrix.a, y: matrix.d });
+          });
+          
           if (performance.now() - start < 300) requestAnimationFrame(sample);
         }
         requestAnimationFrame(sample);
       });
       await action();
       await page.waitForTimeout(320);
-      const samples = await page.evaluate(() => window.fieldScaleSamples);
-      assert.ok(samples.length > 0);
-      assert.ok(samples.some(scale => Math.abs(scale.y - 1) > 0.01), 'Sidebar layout should animate through scale');
+      const shapeSamples = await page.evaluate(() => window.shapeScaleSamples);
+      const contentSamples = await page.evaluate(() => window.contentScaleSamples);
+      assert.ok(shapeSamples.length > 0, 'Should sample background shape');
+      assert.ok(contentSamples.length > 0, 'Should sample content');
+      assert.ok(shapeSamples.some(scale => Math.abs(scale.y - 1) > 0.01), 'Background shape should animate through scale');
+      assert.ok(contentSamples.every(scale => Math.abs(scale.y - 1) < 0.01), 'Content should never be scaled (prevents distortion)');
       assert.equal(await page.locator('[data-layout-moving]').count(), 0);
       assert.equal(await page.locator('[data-motion-ghost]').count(), 0);
     }
@@ -133,11 +146,11 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await page.locator('[data-photo-placeholder]').evaluate(node => getComputedStyle(node).imageRendering), 'pixelated');
     console.log('PASS photo crossfade preserves the previous blend, uses a pixelated placeholder and cleans up interrupted layers');
 
-    await assertSidebarScale(() => page.locator('[data-color-field="background"]').click());
-    await assertSidebarScale(() => page.locator('[data-color-field="foreground"]').click());
-    await assertSidebarScale(() => page.keyboard.press('Escape'));
-    await assertSidebarScale(() => page.locator('[data-color-field="background"]').click());
-    console.log('PASS ColorField scale opens, switches and closes with complete cleanup');
+    await assertShapeScale(() => page.locator('[data-color-field="background"]').click());
+    await assertShapeScale(() => page.locator('[data-color-field="foreground"]').click());
+    await assertShapeScale(() => page.keyboard.press('Escape'));
+    await assertShapeScale(() => page.locator('[data-color-field="background"]').click());
+    console.log('PASS ColorField scaled background opens, switches and closes with no content distortion and complete cleanup');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(250);
     await page.locator('[data-color-field="background"]').click();
@@ -149,9 +162,9 @@ fs.mkdirSync(output, { recursive: true });
     }));
     assert.ok(Math.abs(settled.height - settled.finalHeight) < 1, JSON.stringify(settled));
     assert.equal(settled.transform, 'none');
-    console.log('PASS ColorField scale restores natural editor geometry');
+    console.log('PASS ColorField scaled background restores natural editor geometry');
     const slider = page.locator('[data-color-slider]').first();
-    await assertSidebarScale(() => page.locator('#contrast-score-panel > button').click());
+    await assertShapeScale(() => page.locator('#contrast-score-panel > button').click());
     await page.waitForTimeout(250);
     await page.getByRole('button', { name: 'Set WCAG contrast to 1.5', exact: true }).click();
     await page.waitForTimeout(60);

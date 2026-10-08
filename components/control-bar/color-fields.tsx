@@ -13,6 +13,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useFlipPresence } from "@/lib/use-flip-presence";
+import { useShapeMotion } from "@/lib/use-shape-motion";
 import type { ColorFormat, ColorTarget } from "@/types/color-shift";
 
 import { Swatch } from "./swatch";
@@ -37,8 +38,13 @@ function ColorField({
 }: ColorFieldProps) {
   const [cachedEditor, setCachedEditor] = useState(editor);
   const shellRef = useRef<HTMLDivElement>(null);
+  const backgroundRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLButtonElement>(null);
   const showEditor = useFlipPresence(active);
+
+  // Animate the background shape while keeping content at full size
+  useShapeMotion(shellRef, backgroundRef, contentRef, headerRef, active);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
@@ -145,68 +151,74 @@ function ColorField({
   return (
     <div
       className={cn(
-        "flex w-full flex-col overflow-hidden rounded-[24px] border transition-[background-color,border-color] ease-[var(--ease-out)]",
+        "relative w-full overflow-hidden rounded-[24px] transition-[background-color,border-color] ease-[var(--ease-out)]",
         active
-          ? "gap-4 border-[var(--color-chrome-border)] p-2 duration-[var(--enter-duration)]"
-          : "border-transparent duration-[var(--exit-duration)] hover:border-[var(--color-chrome-border)]",
+          ? "duration-[var(--enter-duration)]"
+          : "duration-[var(--exit-duration)]",
       )}
       data-color-field-shell={target}
-      data-sidebar-layout
       ref={shellRef}
-      style={
-        {
+    >
+      {/* Background shape - this layer gets scaled */}
+      <div
+        ref={backgroundRef}
+        className={cn(
+          "absolute inset-0 rounded-[24px] border transition-[background-color,border-color] ease-[var(--ease-out)]",
+          active
+            ? "border-[var(--color-chrome-border)] duration-[var(--enter-duration)]"
+            : "border-transparent duration-[var(--exit-duration)] group-hover:border-[var(--color-chrome-border)]",
+        )}
+        style={{
           backgroundColor: active
             ? "var(--color-chrome-bg)"
             : `color-mix(in srgb, ${color} var(--color-field-tint), transparent)`,
-        }
-      }
-    >
-      <button
-        aria-controls="color-editor"
-        aria-expanded={active}
-        className={cn(
-          "flex w-full items-center gap-2 text-left focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none",
-          active
-            ? "h-8 pl-2"
-            : "h-12 py-2 pr-2 pl-4",
-        )}
-        data-color-field={target}
-        data-sidebar-layout
-        onClick={() => onSelect(target)}
-        type="button"
-      >
-        <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-muted)] uppercase">
-          {label}
-        </span>
-        <span className="min-w-0 flex-1 text-right">
-          <TubeText className="text-sm text-[var(--color-text-value)] tabular-nums">{color}</TubeText>
-        </span>
-        <span className="inline-flex shrink-0"><Swatch color={color} /></span>
-      </button>
+        }}
+        aria-hidden="true"
+      />
 
-      <div
-        className={cn(
-          "grid",
-          active
-            ? "grid-rows-[1fr]"
-            : "grid-rows-[0fr]",
-        )}
-      >
-        <div className="cs-layout-clip min-h-0 overflow-hidden">
-          {showEditor ? (
+      {/* Content - stays at full size, never scaled */}
+      <div className="relative flex flex-col group">
+        {/* Header button */}
+        <button
+          ref={headerRef}
+          aria-controls="color-editor"
+          aria-expanded={active}
+          className={cn(
+            "flex w-full items-center gap-2 text-left focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none",
+            active
+              ? "h-8 pl-2 pt-2 pr-2"
+              : "h-12 py-2 pr-2 pl-4",
+          )}
+          data-color-field={target}
+          onClick={() => onSelect(target)}
+          type="button"
+        >
+          <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-muted)] uppercase">
+            {label}
+          </span>
+          <span className="min-w-0 flex-1 text-right">
+            <TubeText className="text-sm text-[var(--color-text-value)] tabular-nums">{color}</TubeText>
+          </span>
+          <span className="inline-flex shrink-0"><Swatch color={color} /></span>
+        </button>
+
+        {/* Editor content */}
+        {showEditor && active ? (
+          <div
+            ref={contentRef}
+            className="px-2 pb-2 pt-4"
+          >
             <div
               aria-hidden={!active}
               className="cs-layout-content"
               id={active ? "color-editor" : undefined}
               inert={!active ? true : undefined}
               data-open={active}
-              data-sidebar-layout
-              ref={contentRef}
             >
               {editorContent}
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

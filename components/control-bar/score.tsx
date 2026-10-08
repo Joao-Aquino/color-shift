@@ -1,7 +1,7 @@
 "use client";
 
 import { InfoIcon } from "@phosphor-icons/react/Info";
-import { type CSSProperties } from "react";
+import { type CSSProperties, useRef } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useFlipPresence } from "@/lib/use-flip-presence";
+import { useShapeMotion } from "@/lib/use-shape-motion";
 import type {
   ContrastAlgorithm,
   ContrastScore,
@@ -109,6 +110,14 @@ export function Score({
   const showThresholds = useFlipPresence(expanded && !!score);
   const toneStyle = score ? gradeToneVars[score.grade] : undefined;
 
+  const shellRef = useRef<HTMLDivElement>(null);
+  const backgroundRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLButtonElement>(null);
+
+  // Animate the background shape while keeping content at full size
+  useShapeMotion(shellRef, backgroundRef, contentRef, headerRef, expanded && !!score);
+
   return (
     <section
       aria-label="Contrast score"
@@ -169,86 +178,91 @@ export function Score({
         </div>
 
         <div
+          ref={shellRef}
           aria-labelledby={`contrast-tab-${algorithm.toLowerCase()}`}
           className={cn(
-            "overflow-hidden rounded-b-[16px] transition-colors duration-300",
+            "relative overflow-hidden rounded-b-[16px] transition-colors duration-300",
             algorithm === "WCAG" ? "rounded-tr-[8px]" : "rounded-tl-[8px]",
-            scoreBackground,
-            scoreLabel,
           )}
           id="contrast-score-panel"
-          data-sidebar-layout
           role="tabpanel"
         >
-          <button
-            aria-controls="contrast-thresholds"
-            aria-expanded={expanded}
-            aria-label={
-              score
-                ? algorithm === "APCA"
-                  ? `Lc ${score.value.toFixed(1)}, ${score.grade}`
-                  : `${score.value.toFixed(2)} to 1, ${score.grade}`
-                : undefined
-            }
-            className={cn(
-              "flex w-full items-end gap-3 px-6 pt-8 text-left focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current",
-              expanded && score
-                ? "pb-4"
-                : "pb-8",
-            )}
-            disabled={!score}
-            data-sidebar-layout
-            onClick={() => onExpandedChange(!expanded)}
-            type="button"
-          >
-            {score ? (
-              algorithm === "APCA" ? (
-                <>
-                  <span className="min-w-0 flex-1 text-[11px] leading-[11px] font-medium">
-                    L<sup className="text-[7.1px]">C</sup>
-                  </span>
-                  <span className="flex min-w-0 flex-1 justify-end">
-                    <Odometer
-                      className="text-[56px] leading-none tracking-[-2.24px] text-[var(--color-text-value)] [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]"
-                      value={score.value.toFixed(1)}
-                    />
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="flex min-w-0 flex-1">
-                    <Odometer
-                      className="text-[56px] leading-none tracking-[-2.24px] text-[var(--color-text-value)] [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]"
-                      value={score.value.toFixed(2)}
-                    />
-                  </span>
-                  <span className="shrink-0 text-[11px] leading-[11px] font-medium whitespace-nowrap">
-                    {score.grade}
-                  </span>
-                </>
-              )
-            ) : (
-              <Skeleton className="h-14 w-full bg-white/8" />
-            )}
-          </button>
-
+          {/* Background shape - this layer gets scaled */}
           <div
+            ref={backgroundRef}
             className={cn(
-              "grid",
-              expanded && score
-                ? "grid-rows-[1fr]"
-                : "grid-rows-[0fr]",
+              "absolute inset-0 rounded-b-[16px] transition-colors duration-300",
+              algorithm === "WCAG" ? "rounded-tr-[8px]" : "rounded-tl-[8px]",
+              scoreBackground,
+              scoreLabel,
             )}
-            id="contrast-thresholds"
-          >
-            <div className="cs-layout-clip min-h-0 overflow-hidden">
-              {showThresholds ? (
+            aria-hidden="true"
+          />
+
+          {/* Content - stays at full size, never scaled */}
+          <div className="relative">
+            <button
+              ref={headerRef}
+              aria-controls="contrast-thresholds"
+              aria-expanded={expanded}
+              aria-label={
+                score
+                  ? algorithm === "APCA"
+                    ? `Lc ${score.value.toFixed(1)}, ${score.grade}`
+                    : `${score.value.toFixed(2)} to 1, ${score.grade}`
+                  : undefined
+              }
+              className={cn(
+                "flex w-full items-end gap-3 px-6 pt-8 text-left focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current",
+                expanded && score
+                  ? "pb-4"
+                  : "pb-8",
+              )}
+              disabled={!score}
+              onClick={() => onExpandedChange(!expanded)}
+              type="button"
+            >
+              {score ? (
+                algorithm === "APCA" ? (
+                  <>
+                    <span className="min-w-0 flex-1 text-[11px] leading-[11px] font-medium">
+                      L<sup className="text-[7.1px]">C</sup>
+                    </span>
+                    <span className="flex min-w-0 flex-1 justify-end">
+                      <Odometer
+                        className="text-[56px] leading-none tracking-[-2.24px] text-[var(--color-text-value)] [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]"
+                        value={score.value.toFixed(1)}
+                      />
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="flex min-w-0 flex-1">
+                      <Odometer
+                        className="text-[56px] leading-none tracking-[-2.24px] text-[var(--color-text-value)] [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]"
+                        value={score.value.toFixed(2)}
+                      />
+                    </span>
+                    <span className="shrink-0 text-[11px] leading-[11px] font-medium whitespace-nowrap">
+                      {score.grade}
+                    </span>
+                  </>
+                )
+              ) : (
+                <Skeleton className="h-14 w-full bg-white/8" />
+              )}
+            </button>
+
+            {showThresholds && expanded && score ? (
+              <div
+                ref={contentRef}
+                className="pb-6 px-6"
+              >
                 <div
                   aria-hidden={!expanded}
-                  className="cs-layout-content px-6 pb-6"
+                  className="cs-layout-content"
                   inert={!expanded ? true : undefined}
                   data-open={expanded && !!score}
-                  data-sidebar-layout
                 >
                   <div
                     aria-hidden
@@ -264,8 +278,8 @@ export function Score({
                     />
                   </div>
                 </div>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
