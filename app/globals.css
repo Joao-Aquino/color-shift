@@ -46,9 +46,9 @@
   --theme-wipe-duration: 700ms;
   --photo-duration: 0.2s;
   --photo-opacity: 0;
-  --exit-duration: 0.15s;
-  --enter-duration: 0.2s;
-  --sidebar-easing: easeInOutQuart;
+  --exit-duration: 0.25s;
+  --enter-duration: 0.3s;
+  --sidebar-easing: easeOutQuart;
 
   --background: var(--color-chrome-bg);
   --foreground: var(--color-text-value);
@@ -186,6 +186,8 @@
 :root[data-theme="light"] .cs-tooltip-arrow-dark { display: none; }
 :root[data-theme="light"] .cs-tooltip-arrow-light { display: block; }
 .cs-controls { grid-area: controls; display: flex; min-width: 0; flex-direction: column; gap: 16px; }
+[data-color-field-shell]:has([data-color-field]:focus-visible) { box-shadow: 0 0 0 2px var(--color-focus) inset; }
+[data-motion-ghost], [data-motion-ghost] * { animation: none !important; }
 .cs-preview { grid-area: preview; position: relative; min-width: 0; }
 .cs-preview-panels { display: grid; grid-template-columns: 167fr 183fr; gap: 4px; height: 240px; overflow: hidden; border-radius: 8px; }
 .cs-specimen-surface { --specimen-font-size: 48px; transition: background-color var(--color-duration) ease, color var(--color-duration) ease; }

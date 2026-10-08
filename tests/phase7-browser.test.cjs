@@ -16,22 +16,22 @@ fs.mkdirSync(output, { recursive: true });
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     let sequence = 0;
-    await page.route('**/api/photos?*', async route => {
-      const count = Number(new URL(route.request().url()).searchParams.get('count') || 10);
-      const photos = Array.from({ length: count }, () => {
-        const id = sequence++;
-        return { id: `motion-${id}`, url: `/motion-full-${id}.jpg`, tinyUrl: `/motion-tiny-${id}.jpg`,
-          thumbUrl: '/figma/photo.jpg', color: '#f7b955', width: 1200, height: 900,
-          alt: `Motion photo ${id}`, photographer: 'Mara Vale',
-          photographerUrl: 'https://unsplash.com/@test', photoUrl: 'https://unsplash.com/photos/test' };
-      });
-      await route.fulfill({ json: { photos } });
+  await page.route('**/api/photos?*', async route => {
+    const count = Number(new URL(route.request().url()).searchParams.get('count') || 10);
+    const photos = Array.from({ length: count }, () => {
+      const id = sequence++;
+      return { id: `motion-${id}`, url: `/motion-full-${id}.jpg`, tinyUrl: `/motion-tiny-${id}.jpg`,
+        thumbUrl: '/figma/photo.jpg', color: '#f7b955', width: 1200, height: 900,
+        alt: `Motion photo ${id}`, photographer: 'Mara Vale',
+        photographerUrl: 'https://unsplash.com/@test', photoUrl: 'https://unsplash.com/photos/test' };
     });
-    await page.route('**/motion-tiny-*.jpg', async route => {
-      await new Promise(resolve => setTimeout(resolve, 50));
-      await route.fulfill({ path: bitmap });
-    });
-    await page.route('**/motion-full-*.jpg', route => route.fulfill({ path: bitmap }));
+    await route.fulfill({ json: { photos } });
+  });
+  await page.route('**/motion-tiny-*.jpg', async route => {
+    await new Promise(resolve => setTimeout(resolve, 50));
+    await route.fulfill({ path: bitmap });
+  });
+  await page.route('**/motion-full-*.jpg', route => route.fulfill({ path: bitmap }));
     // Preserve a visible placeholder while the full image is delayed.
     await page.route('**/_next/image?*', async route => {
       await new Promise(resolve => setTimeout(resolve, 320));
@@ -48,15 +48,24 @@ fs.mkdirSync(output, { recursive: true });
       });
     }
     await reset();
-    async function assertSidebarScale(action) {
+    async function assertSidebarResize(action) {
       await page.evaluate(() => {
-        window.fieldScaleSamples = [];
+        window.fieldDimensionSamples = [];
         const start = performance.now();
         function sample() {
-          document.querySelectorAll('[data-color-field-shell] *, [data-color-field-shell], #contrast-score-panel, #contrast-score-panel > button').forEach(node => {
+          document.querySelectorAll('[data-color-field-shell], #contrast-score-panel').forEach(node => {
             if (!node.getClientRects().length) return;
-            const matrix = new DOMMatrix(getComputedStyle(node).transform);
-            window.fieldScaleSamples.push({ x: matrix.a, y: matrix.d });
+            const rect = node.getBoundingClientRect();
+            const computed = getComputedStyle(node);
+            const matrix = new DOMMatrix(computed.transform);
+            const borderRadius = parseFloat(computed.borderRadius) || 0;
+            window.fieldDimensionSamples.push({ 
+              height: rect.height,
+              scaleX: matrix.a, 
+              scaleY: matrix.d,
+              borderRadius,
+              tag: node.tagName,
+            });
           });
           if (performance.now() - start < 300) requestAnimationFrame(sample);
         }
@@ -64,9 +73,14 @@ fs.mkdirSync(output, { recursive: true });
       });
       await action();
       await page.waitForTimeout(320);
-      const samples = await page.evaluate(() => window.fieldScaleSamples);
-      assert.ok(samples.length > 0);
-      assert.ok(samples.some(scale => Math.abs(scale.y - 1) > 0.01), 'Sidebar layout should animate through scale');
+      const samples = await page.evaluate(() => window.fieldDimensionSamples);
+      assert.ok(samples.length > 0, 'Should capture dimension samples during animation');
+      assert.ok(samples.some(s => s.height > 48 && s.height < 200), 'Should animate through intermediate heights');
+      assert.ok(samples.every(s => Math.abs(s.scaleX - 1) < 0.01 && Math.abs(s.scaleY - 1) < 0.01), 
+        'No scale transform distortion: all elements should maintain scale 1,1 throughout');
+      const radiusSamples = samples.filter(s => s.borderRadius > 0);
+      assert.ok(radiusSamples.every(s => Math.abs(s.borderRadius - 24) < 1), 
+        'Border radius should remain 24px (not distorted by scale)');
       assert.equal(await page.locator('[data-layout-moving]').count(), 0);
       assert.equal(await page.locator('[data-motion-ghost]').count(), 0);
     }
@@ -133,11 +147,11 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await page.locator('[data-photo-placeholder]').evaluate(node => getComputedStyle(node).imageRendering), 'pixelated');
     console.log('PASS photo crossfade preserves the previous blend, uses a pixelated placeholder and cleans up interrupted layers');
 
-    await assertSidebarScale(() => page.locator('[data-color-field="background"]').click());
-    await assertSidebarScale(() => page.locator('[data-color-field="foreground"]').click());
-    await assertSidebarScale(() => page.keyboard.press('Escape'));
-    await assertSidebarScale(() => page.locator('[data-color-field="background"]').click());
-    console.log('PASS ColorField scale opens, switches and closes with complete cleanup');
+    await assertSidebarResize(() => page.locator('[data-color-field="background"]').click());
+    await assertSidebarResize(() => page.locator('[data-color-field="foreground"]').click());
+    await assertSidebarResize(() => page.keyboard.press('Escape'));
+    await assertSidebarResize(() => page.locator('[data-color-field="background"]').click());
+    console.log('PASS ColorField real resize opens, switches and closes with no distortion');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(250);
     await page.locator('[data-color-field="background"]').click();
@@ -149,9 +163,9 @@ fs.mkdirSync(output, { recursive: true });
     }));
     assert.ok(Math.abs(settled.height - settled.finalHeight) < 1, JSON.stringify(settled));
     assert.equal(settled.transform, 'none');
-    console.log('PASS ColorField scale restores natural editor geometry');
+    console.log('PASS ColorField real resize restores natural editor geometry');
     const slider = page.locator('[data-color-slider]').first();
-    await assertSidebarScale(() => page.locator('#contrast-score-panel > button').click());
+    await assertSidebarResize(() => page.locator('#contrast-score-panel > button').click());
     await page.waitForTimeout(250);
     await page.getByRole('button', { name: 'Set WCAG contrast to 1.5', exact: true }).click();
     await page.waitForTimeout(60);

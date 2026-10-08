@@ -165,7 +165,7 @@ function ColorField({
         aria-controls="color-editor"
         aria-expanded={active}
         className={cn(
-          "flex w-full items-center gap-2 text-left focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none",
+          "flex w-full items-center gap-2 text-left outline-none focus-visible:outline-none transition-none",
           active
             ? "h-8 pl-2"
             : "h-12 py-2 pr-2 pl-4",
