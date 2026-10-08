@@ -27,7 +27,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await page.waitForSelector('[data-color-field]');
     assert.equal(await page.locator('[data-responsive-motion="photo"] button').count(), 3);
     assert.equal(await page.getByRole('button', {name:'Load a new Unsplash photo'}).count(), 0);
-    await page.locator('[data-responsive-motion="photo"] img').evaluate(img => img.decode());
+    await page.locator('[data-photo-layer][data-current="true"] [data-photo-full]').evaluate(img => img.decode());
     await page.waitForTimeout(350);
     console.log('PASS loads and renders a real bitmap with deterministic photo API');
     await page.screenshot({path: '/tmp/color-shift-mobile-dark.png', fullPage: true});
@@ -65,7 +65,15 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     console.log('PASS compact intrinsic theme pills with 4px vertical padding and mobile progressive backdrop');
 
     await page.setViewportSize({width:1440,height:980});
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => {
+      const sizeMatches = innerWidth === 1440 && [...document.querySelectorAll('.cs-panel-actions [data-action]')].every(node => {
+        const bounds = node.getBoundingClientRect();
+        return Math.abs(bounds.width - 48) < 0.01 && Math.abs(bounds.height - 48) < 0.01;
+      });
+      const moving = [...document.querySelectorAll('[data-responsive-motion]')].some(node => node.style.transform);
+      window.phase5LayoutStableCount = sizeMatches && !moving ? (window.phase5LayoutStableCount || 0) + 1 : 0;
+      return window.phase5LayoutStableCount >= 3;
+    }, null, { polling: 'raf' });
     const desktopActions = await page.evaluate(() => {
       const specimen = document.querySelector('.cs-specimen-panel').getBoundingClientRect();
       const photo = document.querySelector('[data-responsive-motion="photo"]').getBoundingClientRect();
@@ -121,6 +129,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     assert.equal(await page.locator('[data-color-field="foreground"]').getAttribute('aria-expanded'), 'false');
 
     await page.getByRole('button', {name: 'Light', exact: true}).click();
+    await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
     assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
     assert.equal(await page.evaluate(() => localStorage.getItem('color-shift-theme')), 'light');
     await page.reload({waitUntil: 'domcontentloaded'});
@@ -209,7 +218,9 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
       const label=await page.locator('#contrast-score-panel > button').getAttribute('aria-label');
       assert.ok(label.endsWith(grade),label);
       await page.getByRole('button',{name:'Dark',exact:true}).click();
+      await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
       await page.getByRole('button',{name:'Light',exact:true}).click();
+      await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
     }
     await page.getByRole('tab',{name:'APCA'}).click();
     assert.ok((await page.locator('#contrast-score-panel > button').getAttribute('aria-label')).startsWith('Lc'));
@@ -236,6 +247,9 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     console.log('PASS action focus persists across mobile and desktop breakpoints');
 
     await page.setViewportSize({width:320,height:320});
+    // Resize/matchMedia schedule the breakpoint Flip on the next frame.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    await page.waitForFunction(() => [...document.querySelectorAll('[data-responsive-motion]')].every(node => !node.style.transform));
     await page.evaluate(() => window.scrollBy(0,120));
     const shortBounds=await page.locator('.cs-panel-actions [data-action="next"]').boundingBox();
     const shortFooter=await page.locator('[data-control-footer]').boundingBox();
@@ -249,6 +263,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await page.locator('[data-export-button]').click();
     await page.waitForSelector('#export-actions');
     await page.getByRole('button',{name:'Light',exact:true}).click();
+    await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
     assert.deepEqual(await fields(), beforeTheme);
     assert.ok(await page.locator('#export-actions').isVisible());
     const downloadEvent = page.waitForEvent('download');
@@ -258,14 +273,23 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await page.waitForSelector('[data-export-button]');
     console.log('PASS theme changes during export and real Markdown download');
 
-    await page.getByRole('button',{name:'Show circle specimen',exact:true}).click();
+    const specimenText = page.getByRole('textbox', { name: 'Specimen text' });
+    await specimenText.fill('A long specimen with multiple lines\n' + 'color '.repeat(14));
+    await specimenText.press('Escape');
     for (const width of [320,402,640,1180,1360]) {
       await page.setViewportSize({width,height:874});
       await page.waitForTimeout(300);
-      const circle = await page.locator('[data-responsive-circle-shape] > span').boundingBox();
-      assert.ok(circle.width > 0 && Math.abs(circle.width-circle.height) < 1,JSON.stringify(circle));
+      const fitting = await specimenText.evaluate(node => ({
+        width: node.clientWidth, height: node.clientHeight,
+        contentWidth: node.scrollWidth, contentHeight: node.scrollHeight,
+        panel: node.closest('[data-responsive-motion="specimen"]').clientHeight,
+      }));
+      assert.ok(fitting.width > 0 && fitting.height > 0 && fitting.height < fitting.panel * 0.7, JSON.stringify(fitting));
+      assert.ok(fitting.contentWidth <= fitting.width + 2 && fitting.contentHeight <= fitting.height + 2, JSON.stringify(fitting));
     }
-    console.log('PASS round, nonzero circle across mobile/tablet/desktop');
+    await specimenText.fill('Aa');
+    await specimenText.press('Escape');
+    console.log('PASS inline specimen text fits across mobile/tablet/desktop');
 
     await page.setViewportSize({width:320,height:500});
     await edit('background','#FFFFFF');
@@ -307,6 +331,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await blockedPage.route('**/api/photos?*',mockPhotos);
     await blockedPage.goto(baseURL,{waitUntil:'domcontentloaded'});
     await blockedPage.getByRole('button',{name:'Light',exact:true}).click();
+    await blockedPage.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
     assert.equal(await blockedPage.locator('html').getAttribute('data-theme'),'light');
     await blockedContext.close();
     console.log('PASS theme switching with blocked browser storage');
@@ -326,7 +351,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await retryPage.goto(baseURL,{waitUntil:'domcontentloaded'});
     await retryPage.getByRole('button',{name:'Retry'}).click();
     await retryPage.waitForSelector('[data-color-field]');
-    assert.equal(await retryPage.locator('[data-responsive-motion="photo"] img').count(),1);
+    assert.equal(await retryPage.locator('[data-photo-layer][data-current="true"] [data-photo-full]').count(),1);
     assert.equal(await retryPage.locator('.cs-credit').count(),1);
     assert.ok(await retryPage.locator('[data-action="shuffle"]').isEnabled());
     await retryPage.waitForFunction(()=>!document.querySelector('[data-action="next"]').disabled);
@@ -344,6 +369,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
       for (const theme of ['Dark', 'Light']) {
         await revealPage.goto(baseURL, {waitUntil:'domcontentloaded'});
         await revealPage.getByRole('button', {name:theme,exact:true}).tap();
+        await revealPage.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
         await revealPage.waitForSelector('[data-color-field]');
         await revealPage.evaluate(() => window.scrollTo(0,0));
         for (const target of ['background', 'foreground']) {

@@ -7,6 +7,10 @@
 :root {
   --color-chrome-bg: #0a0a0a;
   --color-chrome-raised: #1a1a1a;
+  --color-action-hover: #292929;
+  --color-export-bg: #1a1a1a;
+  --color-export-border: #2e2e2e;
+  --color-export-text: #ededed;
   --color-chrome-divider: #1f1f1f;
   --color-chrome-border: #2e2e2e;
   --color-chrome-border-strong: #4a4a4a;
@@ -38,6 +42,13 @@
   --color-score-meh-text: #fef3dc;
   --color-score-bad-text: #feecee;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --color-duration: 0.2s;
+  --theme-wipe-duration: 700ms;
+  --photo-duration: 0.2s;
+  --photo-opacity: 0;
+  --exit-duration: 0.15s;
+  --enter-duration: 0.2s;
+  --sidebar-easing: easeInOutQuart;
 
   --background: var(--color-chrome-bg);
   --foreground: var(--color-text-value);
@@ -63,6 +74,7 @@
 :root[data-theme="light"] {
   --color-chrome-bg: #ffffff;
   --color-chrome-raised: #f2f2f2;
+  --color-action-hover: #e5e5e5;
   --color-chrome-divider: #ebebeb;
   --color-chrome-border: #ebebeb;
   --color-chrome-border-strong: #c9c9c9;
@@ -176,14 +188,14 @@
 .cs-controls { grid-area: controls; display: flex; min-width: 0; flex-direction: column; gap: 16px; }
 .cs-preview { grid-area: preview; position: relative; min-width: 0; }
 .cs-preview-panels { display: grid; grid-template-columns: 167fr 183fr; gap: 4px; height: 240px; overflow: hidden; border-radius: 8px; }
-.cs-specimen-type { max-width: 88%; max-height: 70%; overflow: hidden; font-size: 48px; line-height: .84; font-weight: 400; text-align: center; white-space: pre-wrap; overflow-wrap: anywhere; }
-.cs-specimen-type[data-custom-text="true"] { font-size: clamp(24px, 8vw, 48px); line-height: 1.05; }
-.cs-specimen-edit { position: absolute; z-index: 10; top: 8px; right: 8px; border: 1px solid currentColor; border-radius: 9999px; padding: 6px 10px; background: rgb(0 0 0 / .8); color: #fff; font-size: 11px; line-height: 16px; }
-.cs-specimen-edit:hover { background: #292929; }
-.cs-specimen-edit:focus-visible, .cs-import-error button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
-.cs-specimen-input { width: 88%; max-height: 65%; min-height: 2.5em; resize: none; border: 0; border-radius: 6px; padding: 8px; background: transparent; color: inherit; font: inherit; font-size: clamp(24px, 8vw, 48px); line-height: 1.05; text-align: center; overflow-wrap: anywhere; }
-.cs-specimen-input:focus-visible { outline: 2px dashed currentColor; outline-offset: 4px; }
-.cs-specimen-input::placeholder { color: currentColor; opacity: .55; }
+.cs-specimen-surface { --specimen-font-size: 48px; transition: background-color var(--color-duration) ease, color var(--color-duration) ease; }
+.cs-specimen-type, .cs-specimen-measure { width: 88%; margin: 0; border: 0; padding: 0; background: transparent; color: inherit; font-family: inherit; font-size: var(--specimen-font-size); font-weight: 400; line-height: 1.15; letter-spacing: inherit; text-align: center; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cs-specimen-type { display: block; resize: none; border-radius: 0; outline: none; overflow: hidden; cursor: text; caret-color: currentColor; }
+.cs-specimen-type::placeholder { color: currentColor; opacity: 1; }
+.cs-specimen-measure { position: absolute; top: 0; left: 6%; visibility: hidden; pointer-events: none; }
+.cs-photo-layer { position: absolute; inset: 0; pointer-events: none; }
+.cs-layout-content[data-open="false"] { display: none; }
+.cs-import-error button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .cs-photo-drop { position: absolute; z-index: 30; inset: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; border: 1px dashed #878787; border-radius: 8px; padding: 12px; background: rgb(10 10 10 / .6); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); color: #fff; pointer-events: none; text-align: center; opacity: 0; transform: scale(.97); visibility: hidden; transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out), visibility 0s linear 150ms; }
 .cs-photo-drop[data-active="true"] { opacity: 1; transform: scale(1); visibility: visible; transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), visibility 0s; }
 .cs-photo-drop-icon { display: block; flex: none; width: 32px; height: 32px; background: url("/figma/icon-upload.svg") center / 32px 32px no-repeat; }
@@ -219,8 +231,8 @@
 .cs-export-actions { display: flex; gap: 8px; }
 .cs-export-actions button { padding-inline: 8px; font-size: 11px; }
 .cs-panel-actions { position: absolute; z-index: 20; bottom: 8px; left: 50%; display: flex; gap: 4px; transform: translateX(-50%); }
-.cs-panel-action { width: 44px; height: 44px; flex: none; border-color: #2e2e2e; background: #1a1a1a; color: #ededed; }
-.cs-panel-action:hover { border-color: #4a4a4a; background: #292929; }
+.cs-panel-action { width: 44px; height: 44px; flex: none; border-color: var(--color-chrome-border); background: var(--color-chrome-raised); color: var(--color-text-value); }
+.cs-panel-action:hover { border-color: var(--color-chrome-border-strong); background: var(--color-action-hover); }
 html { scroll-padding-bottom: calc(var(--cs-footer-height, 96px) + var(--cs-keyboard-offset, 0px) + 24px); -webkit-text-size-adjust: 100%; }
 html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-theme-option) { transition: background-color 200ms, color 200ms, border-color 200ms; }
 @media (max-width: 359px) {
@@ -237,9 +249,7 @@ html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-t
 @media (min-width: 640px) {
   .cs-app { padding: 24px; }
   .cs-preview-panels { height: 560px; grid-template-columns: 1fr 1fr; border-radius: 12px; }
-  .cs-specimen-type { font-size: 160px; }
-  .cs-specimen-type[data-custom-text="true"], .cs-specimen-input { font-size: clamp(40px, 6vw, 96px); }
-  .cs-specimen-edit { top: 16px; right: 16px; }
+  .cs-specimen-surface { --specimen-font-size: 160px; }
   .cs-photo-drop { inset: 16px; gap: 24px; border-radius: 12px; padding: 32px; }
   .cs-photo-drop-title { font-size: 16px; line-height: normal; }
   .cs-photo-drop-formats { font-size: 12px; line-height: normal; }
@@ -262,8 +272,8 @@ html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-t
   .cs-header h1 { font-size: 16px; }
   .cs-controls { overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; gap: 24px; }
   .cs-preview-panels { height: 100%; }
-  .cs-specimen-type { font-size: 220px; font-weight: 500; }
-  .cs-specimen-type[data-custom-text="true"], .cs-specimen-input { font-size: clamp(48px, 5vw, 104px); }
+  .cs-specimen-surface { --specimen-font-size: 220px; }
+  .cs-specimen-type, .cs-specimen-measure { font-weight: 500; }
 }
 @media (prefers-reduced-motion: reduce) {
   html[data-theme-ready] *, html[data-theme-ready] *::before, html[data-theme-ready] *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
@@ -271,6 +281,16 @@ html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-t
   html[data-theme-ready] .cs-photo-drop[data-active="true"] { transition: opacity 150ms var(--ease-out), visibility 0s !important; }
   html[data-theme-ready] .cs-photo-drop-icon, html[data-theme-ready] .cs-photo-drop-copy { opacity: 1 !important; transform: none !important; }
 }
+
+/* Snapshots reveal the next theme over the old one, without a default fade. */
+html[data-theme-wipe]::view-transition { pointer-events: none; }
+html[data-theme-wipe]::view-transition-group(root) { animation: none; }
+html[data-theme-wipe]::view-transition-image-pair(root) { isolation: auto; }
+html[data-theme-wipe]::view-transition-old(root), html[data-theme-wipe]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html[data-theme-wipe]::view-transition-old(root) { z-index: 0; }
+html[data-theme-wipe]::view-transition-new(root) { z-index: 1; }
+/* Capture fully committed theme colors rather than intermediate color tweens. */
+html[data-theme-transition] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-theme-option, .cs-panel-action, [data-color-field-shell], [data-color-field-shell] *, [data-contrast-score] *, [data-export-button]) { transition-duration: 0s !important; }
 
 /* Osmo number odometer */
 [data-odometer-element] {

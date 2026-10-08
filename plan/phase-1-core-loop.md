@@ -45,7 +45,7 @@ Layout follows Figma "Controls V6": a left sidebar (~320px) beside the specimen 
 - `ControlsBar` — the action row, modeled as a state-driven component (`state: "default" | "export"`, more addable later). Phase 1 renders: previous, shuffle (new random photo, same as Space), swap (also `S`), next. Slots for undo (Phase 2) and fix/wrench (Phase 3) are reserved in the row order but not rendered. Full order: prev · undo · shuffle · swap · fix · next.
 - `Arrows` — previous/next photo buttons at the outer ends of the action row, using Phosphor arrow icons.
 - `CSButton`, `IconButton`, `Swatch` — atomic building blocks. `IconButton` renders Phosphor icons consistently across the app.
-- `TubeText` — used now for hex/score text, rendered as plain text (no animation). Phase 7 swaps in the 3D-rotation implementation behind the same interface.
+- Score values use a GSAP odometer. Hex values and color-editor readouts remain plain text; Phase 7 preserves this scope.
 - **Not built in Phase 1**, added in their own phases without touching the above: editor panel (`FormatTabs`, `ColorSliders`, `ColorSlider`, readout row) and undo (Phase 2); APCA tab, `ThresholdButtons`, fix/wrench (Phase 3); `ExportPanel` and the EXPORT button (Phase 4); theme toggle (Phase 5).
 
 ### 5b. Loading and error states
@@ -74,7 +74,7 @@ Name the shared TypeScript data shapes up front so the photo pipeline, scoring e
 
 ## Explicitly out of scope for Phase 1
 - Color editing (format tabs, sliders, readout row), undo, fix/wrench, threshold bumping UI, APCA scoring/tab (`apca-w3` is installed per §0 but not wired up yet)
-- EXPORT button and panel, GSAP animation polish (squish/pop/crossfade/TubeText/Flip)
+- EXPORT button and panel, GSAP animation polish (squish/pop, photo crossfade, score odometer, Flip)
 - Light theme and theme toggle, DialKit integration, rotating specimen fonts, mobile layout
 - Drag-and-drop custom photos, editable Aa text, iOS/macOS builds
 

@@ -18,6 +18,8 @@ export function applyTheme(theme: Theme) {
   document.querySelector('meta[name="theme-color"]')?.setAttribute(
     "content", theme === "light" ? "#ffffff" : "#0a0a0a",
   );
+  // Notify React consumers synchronously before a view-transition snapshot.
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("cs:theme-change"));
 }
 
 export function setTheme(theme: Theme) {

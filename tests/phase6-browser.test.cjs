@@ -39,18 +39,17 @@ async function dropFile(page, name, mimeType, bytes) {
     await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('[data-color-field]');
 
-    await page.getByRole('button', { name: 'Edit specimen text' }).click();
     const input = page.getByRole('textbox', { name: 'Specimen text' });
     await input.fill('Sample content');
     await input.press('s');
     assert.equal(await input.inputValue(), 'Sample contents');
     await input.press('Escape');
-    assert.equal(await page.locator('.cs-specimen-type').innerText(), 'Sample contents');
+    assert.equal(await page.locator('.cs-specimen-type').inputValue(), 'Sample contents');
     await page.locator('[data-action="next"]').click();
-    assert.equal(await page.locator('.cs-specimen-type').innerText(), 'Sample contents');
-    await page.locator('[data-responsive-motion="specimen"]').click();
-    assert.ok(await page.locator('[data-responsive-motion="circle"]').isVisible());
-    await page.getByRole('button', { name: 'Edit specimen text' }).click();
+    assert.equal(await page.locator('.cs-specimen-type').inputValue(), 'Sample contents');
+    await input.click();
+    assert.ok(await input.evaluate(node => document.activeElement === node));
+    assert.equal(await page.locator('[data-responsive-motion="circle"]').count(), 0);
     assert.equal(await input.inputValue(), 'Sample contents');
     await input.press('Escape');
 
@@ -80,7 +79,7 @@ async function dropFile(page, name, mimeType, bytes) {
     assert.equal(await page.locator('[aria-label="Photo controls"]').evaluate(node => getComputedStyle(node).visibility), 'visible');
     await page.getByText('Your photo · my-image.jpg').waitFor();
     await page.screenshot({ path: '/tmp/color-shift-phase6-mobile.png' });
-    const localImage = page.locator('[data-responsive-motion="photo"] img');
+    const localImage = page.locator('[data-photo-layer][data-current="true"] [data-photo-full]');
     assert.ok((await localImage.getAttribute('src')).startsWith('blob:'));
     assert.equal(await page.locator('.cs-import-error').count(), 0);
     assert.ok(await page.locator('[data-action="previous"]').isEnabled());
@@ -100,8 +99,8 @@ async function dropFile(page, name, mimeType, bytes) {
     assert.equal(await page.locator('.cs-import-error').count(), 0);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.waitForTimeout(350);
-    assert.equal(await page.locator('.cs-specimen-type').innerText(), 'Sample contents');
-    assert.ok((await page.locator('[data-responsive-motion="photo"] img').getAttribute('src')).startsWith('blob:'));
+    assert.equal(await page.locator('.cs-specimen-type').inputValue(), 'Sample contents');
+    assert.ok((await page.locator('[data-photo-layer][data-current="true"] [data-photo-full]').getAttribute('src')).startsWith('blob:'));
     await page.screenshot({ path: '/tmp/color-shift-phase6-desktop.png' });
     await page.locator('[data-responsive-motion="photo"]').evaluate(target => {
       const transfer = new DataTransfer();

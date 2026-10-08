@@ -6,20 +6,17 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type CSSProperties,
   type ReactElement,
   type ReactNode,
 } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCollapsiblePresence } from "@/lib/use-collapsible-presence";
 import { cn } from "@/lib/utils";
+import { useFlipPresence } from "@/lib/use-flip-presence";
 import type { ColorFormat, ColorTarget } from "@/types/color-shift";
 
 import { Swatch } from "./swatch";
 import { TubeText } from "./tube-text";
-
-const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
 
 interface ColorFieldProps {
   active: boolean;
@@ -38,10 +35,10 @@ function ColorField({
   editor,
   onSelect,
 }: ColorFieldProps) {
-  const { present: showEditor, onTransitionEnd } = useCollapsiblePresence(active);
   const [cachedEditor, setCachedEditor] = useState(editor);
   const shellRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const showEditor = useFlipPresence(active);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
@@ -80,10 +77,10 @@ function ColorField({
         footer.getBoundingClientRect().top,
       ) - 16;
       const bounds = shell.getBoundingClientRect();
-      // The inner content stays natural-sized inside the clipped grid. The open
-      // shell adds a 32px header, 16px gap, 8px padding on each side and borders.
+      // offsetHeight measures natural content, unaffected by Flip transforms.
+      // Add the 32px header, 16px gap, 8px padding on each side and borders.
       const style = getComputedStyle(shell);
-      const expandedHeight = content.getBoundingClientRect().height + 32 + 16 + 16
+      const expandedHeight = content.offsetHeight + 32 + 16 + 16
         + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
       const delta = expandedHeight > bottom - top || bounds.top < top
         ? bounds.top - top
@@ -119,6 +116,7 @@ function ColorField({
     viewport?.addEventListener("resize", schedule);
     viewport?.addEventListener("scroll", schedule);
     window.addEventListener("resize", schedule);
+    document.addEventListener("cs:layout-motion", schedule);
     window.addEventListener("wheel", cancel, { passive: true, capture: true });
     window.addEventListener("touchmove", cancel, { passive: true, capture: true });
     document.addEventListener("focusin", onFocus);
@@ -131,6 +129,7 @@ function ColorField({
       viewport?.removeEventListener("resize", schedule);
       viewport?.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
+      document.removeEventListener("cs:layout-motion", schedule);
       window.removeEventListener("wheel", cancel, true);
       window.removeEventListener("touchmove", cancel, true);
       document.removeEventListener("focusin", onFocus);
@@ -146,65 +145,62 @@ function ColorField({
   return (
     <div
       className={cn(
-        "flex w-full flex-col overflow-hidden rounded-[24px] border motion-safe:transition-[background-color,border-color,padding,gap] motion-safe:ease-[var(--field-ease)]",
+        "flex w-full flex-col overflow-hidden rounded-[24px] border transition-[background-color,border-color] ease-[var(--ease-out)]",
         active
-          ? "gap-4 border-[var(--color-chrome-border)] p-2 motion-safe:duration-200"
-          : "border-transparent motion-safe:duration-150 hover:border-[var(--color-chrome-border)]",
+          ? "gap-4 border-[var(--color-chrome-border)] p-2 duration-[var(--enter-duration)]"
+          : "border-transparent duration-[var(--exit-duration)] hover:border-[var(--color-chrome-border)]",
       )}
       data-color-field-shell={target}
+      data-sidebar-layout
       ref={shellRef}
       style={
         {
-          "--field-ease": EASE_OUT,
           backgroundColor: active
             ? "var(--color-chrome-bg)"
             : `color-mix(in srgb, ${color} var(--color-field-tint), transparent)`,
-        } as CSSProperties
+        }
       }
     >
       <button
         aria-controls="color-editor"
         aria-expanded={active}
         className={cn(
-          "flex w-full items-center gap-2 text-left motion-safe:transition-[height,padding] motion-safe:ease-[var(--field-ease)] focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none",
+          "flex w-full items-center gap-2 text-left focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none",
           active
-            ? "h-8 pl-2 motion-safe:duration-200"
-            : "h-12 py-2 pr-2 pl-4 motion-safe:duration-150",
+            ? "h-8 pl-2"
+            : "h-12 py-2 pr-2 pl-4",
         )}
         data-color-field={target}
+        data-sidebar-layout
         onClick={() => onSelect(target)}
         type="button"
       >
         <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-muted)] uppercase">
           {label}
         </span>
-        <TubeText className="min-w-0 flex-1 text-right text-sm text-[var(--color-text-value)] tabular-nums">
-          {color}
-        </TubeText>
-        <Swatch color={color} />
+        <span className="min-w-0 flex-1 text-right">
+          <TubeText className="text-sm text-[var(--color-text-value)] tabular-nums">{color}</TubeText>
+        </span>
+        <span className="inline-flex shrink-0"><Swatch color={color} /></span>
       </button>
 
       <div
         className={cn(
-          "grid motion-safe:transition-[grid-template-rows] motion-safe:ease-[var(--field-ease)]",
+          "grid",
           active
-            ? "grid-rows-[1fr] motion-safe:duration-200"
-            : "grid-rows-[0fr] motion-safe:duration-150",
+            ? "grid-rows-[1fr]"
+            : "grid-rows-[0fr]",
         )}
-        onTransitionEnd={onTransitionEnd}
       >
-        <div className="min-h-0 overflow-hidden">
+        <div className="cs-layout-clip min-h-0 overflow-hidden">
           {showEditor ? (
             <div
               aria-hidden={!active}
-              className={cn(
-                "motion-safe:transition-opacity motion-safe:ease-[var(--field-ease)]",
-                active
-                  ? "opacity-100 motion-safe:duration-200"
-                  : "opacity-0 motion-safe:duration-150",
-              )}
+              className="cs-layout-content"
               id={active ? "color-editor" : undefined}
               inert={!active ? true : undefined}
+              data-open={active}
+              data-sidebar-layout
               ref={contentRef}
             >
               {editorContent}

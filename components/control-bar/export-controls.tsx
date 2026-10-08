@@ -7,6 +7,9 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 
 import { createColorShiftExport, type ColorShiftExport } from "@/lib/export";
 import { cn } from "@/lib/utils";
+import { useFlipLayoutMotion } from "@/lib/use-flip-layout-motion";
+import { useFlipPresence } from "@/lib/use-flip-presence";
+import { motionValue, prefersReducedMotion } from "@/lib/motion";
 import type { Photo } from "@/types/color-shift";
 
 type ExportPhase = "closed" | "loading" | "open";
@@ -78,6 +81,9 @@ function ExportSlot({
   const timersRef = useRef<number[]>([]);
   const focusActionsRef = useRef(false);
   const restoreFocusRef = useRef(false);
+  const slotRef = useRef<HTMLDivElement>(null);
+  const prepareMotion = useFlipLayoutMotion(slotRef, phase, Number(phase === "open"));
+  const actionsPresent = useFlipPresence(phase === "open");
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -86,20 +92,25 @@ function ExportSlot({
 
   const closeExport = useCallback(() => {
     const focused = document.activeElement;
-    if ((focused instanceof HTMLElement && focused.closest("[data-export-slot]")) ||
-      (restoreFocusRef.current && focused === document.body)) {
-      requestAnimationFrame(() => document.querySelector<HTMLButtonElement>("[data-export-button]")?.focus({ preventScroll: true }));
-    }
+    const returnFocus = (focused instanceof HTMLElement && !!focused.closest("[data-export-slot]")) ||
+      (restoreFocusRef.current && focused === document.body);
     focusActionsRef.current = false;
     restoreFocusRef.current = false;
     clearTimers();
+    if (returnFocus) timersRef.current.push(window.setTimeout(() => {
+      const active = document.activeElement;
+      if (active === document.body || active?.closest("[data-export-slot]")) {
+        slotRef.current?.querySelector<HTMLButtonElement>("[data-export-button]")?.focus({ preventScroll: true });
+      }
+    }, prefersReducedMotion() ? 0 : motionValue("--exit-duration") * 1000 + 32));
+    prepareMotion();
     setPhase("closed");
     setProgress(0);
     setPayload(null);
     setSuccess(null);
     setActionPending(false);
     setErrorMessage(null);
-  }, [clearTimers]);
+  }, [clearTimers, prepareMotion]);
 
   useEffect(() => clearTimers, [clearTimers]);
 
@@ -131,6 +142,7 @@ function ExportSlot({
     setPayload(createColorShiftExport({ background, foreground, photo }));
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      prepareMotion();
       setProgress(100);
       setPhase("open");
       return;
@@ -141,6 +153,7 @@ function ExportSlot({
     schedule(() => setProgress(40), 16);
     schedule(() => setProgress(90), 140);
     schedule(() => {
+      prepareMotion();
       setProgress(100);
       setPhase("open");
     }, 260);
@@ -203,11 +216,15 @@ function ExportSlot({
     if (phase === "open") focusActionsRef.current = false;
   }, [phase]);
   return (
-    <div className="cs-export-slot" data-export-slot data-state={phase}>
-        {exportOpen ? (
+    <div ref={slotRef} className="cs-export-slot" data-export-slot data-state={phase}>
+        {actionsPresent ? (
           <div
             aria-label="Export actions"
-            className="cs-export-actions motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 motion-safe:duration-200"
+            className="cs-export-actions cs-layout-content"
+            data-layout-item
+            data-open={exportOpen}
+            aria-hidden={!exportOpen}
+            inert={!exportOpen ? true : undefined}
             id="export-actions"
           >
             <ExportAction
@@ -223,12 +240,14 @@ function ExportSlot({
               success={success === "download"}
             />
           </div>
-        ) : (
+        ) : null}
           <button
             data-export-button
+            data-layout-item
+            data-open={!exportOpen}
             aria-controls="export-actions"
             className={cn(
-              "relative flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-[var(--color-chrome-border)] bg-[var(--color-chrome-raised)] px-2 text-sm leading-5 font-medium text-[var(--color-text-value)] transition-[border-color,background-color,opacity,transform] duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[var(--color-chrome-border-strong)] hover:bg-[var(--color-chrome-raised)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-[0.97] motion-safe:duration-150 motion-safe:active:scale-[0.97] disabled:cursor-wait",
+              "cs-layout-content relative flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-[var(--color-export-border)] bg-[var(--color-export-bg)] px-2 text-sm leading-5 font-medium text-[var(--color-export-text)] transition-[border-color,background-color,opacity,transform] duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[var(--color-chrome-border-strong)] hover:bg-[var(--color-export-bg)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] motion-safe:active:scale-[0.97] disabled:cursor-wait",
               disabled && "cursor-not-allowed opacity-30",
             )}
             disabled={disabled || phase === "loading"}
@@ -244,7 +263,6 @@ function ExportSlot({
             />
             <span className="relative">EXPORT</span>
           </button>
-        )}
       <p aria-live="polite" className="sr-only" role="status">
         {errorMessage ??
           (phase === "loading"
