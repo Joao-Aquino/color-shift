@@ -19,9 +19,9 @@ export function MotionDevtools() {
       initialOpacity: [MOTION_DEFAULTS["--photo-opacity"], 0, 1, 0.05],
     },
     states: {
-      easing: { type: "select", options: Object.keys(SIDEBAR_EASES), default: "easeInOutQuart" },
-      exitDurationMs: [MOTION_DEFAULTS["--exit-duration"] * 1000, 0, 250, 10],
-      enterDurationMs: [MOTION_DEFAULTS["--enter-duration"] * 1000, 0, 300, 10],
+      easing: { type: "select", options: Object.keys(SIDEBAR_EASES), default: "easeOutQuart" },
+      exitDurationMs: [MOTION_DEFAULTS["--exit-duration"] * 1000, 0, 300, 10],
+      enterDurationMs: [MOTION_DEFAULTS["--enter-duration"] * 1000, 0, 350, 10],
     },
   }, { id: "color-shift-phase-7", persist: true });
   const values = useDialKit(

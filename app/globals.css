@@ -317,3 +317,56 @@ html[data-theme-transition] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, 
 [data-odometer-part="static"] {
   display: inline-block;
 }
+
+/* Variant A: Real resize content choreography */
+.cs-layout-content {
+  transition: opacity var(--content-fade-duration, 0.1s) var(--content-fade-delay, 0s) ease-out,
+              transform var(--content-fade-duration, 0.1s) var(--content-fade-delay, 0s) ease-out;
+}
+
+/* Opening: content fades in after container grows (60% through) */
+[data-open="true"].cs-layout-content {
+  --content-fade-duration: 0.12s;
+  --content-fade-delay: calc(var(--enter-duration) * 0.6);
+  animation: cs-content-fade-in var(--content-fade-duration) var(--content-fade-delay) ease-out both;
+}
+
+/* Closing: content fades out immediately, before container shrinks */
+[data-open="false"].cs-layout-content {
+  --content-fade-duration: 0.1s;
+  --content-fade-delay: 0s;
+  animation: cs-content-fade-out var(--content-fade-duration) ease-out both;
+}
+
+@keyframes cs-content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cs-content-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-layout-content,
+  [data-open="true"].cs-layout-content,
+  [data-open="false"].cs-layout-content {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
