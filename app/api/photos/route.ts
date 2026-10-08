@@ -1,4 +1,4 @@
-import { getRandomPhotos } from "@/lib/photos/unsplash";
+import { getRandomPhotos, UnsplashApiError } from "@/lib/photos/unsplash";
 
 export const dynamic = "force-dynamic";
 
@@ -19,9 +19,15 @@ export async function GET(request: Request) {
     );
   } catch (error) {
     console.error("Unable to fetch Unsplash photos", error);
+    if (error instanceof UnsplashApiError && error.rateLimited) {
+      return Response.json(
+        { error: "Unsplash is temporarily out of requests. Please try again later." },
+        { status: 429, headers: { "Cache-Control": "no-store" } },
+      );
+    }
     return Response.json(
       { error: "We could not load a new photo. Please try again." },
-      { status: 502 },
+      { status: 502, headers: { "Cache-Control": "no-store" } },
     );
   }
 }

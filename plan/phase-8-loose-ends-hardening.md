@@ -1,6 +1,6 @@
 # Color Shift — Phase 8 Spec
 
-*Status: Proposed / Not Started*
+*Status: In progress — implementation on `codex/phase-8-hardening`; see `docs/phase-8-release-checklist.md` for results and remaining work.*
 *Written: 2026-10-07*
 
 ## Goal

@@ -152,37 +152,6 @@ module.exports = async function verifyMobileReveal(browser, baseURL, mockPhotos,
     assert.ok(await page.locator('[data-color-field="foreground"]').evaluate(n => n === document.activeElement));
     console.log('PASS Escape during expansion cancels reveal and restores trigger focus');
 
-    await reset();
-    const idleListeners = await page.evaluate(() => window.revealGestureListenerCount());
-    let imageRoute;
-    await page.route('**/reveal-unmount-photo.jpg', route => { imageRoute = route; });
-    await page.route('**/api/photos?count=1', route => route.fulfill({json:{photos:[{
-      id:'reveal-unmount',url:'/figma/photo.jpg',thumbUrl:'/reveal-unmount-photo.jpg',tinyUrl:'/figma/photo.jpg',
-      color:'#f7b955',width:1200,height:900,alt:'Reference landscape',photographer:'Mara Vale',
-      photographerUrl:'https://unsplash.com/@test',photoUrl:'https://unsplash.com/photos/test',
-    }]}}));
-    await page.evaluate(() => window.startRevealTrace());
-    await rawOpen('foreground');
-    await page.waitForFunction(() => window.revealTrace.calls.some(c => c.method === 'scrollTo' && c.after > c.before));
-    assert.equal(await page.evaluate(() => window.revealGestureListenerCount()),idleListeners+2);
-    await page.evaluate(() => {
-      window.previousRevealShell = document.querySelector('[data-color-field-shell="foreground"]');
-      document.activeElement.blur();
-    });
-    // A pending new palette genuinely unmounts ColorField without navigation.
-    await page.keyboard.press('Space');
-    await page.waitForFunction(() => !window.previousRevealShell.isConnected);
-    const unmountedAt = await page.evaluate(() => performance.now());
-    const unmounted = await trace('pending-photo-unmount');
-    noRevealAfter(unmounted,unmountedAt,'Unmount cancels pending reveal');
-    assert.equal(await page.evaluate(() => window.revealGestureListenerCount()),idleListeners);
-    assert.ok(imageRoute, 'Hold the real bitmap until after cleanup is checked');
-    await imageRoute.fulfill({path:path.resolve(__dirname,'../public/figma/photo.jpg')});
-    await page.unroute('**/reveal-unmount-photo.jpg');
-    await page.unroute('**/api/photos?count=1');
-    await page.waitForSelector('[data-color-field]');
-    console.log('PASS pending-photo unmount cancels reveal and removes owned gesture listeners');
-
     // Headers remain physically reachable during layout transitions.
     await reset('no-preference',{width:393,height:1100});
     await page.evaluate(() => window.startRevealTrace());

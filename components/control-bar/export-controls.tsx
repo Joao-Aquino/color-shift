@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { ShortcutKey } from "@/components/ui/shortcut-key";
 
 import { createColorShiftExport, type ColorShiftExport } from "@/lib/export";
+import { trackPhotoUse } from "@/lib/photos/client";
 import { cn } from "@/lib/utils";
 import { useFlipLayoutMotion } from "@/lib/use-flip-layout-motion";
 import { useFlipPresence } from "@/lib/use-flip-presence";
@@ -193,6 +194,7 @@ function ExportSlot({
     setErrorMessage(null);
     try {
       await navigator.clipboard.writeText(payload.content);
+      if (photo) void trackPhotoUse(photo).catch((error) => console.warn("Unsplash tracking failed", error));
       completeAction("copy");
     } catch {
       setErrorMessage("Unable to copy. Check the browser clipboard permission.");
@@ -219,6 +221,7 @@ function ExportSlot({
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      if (photo) void trackPhotoUse(photo).catch((error) => console.warn("Unsplash tracking failed", error));
       completeAction("download");
     } catch {
       setErrorMessage("Unable to download the Markdown file.");

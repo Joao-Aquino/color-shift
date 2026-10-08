@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-10-08 - Phase 8 hardening started
+
+Started Phase 8 on `codex/phase-8-hardening`. Added CI for lint, Next type generation, TypeScript, build and deterministic tests; added `npm test` and replaced the boilerplate README. Added a reusable device/browser log with the limited historical user-reported result, and reconciled the URL, font, contrast-search and APCA-label spec drift.
+
+The Unsplash API key remains server-side. Photo responses now retain `download_location`; successful copy and Markdown download actions send a tracking request through a validated server route. API errors distinguish exhausted quota from other failures, and the client retries one transient 502. A live authenticated call returned HTTP 200 with a 50/hour limit, confirming Demo access; earlier 403 causes were not logged in enough detail to prove each case. Production access application text and remaining steps are in `docs/phase-8-release-checklist.md`.
+
+Updated Next, React, Radix and compatible packages; removed unused `lucide-react`. Restored `motion` and `shadcn` after builds exposed their runtime/CSS use. `npm audit fix` leaves 14 alerts (9 high, 5 moderate) in tool and node-vibrant dependency chains; risk and upstream limitations are documented in the release checklist. Lint, deterministic tests, Next typegen, TypeScript and a clean Turbopack production build pass. Chrome themed-photo, Phase 5, Phase 6 and focused tracking suites pass with no browser errors. Phase 5 fixtures were updated for automatic 502 retry and the obsolete shuffle-pending-unmount case was removed because photo selection now prepares the palette before switching. Plan 006 decision, physical-device retest, CI activation, deployment/live tracking confirmation and the Unsplash application remain open.
+
 ## 2026-10-08 - Corrected Light format text and theme-directed generation
 
 The user corrected selected-format text from #171717 to #EDEDED. Applied a dedicated selected-text token and scoped active-tab rule so the generic hover color cannot override it. Other Light text colors and the #2E2E2E pill background remain.

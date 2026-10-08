@@ -344,7 +344,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await retryPage.route('**/api/photos?*',async route=>{
       if(failInitialLoad){
         failInitialLoad=false;
-        await route.fulfill({status:502,json:{error:'Temporary photo failure'}});
+        await route.fulfill({status:503,json:{error:'Temporary photo failure'}});
       } else {
         await mockPhotos(route);
       }

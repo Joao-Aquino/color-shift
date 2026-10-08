@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Color Shift
 
-## Getting Started
+Color Shift extracts a two-color pair from a photo and shows it in a live text specimen. You can adjust the colors, compare WCAG 2 and APCA contrast scores, and copy or download a Markdown record. Photos come from Unsplash, or you can import your own image locally.
 
-First, run the development server:
+## Run locally
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Use Node.js 20.9 or later. Clone the repository, then run:
+
+```sh
+npm ci
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create `.env.local` in the project root with your Unsplash API access key:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+UNSPLASH_ACCESS_KEY=your_access_key
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The key stays on the server. It is required for Unsplash photos; personal-photo import runs locally in the browser. Start the app with `npm run dev` and open [localhost:3000](http://localhost:3000).
 
-## Learn More
+## Commands
 
-To learn more about Next.js, take a look at the following resources:
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm start` | Serve a production build |
+| `npm run lint` | ESLint |
+| `npm test` | Deterministic Node tests in `tests/*.test.cjs` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For browser regression suites and their preview setup, see [tests/README.md](tests/README.md). They use a production preview and Playwright with Chrome. Physical-device results and the next testing template are in [tests/device-browser-log.md](tests/device-browser-log.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The web app is available at [colorshift.co-opstudio.com](https://colorshift.co-opstudio.com). Set `UNSPLASH_ACCESS_KEY` as a server-side environment variable in the deployment environment, then run the production build and server commands above. The GitHub Actions workflow checks lint, generated types, TypeScript, build, and deterministic tests on pull requests and pushes to `main`.

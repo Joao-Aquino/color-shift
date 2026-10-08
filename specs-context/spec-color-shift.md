@@ -2,7 +2,7 @@
 
 **Name:** Color Shift
 **Tagline:** Two colors. One photo. Feel the contrast.
-**Potential URL:** [coloshift.co-opstudio.com/color](http://coloshift.co-opstudio.com/color)  
+**Production URL:** [colorshift.co-opstudio.com](https://colorshift.co-opstudio.com)
 **Created by:** John Aquino ([joao@co-opstudio.com](mailto:joao@co-opstudio.com))  
 **Repo:** `color-shift` (Next.js 16 + Tailwind v4 (or latesst) + TypeScript)
 
@@ -102,6 +102,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 
 - **WCAG 2:** contrast ratio (e.g. "4.50:1"), grades: AAA (≥7.0), AA (≥4.5), AA Large (≥3.0), Fail
 - **APCA:** Lc value (e.g. "Lc 72.3"), grades: AAA (≥75), AA (≥60), AA Large (≥45), Fail
+- APCA uses these familiar badge names as Color Shift's shorthand for its chosen Lc thresholds. They are not WCAG conformance grades and should not be read as an APCA certification.
 - Toggle between algorithms with the WCAG | APCA tabs at the top of the score tile
 - WCAG and APCA score values use the existing GSAP odometer animation on value change. Other numeric values remain unanimated.
 
@@ -265,9 +266,9 @@ Every icon-only button must have an accessible label, visible focus state, and a
 
 
 
-### Custom Fonts (local, in `src/fonts/`)
+### Fonts
 
-- **Geist Sans: [https://fonts.google.com/specimen/Geist](https://fonts.google.com/specimen/Geist)**
+- The app loads Geist Sans and Geist Mono with `next/font/google` in `app/layout.tsx`; there is no active `src/fonts/` directory.
 
 
 

@@ -25,6 +25,7 @@ export interface Photo {
   photographer: string;
   photographerUrl: string;
   photoUrl: string;
+  downloadLocation?: string;
 }
 
 export interface PaletteSwatch {

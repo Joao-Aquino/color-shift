@@ -17,7 +17,7 @@ function load(file,environment) {
   require:()=>({}),process:{env:{UNSPLASH_ACCESS_KEY:'test-only'}},
   fetch:async(url,options)=>{
    observed.push(new URL(url));assert.equal(options.headers.Authorization,'Client-ID test-only');
-   return {ok:true,json:async()=>[{id:'test',width:1200,height:900,color:'#888888',urls:{raw:'https://images.unsplash.com/test?ixid=preserved',small:'https://images.unsplash.com/thumb'},links:{html:'https://unsplash.com/photos/test'},user:{name:'Test',links:{html:'https://unsplash.com/@test'}}}]};
+   return {ok:true,json:async()=>[{id:'test',width:1200,height:900,color:'#888888',urls:{raw:'https://images.unsplash.com/test?ixid=preserved',small:'https://images.unsplash.com/thumb'},links:{html:'https://unsplash.com/photos/test',download_location:'https://api.unsplash.com/photos/test/download?ixid=preserved'},user:{name:'Test',links:{html:'https://unsplash.com/@test'}}}]};
   },
  });
  for(const theme of ['light','dark',undefined]){
@@ -31,7 +31,17 @@ function load(file,environment) {
   else assert.ok(!query.startsWith('bright light ')&&!query.startsWith('dark '));
   assert.equal(new URL(photo.url).searchParams.get('ixid'),'preserved');
   assert.equal(new URL(photo.url).searchParams.get('w'),'2400');
+  assert.equal(photo.downloadLocation,'https://api.unsplash.com/photos/test/download?ixid=preserved');
  }
+ await api.trackPhotoDownload('test','https://api.unsplash.com/photos/test/download?ixid=preserved');
+ assert.equal(observed.at(-1).pathname,'/photos/test/download');
+ await assert.rejects(api.trackPhotoDownload('test','https://evil.example/photos/test/download'));
+ await assert.rejects(api.trackPhotoDownload('test','https://api.unsplash.com/photos/other/download'));
+ const exhausted=load('../lib/photos/unsplash.ts',{
+  require:()=>({}),process:{env:{UNSPLASH_ACCESS_KEY:'test-only'}},
+  fetch:async()=>({ok:false,status:403,headers:new Headers({'x-ratelimit-remaining':'0'})}),
+ });
+ await assert.rejects(exhausted.getRandomPhotos(1),error=>error.rateLimited===true);
  const calls=[];
  const route=load('../app/api/photos/route.ts',{require:()=>({getRandomPhotos:async(count,theme)=>{calls.push({count,theme});return [];}})});
  for(const [query,count,theme] of [['count=4&theme=light',4,'light'],['count=4&theme=dark',4,'dark'],['count=999&theme=invalid',30,undefined],['count=0',1,undefined]]){
@@ -39,5 +49,12 @@ function load(file,environment) {
   assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'no-store');
   assert.deepEqual(calls.at(-1),{count,theme});
  }
+ const tracked=[];
+ const downloadRoute=load('../app/api/photos/download/route.ts',{require:()=>({trackPhotoDownload:async(...args)=>tracked.push(args)})});
+ const post=(body)=>new Request('http://localhost/api/photos/download',{method:'POST',headers:{'Content-Type':'application/json'},body});
+ assert.equal((await downloadRoute.POST(post('{'))).status,400);
+ assert.equal((await downloadRoute.POST(post('{}'))).status,400);
+ assert.equal((await downloadRoute.POST(post(JSON.stringify({photoId:'test',location:'https://api.unsplash.com/photos/test/download?ixid=preserved'})))).status,204);
+ assert.deepEqual(tracked,[['test','https://api.unsplash.com/photos/test/download?ixid=preserved']]);
  console.log('PASS themed/default Unsplash queries, original quality/tracking, allowed theme validation and bounded counts');
 })().catch(e=>{console.error(e);process.exitCode=1});
