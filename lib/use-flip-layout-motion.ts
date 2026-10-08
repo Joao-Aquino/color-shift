@@ -103,6 +103,7 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
       const enteringContent = contents.filter(el => el.dataset.open === "true");
       
       const exits = exitingContent.map(original => {
+        const beforeState = before.get(original);
         const copy = original.cloneNode(true) as HTMLElement;
         [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("*"))].forEach(element => {
           Array.from(element.attributes).forEach(attribute => {
@@ -114,7 +115,7 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         copy.setAttribute("aria-hidden", "true");
         copy.setAttribute("data-motion-ghost", "true");
         copy.inert = true;
-        const rect = original.getBoundingClientRect();
+        const rect = beforeState ? { top: beforeState.y, left: original.getBoundingClientRect().left, width: original.getBoundingClientRect().width, height: beforeState.height } : original.getBoundingClientRect();
         const computed = getComputedStyle(original);
         ["--score-border", "--score-pill", "--score-pill-border", "--score-text"].forEach(property => {
           const value = computed.getPropertyValue(property);
