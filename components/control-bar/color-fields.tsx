@@ -38,13 +38,11 @@ function ColorField({
 }: ColorFieldProps) {
   const [cachedEditor, setCachedEditor] = useState(editor);
   const shellRef = useRef<HTMLDivElement>(null);
-  const backgroundRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLButtonElement>(null);
   const showEditor = useFlipPresence(active);
 
-  // Animate the background shape while keeping content at full size
-  useShapeMotion(shellRef, backgroundRef, contentRef, headerRef, active);
+  // Animate the shell's real height while content fades in/out
+  useShapeMotion(shellRef, contentRef, active);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
@@ -151,75 +149,56 @@ function ColorField({
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-[24px] transition-[background-color,border-color] ease-[var(--ease-out)]",
+        "flex w-full flex-col overflow-hidden rounded-[24px] border transition-[background-color,border-color] ease-[var(--ease-out)]",
         active
-          ? "duration-[var(--enter-duration)]"
-          : "duration-[var(--exit-duration)]",
+          ? "gap-4 border-[var(--color-chrome-border)] p-2 duration-[var(--enter-duration)]"
+          : "border-transparent duration-[var(--exit-duration)] hover:border-[var(--color-chrome-border)]",
       )}
       data-color-field-shell={target}
       ref={shellRef}
+      style={{
+        backgroundColor: active
+          ? "var(--color-chrome-bg)"
+          : `color-mix(in srgb, ${color} var(--color-field-tint), transparent)`,
+      }}
     >
-      {/* Background shape - this layer gets scaled */}
-      <div
-        ref={backgroundRef}
+      {/* Header button */}
+      <button
+        aria-controls="color-editor"
+        aria-expanded={active}
         className={cn(
-          "absolute inset-0 rounded-[24px] border transition-[background-color,border-color] ease-[var(--ease-out)]",
+          "flex w-full items-center gap-2 text-left focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none",
           active
-            ? "border-[var(--color-chrome-border)] duration-[var(--enter-duration)]"
-            : "border-transparent duration-[var(--exit-duration)] group-hover:border-[var(--color-chrome-border)]",
+            ? "h-8 pl-2"
+            : "h-12 py-2 pr-2 pl-4",
         )}
-        style={{
-          backgroundColor: active
-            ? "var(--color-chrome-bg)"
-            : `color-mix(in srgb, ${color} var(--color-field-tint), transparent)`,
-        }}
-        aria-hidden="true"
-      />
+        data-color-field={target}
+        onClick={() => onSelect(target)}
+        type="button"
+      >
+        <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-muted)] uppercase">
+          {label}
+        </span>
+        <span className="min-w-0 flex-1 text-right">
+          <TubeText className="text-sm text-[var(--color-text-value)] tabular-nums">{color}</TubeText>
+        </span>
+        <span className="inline-flex shrink-0"><Swatch color={color} /></span>
+      </button>
 
-      {/* Content - stays at full size, never scaled */}
-      <div className="relative flex flex-col group">
-        {/* Header button */}
-        <button
-          ref={headerRef}
-          aria-controls="color-editor"
-          aria-expanded={active}
-          className={cn(
-            "flex w-full items-center gap-2 text-left focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none",
-            active
-              ? "h-8 pl-2 pt-2 pr-2"
-              : "h-12 py-2 pr-2 pl-4",
-          )}
-          data-color-field={target}
-          onClick={() => onSelect(target)}
-          type="button"
+      {/* Editor content - keep mounted but hidden when closing */}
+      {showEditor ? (
+        <div
+          ref={contentRef}
+          aria-hidden={!active}
+          className="cs-layout-content"
+          id={active ? "color-editor" : undefined}
+          inert={!active ? true : undefined}
+          data-open={active}
+          style={{ display: active ? "" : "none" }}
         >
-          <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-muted)] uppercase">
-            {label}
-          </span>
-          <span className="min-w-0 flex-1 text-right">
-            <TubeText className="text-sm text-[var(--color-text-value)] tabular-nums">{color}</TubeText>
-          </span>
-          <span className="inline-flex shrink-0"><Swatch color={color} /></span>
-        </button>
-
-        {/* Editor content */}
-        {showEditor && active ? (
-          <div
-            ref={contentRef}
-            className="px-2 pb-2 pt-4"
-          >
-            <div
-              aria-hidden={!active}
-              className="cs-layout-content"
-              id={active ? "color-editor" : undefined}
-              inert={!active ? true : undefined}
-              data-open={active}
-            >
-              {editorContent}
-            </div>
-          </div>
-        ) : null}
-      </div>
+          {editorContent}
+        </div>
+      ) : null}
     </div>
   );
 }

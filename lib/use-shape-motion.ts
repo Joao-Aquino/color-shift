@@ -3,43 +3,36 @@
 import gsap from "gsap";
 import { useCallback, useLayoutEffect, useRef, type RefObject } from "react";
 
-import { motionValue, prefersReducedMotion, sidebarEase } from "@/lib/motion";
+import { motionValue, prefersReducedMotion } from "@/lib/motion";
 
 /**
- * Animates ColorField open/close by scaling the background shape while keeping
- * content at full size. This eliminates mid-animation distortion of text, swatches,
- * and rounded corners.
+ * Animates ColorField open/close by animating the shell's real height while
+ * keeping corners and border perfect. Content fades in/out with choreography.
  * 
  * Choreography:
- * - Close: fade content out (~80-100ms), then shrink the shape
- * - Open: grow the shape, then fade content in
+ * - Close: fade content out (~80-100ms), then shrink the shell
+ * - Open: grow the shell, then fade content in
  */
 export function useShapeMotion(
   shellRef: RefObject<HTMLElement | null>,
-  backgroundRef: RefObject<HTMLElement | null>,
   contentRef: RefObject<HTMLElement | null>,
-  headerRef: RefObject<HTMLElement | null>,
   active: boolean
 ) {
   const timeline = useRef<gsap.core.Timeline | null>(null);
   const previousActive = useRef(active);
+  const fullHeight = useRef<number>(0);
 
   const animate = useCallback(() => {
     const shell = shellRef.current;
-    const background = backgroundRef.current;
     const content = contentRef.current;
-    const header = headerRef.current;
 
-    if (!shell || !background || prefersReducedMotion()) {
+    if (!shell || prefersReducedMotion()) {
       // Instant for reduced motion
-      if (background) {
-        gsap.set(background, { clearProps: "all" });
+      if (shell) {
+        gsap.set(shell, { clearProps: "height" });
       }
       if (content) {
         gsap.set(content, { clearProps: "all" });
-      }
-      if (header) {
-        gsap.set(header, { clearProps: "all" });
       }
       return;
     }
@@ -49,44 +42,51 @@ export function useShapeMotion(
 
     const opening = active && !previousActive.current;
     const closing = !active && previousActive.current;
+    const switching = active && previousActive.current;
 
-    if (opening) {
-      // Opening: grow shape first, then fade in content
+    if (opening || switching) {
+      // Opening or switching: grow shell first, then fade in content
       const enterDuration = motionValue("--enter-duration");
-      const ease = sidebarEase();
+      const ease = "power3.out"; // easeOutQuart
 
-      // Measure the final and initial states
+      // Measure the full content height if we haven't yet
+      if (fullHeight.current === 0 && content) {
+        // Temporarily show content to measure
+        const wasHidden = content.style.display === "none";
+        if (wasHidden) {
+          content.style.display = "";
+        }
+        fullHeight.current = shell.scrollHeight;
+        if (wasHidden) {
+          content.style.display = "none";
+        }
+      }
+
       const closedHeight = 48; // Height when collapsed (h-12 = 48px)
-      const openHeight = shell.scrollHeight;
-      const scaleY = closedHeight / openHeight;
+      const openHeight = fullHeight.current || shell.scrollHeight;
 
       timeline.current = gsap.timeline();
 
-      // Set initial state: shape is scaled down
-      gsap.set(background, {
-        scaleY: scaleY,
-        transformOrigin: "top center",
-      });
+      // Start from closed height if opening (or current height if switching)
+      if (opening) {
+        gsap.set(shell, { height: closedHeight });
+      }
 
-      // Content and header start invisible
+      // Content starts invisible
       if (content) {
-        gsap.set(content, { opacity: 0, y: 4 });
-      }
-      if (header) {
-        gsap.set(header, { opacity: 1 });
+        gsap.set(content, { opacity: 0, y: 4, display: "" });
       }
 
-      // Grow the shape
-      timeline.current.to(background, {
-        scaleY: 1,
+      // Grow the shell to full height
+      timeline.current.to(shell, {
+        height: openHeight,
         duration: enterDuration,
         ease,
       }, 0);
 
-      // Fade in content after shape reaches ~40% of its animation
+      // Fade in content after shell reaches ~40% of its animation
       if (content) {
-        timeline.current.fromTo(content, 
-          { opacity: 0, y: 4 },
+        timeline.current.to(content, 
           { 
             opacity: 1, 
             y: 0, 
@@ -98,19 +98,20 @@ export function useShapeMotion(
       }
 
     } else if (closing) {
-      // Closing: fade content first, then shrink shape
+      // Closing: fade content first, then shrink shell
       const exitDuration = motionValue("--exit-duration");
-      const ease = sidebarEase();
+      const ease = "power3.out"; // easeOutQuart
       const contentFadeDuration = Math.min(0.1, exitDuration * 0.4);
 
       const closedHeight = 48;
-      const openHeight = shell.scrollHeight;
-      const scaleY = closedHeight / openHeight;
 
       timeline.current = gsap.timeline({
         onComplete: () => {
           // Clean up after animation completes
-          gsap.set([background, content, header], { clearProps: "all" });
+          gsap.set(shell, { clearProps: "height" });
+          if (content) {
+            gsap.set(content, { clearProps: "all", display: "none" });
+          }
         }
       });
 
@@ -124,22 +125,16 @@ export function useShapeMotion(
         }, 0);
       }
 
-      // Then shrink the shape
-      timeline.current.to(background, {
-        scaleY: scaleY,
+      // Then shrink the shell
+      timeline.current.to(shell, {
+        height: closedHeight,
         duration: exitDuration - contentFadeDuration,
         ease,
-        transformOrigin: "top center",
       }, contentFadeDuration);
-
-      // Header stays visible throughout
-      if (header) {
-        gsap.set(header, { opacity: 1 });
-      }
     }
 
     previousActive.current = active;
-  }, [active, shellRef, backgroundRef, contentRef, headerRef]);
+  }, [active, shellRef, contentRef]);
 
   useLayoutEffect(() => {
     animate();
@@ -150,14 +145,11 @@ export function useShapeMotion(
     const cancel = () => {
       timeline.current?.kill();
       timeline.current = null;
-      if (backgroundRef.current) {
-        gsap.set(backgroundRef.current, { clearProps: "all" });
+      if (shellRef.current) {
+        gsap.set(shellRef.current, { clearProps: "height" });
       }
       if (contentRef.current) {
         gsap.set(contentRef.current, { clearProps: "all" });
-      }
-      if (headerRef.current) {
-        gsap.set(headerRef.current, { clearProps: "all" });
       }
     };
 
@@ -169,7 +161,7 @@ export function useShapeMotion(
       reduced.removeEventListener("change", cancel);
       window.removeEventListener("resize", cancel);
     };
-  }, [backgroundRef, contentRef, headerRef]);
+  }, [shellRef, contentRef]);
 
   return animate;
 }
