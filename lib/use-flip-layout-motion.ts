@@ -151,12 +151,7 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         return copy;
       });
 
-      gsap.ticker.lagSmoothing(0);
-      
       timeline.current = gsap.timeline({
-        onStart: () => {
-          gsap.ticker.lagSmoothing(500, 33);
-        },
         onUpdate: () => {
           exits.forEach(copy => { copy.style.translate = `0px ${-(window.scrollY - scroll)}px`; });
           root.dispatchEvent(new Event("cs:layout-motion", { bubbles: true }));
@@ -291,7 +286,7 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
             ease,
             clearProps: "opacity,y",
           },
-          exitDuration * 0.5
+          exitFadeDuration
         );
       }
 
