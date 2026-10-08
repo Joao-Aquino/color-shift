@@ -46,9 +46,9 @@
   --theme-wipe-duration: 700ms;
   --photo-duration: 0.2s;
   --photo-opacity: 0;
-  --exit-duration: 0.15s;
-  --enter-duration: 0.2s;
-  --sidebar-easing: easeInOutQuart;
+  --exit-duration: 0.25s;
+  --enter-duration: 0.3s;
+  --sidebar-easing: easeOutQuart;
 
   --background: var(--color-chrome-bg);
   --foreground: var(--color-text-value);
