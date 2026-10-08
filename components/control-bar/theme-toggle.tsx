@@ -2,7 +2,7 @@
 
 import type { Theme } from "@/lib/theme";
 
-export function ThemeToggle({ theme, onChange }: { theme: Theme; onChange: (theme: Theme) => void }) {
+export function ThemeToggle({ theme, onChange }: { theme: Theme; onChange: (theme: Theme, animate?: boolean) => void }) {
   return (
     <div className="cs-theme-toggle" role="group" aria-label="Color theme">
       {(["light", "dark"] as const).map((value) => (
@@ -11,7 +11,7 @@ export function ThemeToggle({ theme, onChange }: { theme: Theme; onChange: (them
           className="cs-theme-option"
           data-theme-choice={value}
           key={value}
-          onClick={() => onChange(value)}
+          onClick={(event) => onChange(value, event.detail !== 0)}
           type="button"
         >
           {value === "light" ? "Light" : "Dark"}

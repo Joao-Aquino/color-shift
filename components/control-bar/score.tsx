@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useCollapsiblePresence } from "@/lib/use-collapsible-presence";
+import { useFlipPresence } from "@/lib/use-flip-presence";
 import type {
   ContrastAlgorithm,
   ContrastScore,
@@ -18,8 +18,6 @@ import type {
 
 import { Odometer } from "./odometer";
 import { ThresholdButtons } from "./threshold-buttons";
-
-const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
 
 const gradeBackgrounds: Record<ContrastScore["grade"], string> = {
   AAA: "bg-[var(--color-score-good)]",
@@ -99,7 +97,6 @@ export function Score({
   onExpandedChange,
   onThresholdSelect,
 }: ScoreProps) {
-  const { present, onTransitionEnd } = useCollapsiblePresence(expanded && !!score);
   const scoreBackground = score
     ? gradeBackgrounds[score.grade]
     : "bg-[var(--color-chrome-raised)]";
@@ -109,7 +106,7 @@ export function Score({
   const tabSelectedText = score
     ? gradeTabText[score.grade]
     : "text-[var(--color-text-muted)]";
-  const showThresholds = present && !!score;
+  const showThresholds = useFlipPresence(expanded && !!score);
   const toneStyle = score ? gradeToneVars[score.grade] : undefined;
 
   return (
@@ -117,7 +114,7 @@ export function Score({
       aria-label="Contrast score"
       className="flex flex-col gap-2.5"
       data-contrast-score
-      style={{ "--field-ease": EASE_OUT, ...toneStyle } as CSSProperties}
+      style={toneStyle}
     >
       <div>
         <div aria-label="Contrast method" className="flex" role="tablist">
@@ -180,6 +177,7 @@ export function Score({
             scoreLabel,
           )}
           id="contrast-score-panel"
+          data-sidebar-layout
           role="tabpanel"
         >
           <button
@@ -193,12 +191,13 @@ export function Score({
                 : undefined
             }
             className={cn(
-              "flex w-full items-end gap-3 px-6 pt-8 text-left focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current motion-safe:transition-[padding-bottom] motion-safe:ease-[var(--field-ease)]",
+              "flex w-full items-end gap-3 px-6 pt-8 text-left focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current",
               expanded && score
-                ? "pb-4 motion-safe:duration-200"
-                : "pb-8 motion-safe:duration-150",
+                ? "pb-4"
+                : "pb-8",
             )}
             disabled={!score}
+            data-sidebar-layout
             onClick={() => onExpandedChange(!expanded)}
             type="button"
           >
@@ -235,25 +234,21 @@ export function Score({
 
           <div
             className={cn(
-              "grid motion-safe:transition-[grid-template-rows] motion-safe:ease-[var(--field-ease)]",
+              "grid",
               expanded && score
-                ? "grid-rows-[1fr] motion-safe:duration-200"
-                : "grid-rows-[0fr] motion-safe:duration-150",
+                ? "grid-rows-[1fr]"
+                : "grid-rows-[0fr]",
             )}
             id="contrast-thresholds"
-            onTransitionEnd={onTransitionEnd}
           >
-            <div className="min-h-0 overflow-hidden">
+            <div className="cs-layout-clip min-h-0 overflow-hidden">
               {showThresholds ? (
                 <div
                   aria-hidden={!expanded}
-                  className={cn(
-                    "px-6 pb-6 motion-safe:transition-opacity motion-safe:ease-[var(--field-ease)]",
-                    expanded
-                      ? "opacity-100 motion-safe:duration-200"
-                      : "opacity-0 motion-safe:duration-150",
-                  )}
+                  className="cs-layout-content px-6 pb-6"
                   inert={!expanded ? true : undefined}
+                  data-open={expanded && !!score}
+                  data-sidebar-layout
                 >
                   <div
                     aria-hidden

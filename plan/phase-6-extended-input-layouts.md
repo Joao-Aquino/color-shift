@@ -25,7 +25,7 @@ Drop a custom image onto the photo area and see its extracted colors → type cu
 
 ## Implementation notes
 - Dropped JPEG, PNG, WebP, AVIF, and GIF files up to 20 MB use the browser-side palette extraction pipeline and join the photo navigation history. Their object URLs remain available while the app is open and are revoked on unmount.
-- The edit control opens an inline textarea. Custom text persists while browsing photos, and Escape exits editing. The Aa/circle toggle remains available.
+- Final Phase 7 browser review (2026-10-07): click the specimen text to edit a seamless textarea, with native caret and automatic font fitting. Removed the separate edit button and Aa/circle toggle. Custom text persists while browsing photos; Escape exits editing.
 - Local photo credits and Markdown export identify the image as personal without creating Unsplash links.
 - The drag state follows Figma Source Photograph variant `3409:1053`: inset dashed target, blurred translucent backdrop, original upload icon, supported-format guidance, and temporarily hidden photo credit/actions.
 - The drop target uses reversible 200ms entry/150ms exit transitions on opacity and scale, with a short icon/text stagger. Reduced motion keeps only opacity.

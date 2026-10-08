@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 
 import { ColorEditor } from "@/components/control-bar/color-editor";
@@ -8,6 +7,9 @@ import { ControlContainer } from "@/components/control-bar/control-container";
 import { ControlsBar } from "@/components/control-bar/controls-bar";
 import { CSButton } from "@/components/control-bar/cs-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Specimen } from "@/components/specimen";
+import { useThemeWipeToggle } from "@/components/ui/theme-wipe-toggle";
+import { PhotoTransition } from "@/components/photo-transition";
 import {
   adjustColorToContrast,
   CONTRAST_THRESHOLDS,
@@ -17,6 +19,7 @@ import {
 import { createFallbackPair, extractColorPair } from "@/lib/color/palette";
 import { fetchPhotos } from "@/lib/photos/client";
 import { useResponsiveLayoutMotion } from "@/lib/use-responsive-layout-motion";
+import { useFlipLayoutMotion } from "@/lib/use-flip-layout-motion";
 import { useTheme } from "@/lib/use-theme";
 import type {
   ColorPair,
@@ -50,12 +53,11 @@ function LoadingPanel({ className = "" }: { className?: string }) {
 
 export function ColorShiftApp() {
   const layoutRef = useResponsiveLayoutMotion();
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
+  const { changeTheme } = useThemeWipeToggle();
   const [entries, setEntries] = useState<PhotoEntry[]>([]);
   const [index, setIndex] = useState(0);
-  const [showCircle, setShowCircle] = useState(false);
   const [specimenText, setSpecimenText] = useState("Aa");
-  const [isEditingSpecimen, setIsEditingSpecimen] = useState(false);
   const [isDraggingPhoto, setIsDraggingPhoto] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -78,17 +80,18 @@ export function ColorShiftApp() {
   const importInFlight = useRef(false);
   const dragDepth = useRef(0);
   const localPhotoUrls = useRef<string[]>([]);
-  const specimenInputRef = useRef<HTMLTextAreaElement>(null);
-  const specimenEditButtonRef = useRef<HTMLButtonElement>(null);
+  const settleSidebarLayout = useFlipLayoutMotion(layoutRef,
+    `${activeColor ?? "closed"}:${scoreExpanded}`,
+    Number(activeColor !== null) + Number(scoreExpanded), "[data-sidebar-layout]", true);
+  const changeScoreExpanded = useCallback((expanded: boolean) => {
+    settleSidebarLayout();
+    setScoreExpanded(expanded);
+  }, [settleSidebarLayout]);
 
   useEffect(() => {
     const urls = localPhotoUrls.current;
     return () => urls.forEach((url) => URL.revokeObjectURL(url));
   }, []);
-
-  useEffect(() => {
-    if (isEditingSpecimen) specimenInputRef.current?.focus();
-  }, [isEditingSpecimen]);
 
   const updateEntries = useCallback(
     (updater: (current: PhotoEntry[]) => PhotoEntry[]) => {
@@ -199,14 +202,17 @@ export function ColorShiftApp() {
   }, [updateCurrentPair]);
 
   const selectColor = useCallback((target: ColorTarget) => {
+    if (target === activeColorRef.current) return;
+    settleSidebarLayout();
     activeColorRef.current = target;
     setActiveColor(target);
-  }, []);
+  }, [settleSidebarLayout]);
 
   const closeEditor = useCallback((restoreFocus = true) => {
     const target = activeColorRef.current;
     if (!target) return;
 
+    settleSidebarLayout();
     activeColorRef.current = null;
     setActiveColor(null);
     if (!restoreFocus) return;
@@ -215,7 +221,7 @@ export function ColorShiftApp() {
         .querySelector<HTMLButtonElement>(`[data-color-field="${target}"]`)
         ?.focus();
     });
-  }, []);
+  }, [settleSidebarLayout]);
 
   const processPhoto = useCallback(
     async (photo: Photo) => {
@@ -531,12 +537,12 @@ export function ColorShiftApp() {
       const target = event.target;
       if (!(target instanceof Element)) return;
       if (target.closest("[data-contrast-score], [data-photo-actions], .cs-theme-toggle")) return;
-      setScoreExpanded(false);
+      changeScoreExpanded(false);
     }
 
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
-  }, [scoreExpanded]);
+  }, [scoreExpanded, changeScoreExpanded]);
 
   useEffect(() => {
     function handleActionEscape(event: KeyboardEvent) {
@@ -549,12 +555,12 @@ export function ColorShiftApp() {
 
       event.preventDefault();
       if (activeColorRef.current) closeEditor();
-      if (scoreExpanded) setScoreExpanded(false);
+      if (scoreExpanded) changeScoreExpanded(false);
     }
 
     window.addEventListener("keydown", handleActionEscape, true);
     return () => window.removeEventListener("keydown", handleActionEscape, true);
-  }, [closeEditor, scoreExpanded]);
+  }, [closeEditor, scoreExpanded, changeScoreExpanded]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -584,7 +590,7 @@ export function ColorShiftApp() {
 
         event.preventDefault();
         if (activeColorRef.current) closeEditor();
-        if (scoreExpanded) setScoreExpanded(false);
+        if (scoreExpanded) changeScoreExpanded(false);
         return;
       }
 
@@ -611,13 +617,13 @@ export function ColorShiftApp() {
         swapColors();
       } else if (event.key.toLowerCase() === "t") {
         event.preventDefault();
-        setTheme(theme === "dark" ? "light" : "dark");
+        changeTheme(theme === "dark" ? "light" : "dark", false);
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo, theme, setTheme]);
+  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo, theme, changeTheme, changeScoreExpanded]);
 
   const current = entries[index];
   const pair = current?.pair ?? null;
@@ -653,72 +659,12 @@ export function ColorShiftApp() {
       <div className="cs-preview-panels">
         <div className="cs-specimen-panel relative min-w-0">
           {ready ? (
-            <>
-              {isEditingSpecimen ? (
-                <div
-                  data-responsive-motion="specimen"
-                  className="flex h-full w-full items-center justify-center"
-                  style={{ backgroundColor: pair.background, color: pair.foreground }}
-                >
-                  <textarea
-                    ref={specimenInputRef}
-                    aria-label="Specimen text"
-                    className="cs-specimen-input"
-                    maxLength={120}
-                    onBlur={() => setIsEditingSpecimen(false)}
-                    onChange={(event) => setSpecimenText(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key !== "Escape") return;
-                      event.preventDefault();
-                      event.stopPropagation();
-                      setIsEditingSpecimen(false);
-                      window.requestAnimationFrame(() => specimenEditButtonRef.current?.focus());
-                    }}
-                    placeholder="Aa"
-                    value={specimenText}
-                  />
-                </div>
-              ) : (
-                <button
-                  aria-label={showCircle ? "Show Aa specimen" : "Show circle specimen"}
-                  data-responsive-motion="specimen"
-                  className="group flex h-full w-full cursor-pointer items-center justify-center overflow-hidden transition-colors duration-300 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-current"
-                  onClick={() => setShowCircle((currentValue) => !currentValue)}
-                  style={{ backgroundColor: pair.background, color: pair.foreground }}
-                  type="button"
-                >
-                  {showCircle ? (
-                    <span
-                      aria-hidden
-                      data-responsive-motion="circle"
-                      className="inline-flex aspect-square w-[min(240px,52%)]"
-                    >
-                      <span data-responsive-circle-shape className="inline-flex h-full w-full">
-                        <span className="h-full w-full rounded-full bg-current transition-[transform,opacity] duration-200 group-active:scale-95" />
-                      </span>
-                    </span>
-                  ) : (
-                    <span data-responsive-motion="type" className="cs-specimen-type inline-flex" data-custom-text={specimenText !== "Aa"}>
-                      <span className="transition-[transform,opacity] duration-200 group-active:scale-95">
-                        {specimenText || "Aa"}
-                      </span>
-                    </span>
-                  )}
-                </button>
-              )}
-              <button
-                ref={specimenEditButtonRef}
-                aria-label="Edit specimen text"
-                className="cs-specimen-edit"
-                onClick={() => {
-                  setShowCircle(false);
-                  setIsEditingSpecimen(true);
-                }}
-                type="button"
-              >
-                Edit text
-              </button>
-            </>
+            <Specimen
+              background={pair.background}
+              foreground={pair.foreground}
+              text={specimenText}
+              onTextChange={setSpecimenText}
+            />
           ) : (
             <LoadingPanel />
           )}
@@ -734,22 +680,8 @@ export function ColorShiftApp() {
           onDragOver={onPhotoDragOver}
           onDrop={onPhotoDrop}
         >
-          {ready ? (
-            <>
-              <Image
-                key={current.photo.id}
-                alt={current.photo.alt}
-                blurDataURL={current.photo.tinyUrl}
-                className="object-cover"
-                fill
-                placeholder="blur"
-                preload={index === 0}
-                quality={90}
-                sizes="(min-width: 1180px) 38vw, 50vw"
-                src={current.photo.url}
-                unoptimized={current.photo.source === "local"}
-              />
-            </>
+          {current ? (
+            <PhotoTransition photo={current.photo} />
           ) : (
             <LoadingPanel />
           )}
@@ -817,7 +749,7 @@ export function ColorShiftApp() {
       <ControlContainer
         preview={preview}
         theme={theme}
-        onThemeChange={setTheme}
+        onThemeChange={changeTheme}
         activeTarget={activeColor}
         algorithm={contrastAlgorithm}
         background={pair?.background ?? null}
@@ -838,7 +770,7 @@ export function ColorShiftApp() {
         nearestThreshold={nearestThreshold}
         onAlgorithmChange={setContrastAlgorithm}
         onSelectColor={selectColor}
-        onScoreExpandedChange={setScoreExpanded}
+        onScoreExpandedChange={changeScoreExpanded}
         onThresholdSelect={selectThreshold}
         photo={current?.photo ?? null}
         score={score}

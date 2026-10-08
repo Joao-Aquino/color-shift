@@ -207,15 +207,16 @@ export function useResponsiveLayoutMotion() {
     const observer = new ResizeObserver(schedule);
     const mutations = new MutationObserver((records) => {
       // Ignore GSAP's temporary measurement nodes and unrelated content updates.
-      if (records.some((record) => [...record.addedNodes, ...record.removedNodes].some(
+      if (records.some((record) => record.type === "attributes" || [...record.addedNodes, ...record.removedNodes].some(
         (node) => node instanceof HTMLElement && (node.matches(TARGET) || node.querySelector(TARGET)),
       ))) refresh();
     });
     syncTargets();
     baseline = capture();
-    mutations.observe(root, { childList: true, subtree: true });
+    mutations.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-responsive-motion"] });
     window.addEventListener("resize", schedule);
     window.addEventListener("scroll", refresh, true);
+    window.addEventListener("cs:sidebar-will-change", settle);
     small.addEventListener("change", schedule);
     desktop.addEventListener("change", schedule);
     reduced.addEventListener("change", handlePreferenceChange);
@@ -225,6 +226,7 @@ export function useResponsiveLayoutMotion() {
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", schedule);
       window.removeEventListener("scroll", refresh, true);
+      window.removeEventListener("cs:sidebar-will-change", settle);
       small.removeEventListener("change", schedule);
       desktop.removeEventListener("change", schedule);
       reduced.removeEventListener("change", handlePreferenceChange);

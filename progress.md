@@ -1,5 +1,57 @@
 # Progress Log
 
+## 2026-10-07 - Destination-specific theme wipe and restored sidebar scale
+
+The user requested Dark left → right and Light right → left, restored scale on both ColorFields and score, and an editable easing selector in DialKit. The wipe now derives its direction from the destination theme. Sidebar Flip/presence is restored with easeInOutQuart (GSAP power3.inOut), leaving export easing unchanged. Development States → Easing selects easeInOutQuart, easeInOutCubic, easeOutQuart, easeOutExpo or linear through --sidebar-easing. Existing enter/exit duration controls still apply.
+
+Mobile reveal follows cs:layout-motion frames and retains its manual wheel/touch and input-focus cancellation. Interrupted timelines, inert exit copies and temporary styles clean up on settlement, resize and reduced motion. The archived curtain branch remains available.
+
+Validation: lint and the final webpack build/TypeScript pass. Chrome theme-wipe, Phase 7 and complete Phase 5/mobile-reveal suites pass with no console errors. Development DialKit verification selects quartic/linear easing, measures the rendered curves for fields and score, and confirms persistence after reload. Added that development regression as tests/motion-devtools.browser.cjs.
+
+## 2026-10-07 - Curtain archived; horizontal theme wipe selected
+
+The user approved the curtain for future reuse, requested a separate branch, and supplied a replacement 21st.dev horizontal wipe. Saved the complete curtain implementation locally as `codex/theme-curtain` at `4ac7b422a326`, preserving the active checkout and its index. That branch includes the component, tuning and regression suite; the active branch remains `codex/phase-7`.
+
+Replaced the active curtain with native View Transition snapshots and left-to-right clip-path reveal: 700ms, ease-in-out, adjustable through Theme Wipe → Duration Ms. Existing theme pills, persistence and previous browser-review corrections remain. Added synchronous theme subscriber notification for React snapshot consistency, guards for skipped/stale update callbacks, snapshot cleanup and immediate fallback for keyboard, reduced motion or unsupported APIs.
+
+Validation: lint, TypeScript/webpack build, deterministic theme tests, the dedicated Chrome wipe suite, Phase 7 and the full Phase 5/mobile-reveal regression pass with no browser console errors. Development localhost:3000 confirms Theme Wipe → Duration Ms = 700 and the 0.7s root property. The browser suite covers clip direction/timing, snapshot selection state, cancelled callbacks, preserved work/focus, reduced motion, keyboard, external storage, resize and API/storage fallbacks. Native snapshots temporarily suspend hit-testing of captured participants; the interruption check dispatches an already-observed theme request during a paused snapshot.
+
+## 2026-10-07 - Theme curtain integrated after browser corrections
+
+Adapted the user-supplied 21st.dev animation into the existing Light/Dark pills. A fixed curtain falls in the next theme's chrome color, commits the persisted theme under full coverage, and rises. Each leg defaults to 550ms with cubic-bezier(0.76,0,0.24,1). Theme controls remain above the curtain. Development DialKit adds Theme Curtain → Duration Ms via `--theme-curtain-duration`; removed effects remain absent.
+
+The overlay uses native Web Animations with matching scaleY functions to avoid singular-matrix interpolation jumps. Rapid clicks retarget the current rendered position and invalidate stale completions. Keyboard activation/T, reduced motion and unsupported APIs switch immediately; live reduced motion/hidden tabs settle the intended theme, storage synchronization cancels pending animation, and unmount cleans up animation/frame handles.
+
+Validation: lint, TypeScript/webpack build, deterministic theme tests, the dedicated Chrome curtain suite and Phase 7 regression pass. Chrome confirms both directions, covered commits, rapid reversal, preserved text/colors/editor/focus, mobile resize, storage cancellation/failure and reduced-motion behavior. Development localhost:3000 exposes the new 550ms control and no obsolete specimen/ColorField controls.
+
+## 2026-10-07 - Six browser-review corrections completed
+
+Removed score and ColorField layout scaling/resizing, leaving immediate opening/closing and the WCAG/APCA numeral odometer. Specimen click now edits persistent plain text with a native caret, automatic font fitting and no visible editor box. Removed the Aa/circle toggle, Edit text button, and obsolete DialKit controls. Light actions use resolved Figma #F2F2F2 / #EBEBEB / #171717; EXPORT preserves the reference's explicitly dark #1A1A1A / #2E2E2E / #EDEDED style in both themes.
+
+Validation before starting the subsequently requested theme curtain: lint, TypeScript, webpack build and Chrome Phase 7, Phase 6, annotations and full Phase 5/mobile-reveal suites passed with no console errors. Updated reveal assertions to the new immediate layout requirement. The earlier intensity-control entries below describe superseded behavior.
+
+## 2026-10-07 - Manual ColorField click-motion tuning
+
+At the user's request, exposed **Color Field → Click Motion Amount** in development DialKit. The root property `--color-field-motion-amount` ranges from 0 to 1 in 0.01 steps, defaulting to the existing full motion. Lower values reduce the remaining resize distance; zero makes ColorField size changes immediate. The controller seeks the non-scaling Flip timeline closer to its endpoint using the inverse quintic easing curve, then finishes on the existing timing. No scale deformation is reintroduced.
+
+Validation: lint, TypeScript/webpack build, manual numeric DialKit entry at localhost:3000, the Phase 7 Chrome suite and the complete Phase 5/editor-reveal suite pass with no console errors. Checks confirm reduced resize at 0.25, immediate opening at 0, unit-scale text/controls, interrupted field switches, cleanup, reduced motion and mobile reveal (51.5ms movement versus 184.8ms settlement). Production continues to omit DialKit; its preview was rebuilt and restarted.
+
+## 2026-10-07 - ColorField squish removed after browser review
+
+The user reported deformation/glitching in ColorField motion. Disabled Flip scaling for both fields and their descendants; expansion now resizes the actual boxes while text, swatches and controls retain unit scale. Other Phase 7 interactions retain their approved motion. Temporary size constraints are restored along with transform/opacity styles during interruption and cleanup.
+
+Validation: lint, TypeScript/webpack build, the Phase 7 Chrome suite and the complete Phase 5/editor-reveal regression pass without console errors. The new browser check samples rendered transforms throughout opening, switching BG/FG and closing, confirming no squashing or stretching. Mobile reveal begins during expansion (53.1ms versus settlement at 186.4ms), and focus, gesture cancellation and short-viewport fit remain covered. The production preview at port 3001 was updated.
+
+## 2026-10-07 - Phase 7 animation polish
+
+Implemented the approved GSAP motion scope: interruptible specimen press/pop and Aa/circle rotation, layered photo crossfades with a pixelated tiny placeholder, coordinated Flip transitions for editors/thresholds/export, and programmatic slider-thumb easing that yields immediately to manual input. Preserved score-only WCAG/APCA odometer animation; hex values, editor readouts and slider numbers remain plain text. Added the ten root CSS motion parameters and a development DialKit panel alongside existing score timing controls.
+
+Layout captures preserve current visual states during rapid reversal. Decorative inert exit copies let shells retain their natural dimensions, avoiding a late expansion jump and preserving mobile reveal during animation. Resize, live reduced motion and unmount clean up temporary styles/layers/listeners. Releasing outside the specimen cancels the pointer click while allowing the next keyboard activation.
+
+Validation: lint, TypeScript, webpack production build, all deterministic suites, focused Phase 7 Chrome checks, Phase 6 Chrome checks, UI annotation checks and the complete Phase 5/reveal regression pass. Final Phase 5 rerun recorded no console errors and actual reveal movement at 52.0ms before settlement at 168.7ms. Earlier runs exposed a test measuring before the scheduled breakpoint Flip and a transient Chrome touch warning; the geometry test now waits for animation scheduling/settlement, and the complete diagnostic rerun passed without suppressing console errors. Development DialKit exposes all ten motion parameters, keyboard tuning updates CSS variables, and production omits the panel. Browser screenshots were inspected; physical-device feel for the new motion remains unverified.
+
+Used `animate` and `emil-design-eng` for implementation, `find-animation-opportunities` for the scope audit and `react-best-practices` for the changed React components. No extra text/typing animation was warranted. Phase 7 and the roadmap now record the implemented state; the continuous-resize work remains in Phase 8.
+
 ## 2026-10-07 - Roadmap restructure: Phase 8 loose ends inserted
 
 Inserted a new Phase 8 (Loose Ends & Hardening) and renumbered the native Swift phase from Phase 8 to Phase 9. The new phase collects deferred infrastructure work: CI (GitHub Actions running lint, typegen, tsc, build, and deterministic tests), Unsplash production access (implement download tracking via `links.download_location`, apply for production approval per API guidelines — prerequisite for App Store release), dependency updates (`npm audit` reports 13 vulnerabilities), completing or dropping Plan 006 (responsive resize easing), README rewrite (currently create-next-app boilerplate), repository housekeeping (listing four merged branches for deletion and the dead homepage link for John to fix), device/browser testing documentation, and spec drift fixes (local fonts, URL typo, contrast-algorithm description, APCA grading labels).

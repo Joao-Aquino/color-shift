@@ -18,7 +18,7 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
     }))}}));
     await page.goto(baseURL,{waitUntil:'domcontentloaded'});
     await page.waitForSelector('[data-color-field]');
-    await page.locator('[data-responsive-motion="photo"] img').evaluate(image => image.decode());
+    await page.locator('[data-photo-layer][data-current="true"] [data-photo-full]').evaluate(image => image.decode());
 
     for (const width of [2520,640,393,320]) {
       await page.setViewportSize({width,height:width === 2520 ? 1314 : 852});
@@ -63,6 +63,7 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
       await page.setViewportSize({width,height:852});
       for (const theme of ['Dark','Light']) {
         await page.getByRole('button',{name:theme,exact:true}).click();
+        await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
         for (const action of ['undo','shuffle','swap','fix','previous','next']) {
           const button = page.locator(`.cs-panel-actions [data-action="${action}"]`);
           assert.ok(await button.isEnabled(),action);

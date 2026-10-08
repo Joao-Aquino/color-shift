@@ -24,7 +24,7 @@ Not a 5-color palette generator. Not a color theory teaching tool. Two colors, o
 - **Photo-driven discovery.** Random Unsplash photography is the entry point. Each photo arrives with extracted color pairs, ready to evaluate. Navigate through photos with arrow keys to discover new palettes.
 - **Discoverable, not labeled.** No dropdowns of color theory terms. Harmony rules power the engine invisibly.
 - **Minimal chrome.** One compact sidebar holds every control. Everything else is color and photography.
-- **Buttery smooth.** GSAP animations on every interaction. Color transitions ease between states. Slider updates are instant. The specimen squishes on press and pops on release. This is a Shift Nudge product.
+- **Buttery smooth.** GSAP animations on every interaction. Color transitions ease between states. Slider updates are instant. Specimen typing is immediate; score/ColorField layout uses Flip scale with easeInOutQuart. This is a Shift Nudge product.
 
 
 
@@ -49,7 +49,7 @@ Not a 5-color palette generator. Not a color theory teaching tool. Two colors, o
 ### Sidebar + Split Screen (desktop)
 
 - **Left sidebar (~320px):** logo and theme toggle, score tile, background/foreground color rows, editor panel (when open), action row, EXPORT. See "Sidebar Architecture".
-- **Specimen panel:** Aa specimen. Background color fills the panel. Foreground color renders "Aa" at massive scale, centered. Click/tap toggles between Aa text and a filled circle (same foreground color).
+- **Specimen panel:** Aa specimen. Background color fills the panel. Foreground color renders "Aa" at massive scale, centered. Click/tap the text to edit it directly, with only a native caret and automatic font fitting.
 - **Photo panel:** Unsplash photo, full-bleed within its panel. Credit at bottom-right, "Photographer, Unsplash", both linking out.
 - Panels have page padding and rounded corners (Figma V6).
 - Mobile (Phase 5, implemented): header and side-by-side specimen/photo precede scrolling score and inline editing; a fixed footer holds EXPORT and a floating trigger. Six actions expand vertically above it. See `plan/phase-5-theming-responsive.md` for the confirmed design, browser verification, and pending device checks.
@@ -85,7 +85,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 
 - Left half of the screen. Background color fills the panel edge to edge.
 - "Aa" rendered in the foreground color at massive scale (48px mobile per the confirmed Phase 5 Figma reference; desktop sizing follows the existing implementation)
-- Click toggles between Aa text and a filled circle. GSAP squish on press (scale 0.85), pop on release (scale 1.05), then the active element rotates out and the alternate rotates in with back-ease overshoot.
+- Click the text to edit directly. No visible editing box or separate button; font size fits the panel automatically. Escape blurs the input. Text persists while navigating/importing photos.
 
 
 
@@ -103,7 +103,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 - **WCAG 2:** contrast ratio (e.g. "4.50:1"), grades: AAA (≥7.0), AA (≥4.5), AA Large (≥3.0), Fail
 - **APCA:** Lc value (e.g. "Lc 72.3"), grades: AAA (≥75), AA (≥60), AA Large (≥45), Fail
 - Toggle between algorithms with the WCAG | APCA tabs at the top of the score tile
-- Score component uses TubeText (3D per-character rotation animation on value change)
+- WCAG and APCA score values use the existing GSAP odometer animation on value change. Other numeric values remain unanimated.
 
 
 
@@ -141,7 +141,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 
 ### 8. Color Format Display
 
-- Color rows show monospace hex values with animated TubeText (3D character rotation on change)
+- Color rows show plain monospace hex values; editor readouts and slider numbers remain unanimated.
 - Export includes all five formats: HEX, RGB, HSL, HSB, OKLCH
 
 
@@ -160,14 +160,16 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 - Dark mode (default): black chrome (#000), muted text (#a39f9f), subtle borders (#2B2727)
 - Light mode (Phase 5, implemented): white/neutral chrome following Figma; palette tinting is deferred. The guarded `T` shortcut switches themes without resetting current work.
 - Keyboard shortcut: T
+- Light/Dark pointer clicks use the supplied horizontal theme wipe: Dark reveals left to right and Light right to left, 700ms ease-in-out, tunable as Theme Wipe → Duration Ms in development DialKit. Existing controls/theme persistence remain; keyboard activation/T, reduced motion and unsupported APIs are immediate. The earlier vertical curtain is archived in local branch `codex/theme-curtain` (`4ac7b422a326`).
 
 
 
 ### 11. DialKit Integration
 
 - All motion parameters exposed as CSS custom properties on `:root`
-- `--color-duration`, `--photo-duration`, `--photo-opacity`, `--squish-scale`, `--squish-duration`, `--pop-scale`, `--pop-duration`, `--exit-duration`, `--enter-duration`, `--enter-overshoot`
+- `--color-duration`, `--photo-duration`, `--photo-opacity`, `--theme-wipe-duration`, `--exit-duration`, `--enter-duration`, `--sidebar-easing`
 - DialKit can live-tune any of these during development or demonstration
+- Specimen squish/pop controls were removed. The subsequent review restores ColorField/score scale with development DialKit States → Easing (default easeInOutQuart).
 
 
 
@@ -207,8 +209,9 @@ The sidebar is a Figma-matched component system built from atomic pieces:
 | `ControlsBar`      | Action row: prev, undo, shuffle, swap, fix, next. States: `default`, `export`                              |
 | `Arrows`           | Previous/next photo buttons (outer ends of the action row)                                                |
 | `ExportPanel`      | COPY + DOWNLOAD .MD buttons. Replaces the action row in export state; EXPORT button stays                 |
-| `CSButton`         | Atomic button with optional swatch chip + TubeText label                                                  |
-| `TubeText`         | 3D per-character rotation animation using GSAP SplitText                                                  |
+| `CSButton`         | Atomic button with optional swatch chip                                                                    |
+| `Odometer`         | GSAP animation for WCAG and APCA score numerals only                                                        |
+| `TubeText`         | Plain monospace value wrapper; no character animation                                                      |
 | `FormatTabs`       | HEX / RGB / HSL / HSB / OKLCH tab row                                                                     |
 | `ColorSliders`     | Three gradient-tracked sliders with numeric values, one per channel of the active format                  |
 | `ColorSlider`      | Single slider with gradient layers (crossfade on tab change)                                              |
@@ -220,7 +223,7 @@ Phosphor icons use `regular` weight for most controls and `fill` only for active
 
 Every icon-only button must have an accessible label, visible focus state, and a non-color-only indication for selected, active, and disabled states. The theme toggle and score-tab info icons meet the same minimums (no sub-16px targets).
 
-**State transitions** for the action row (default/export), score expansion, and editor open/close use GSAP with ease-out-quint curves. Exit animations (150ms) run faster than entrance animations (200ms). Only transform + opacity are animated (GPU-composited).
+**State transitions** for EXPORT ↔ COPY/DOWNLOAD use GSAP Flip with ease-out-quint: exit 150ms, entrance 200ms. Score threshold expansion and ColorField opening/closing use Flip scale with easeInOutQuart (power3.inOut), adjustable through DialKit States → Easing (subsequent browser review, 2026-10-07). Light action buttons use #F2F2F2 / #EBEBEB / #171717; EXPORT uses the explicit dark button style from Figma in both themes.
 
 ---
 
@@ -252,7 +255,7 @@ Every icon-only button must have an accessible label, visible focus state, and a
 | `culori`                 | OKLCH/HSB/RGB color engine (perceptually uniform conversions, gamut mapping)        |
 | `apca-w3`                | APCA contrast algorithm (Lc values)                                                 |
 | `@phosphor-icons/react`  | Web UI icon library for swap, arrows, generate, export/copy/download, close controls |
-| `gsap` + `@gsap/react`   | All animations: color transitions, slider easing, TubeText, Flip layout, squish/pop |
+| `gsap`                  | Score odometer, photo transitions, slider easing, Flip export layout |
 | `node-vibrant` (browser) | Photo color extraction (VibrantPalette: 6 swatches per image)                       |
 | `dialkit`                | Live motion parameter tuning via CSS custom properties                              |
 | `motion`                 | Available (Framer Motion), not currently primary                                    |
@@ -369,9 +372,9 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | WCAG + APCA scoring       | Dual accessibility algorithms, contrast math                |
 | Threshold bumping         | Binary search, algorithmic color adjustment                 |
 | Three slider modes        | Real-time state management, normalized value mapping        |
-| GSAP animations           | Timeline sequencing, Flip layout, SplitText, spring physics |
+| GSAP animations           | Timeline sequencing, Flip layout, score odometer, spring physics |
 | DialKit integration       | CSS custom properties as a design-engineering workflow      |
-| TubeText component        | 3D CSS transforms, per-character animation                  |
+| Score odometer            | GSAP digit animation limited to WCAG and APCA scores         |
 | Figma-matched components  | Translating a design system into atomic React components    |
 | Sidebar state machine     | GSAP-driven UI state transitions (action row, score, editor) |
 | Export (markdown)         | File generation, clipboard API                              |
@@ -391,9 +394,9 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | Photo-driven (not random-color-driven)   | 2026-03 | Unsplash photos make every palette feel grounded and real. Random generation felt clinical.             |
 | Split screen (specimen + photo)          | 2026-03 | The photo IS the context. Showing it alongside the extracted colors tells a story.                      |
 | Dual contrast algorithms (WCAG 2 + APCA) | 2026-03 | APCA is the future of contrast scoring. Teaching both positions students ahead of the industry.         |
-| GSAP over CSS animations                 | 2026-03 | Complex choreography (Flip layout, SplitText, timeline sequencing) needs a real animation library.      |
+| GSAP over CSS animations                 | 2026-03 | Complex choreography (Flip layout, score odometer, timeline sequencing) needs a real animation library. |
 | Three slider modes (OKLCH/HSB/RGB)       | 2026-03 | Designers think in HSB. Code uses RGB. Modern CSS uses OKLCH. Show all three, explain why OKLCH wins.   |
-| TubeText (3D character rotation)         | 2026-03 | Values change constantly. Smooth per-character animation makes it feel alive, not flickering.           |
+| Score-only odometer animation            | 2026-10 | Keep motion on WCAG and APCA scores; color-editor values stay plain and editable. Supersedes the earlier TubeText proposal. |
 | 20 rotating specimen fonts               | 2026-03 | Each photo gets a different typeface. Keeps the experience fresh. Only Aa glyphs loaded (~1-2KB each).  |
 | DialKit CSS custom properties            | 2026-03 | Demonstrates the designer's fine-tuning workflow. Students see animation parameters they can touch.     |
 | Left sidebar replaces bottom bar         | 2026-09 | Figma V6: all controls in one column keep both panels full height and give the editor room to grow.     |

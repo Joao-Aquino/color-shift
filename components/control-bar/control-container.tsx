@@ -14,7 +14,7 @@ import type {
 interface ControlContainerProps {
   preview: React.ReactNode;
   theme: Theme;
-  onThemeChange: (theme: Theme) => void;
+  onThemeChange: (theme: Theme, animate?: boolean) => void;
   activeTarget: ColorTarget | null;
   algorithm: ContrastAlgorithm;
   scoreExpanded: boolean;
@@ -34,7 +34,7 @@ interface ControlContainerProps {
 }
 
 function Divider() {
-  return <div className="h-px bg-[var(--color-chrome-divider)]" />;
+  return <div className="h-px bg-[var(--color-chrome-divider)]" data-sidebar-layout />;
 }
 
 export function ControlContainer({

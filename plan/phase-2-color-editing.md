@@ -51,7 +51,7 @@ Five tabs: HEX · RGB · HSL · HSB · OKLCH. The active tab sets both the slide
 - Alpha / transparency (not in the product; contrast against transparency is undefined)
 - Threshold bumping, fix/wrench, APCA (Phase 3)
 - Export (Phase 4)
-- GSAP slider easing, TubeText animation (Phase 7)
+- GSAP easing for programmatic slider updates (Phase 7); editor values remain unanimated
 
 ## Done means
 Click a color row → editor panel opens → switch tabs and drag sliders → specimen and score update live with zero lag → edit the value in the readout row → undo steps back → click outside or `Esc` closes the panel.

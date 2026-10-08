@@ -10,9 +10,11 @@ function subscribe(onChange: () => void) {
     if (event.key === THEME_STORAGE_KEY || event.key === null) applyTheme(readTheme());
   }
   window.addEventListener("storage", onStorage);
+  window.addEventListener("cs:theme-change", onChange);
   return () => {
     observer.disconnect();
     window.removeEventListener("storage", onStorage);
+    window.removeEventListener("cs:theme-change", onChange);
   };
 }
 

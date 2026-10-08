@@ -44,7 +44,7 @@ export function ControlFooter({ children }: { children: ReactNode }) {
     };
   }, []);
   return (
-    <footer className="cs-footer" data-control-footer ref={ref}>
+    <footer className="cs-footer" data-control-footer data-sidebar-layout ref={ref}>
       <div aria-hidden="true" className="cs-footer-backdrop">
         <span />
         <span />
