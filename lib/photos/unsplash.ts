@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Photo } from "@/types/color-shift";
+import type { Theme } from "@/lib/theme";
 
 const UNSPLASH_API_URL = "https://api.unsplash.com/photos/random";
 const PHOTO_QUERIES = [
@@ -83,7 +84,7 @@ function normalizePhoto(photo: UnsplashPhoto): Photo {
   };
 }
 
-export async function getRandomPhotos(count: number): Promise<Photo[]> {
+export async function getRandomPhotos(count: number, theme?: Theme): Promise<Photo[]> {
   const accessKey = process.env.UNSPLASH_ACCESS_KEY;
 
   if (!accessKey) {
@@ -95,7 +96,7 @@ export async function getRandomPhotos(count: number): Promise<Photo[]> {
   url.searchParams.set("orientation", "landscape");
   url.searchParams.set("content_filter", "high");
   const query = PHOTO_QUERIES[Math.floor(Math.random() * PHOTO_QUERIES.length)];
-  url.searchParams.set("query", query);
+  url.searchParams.set("query", theme === "light" ? `bright light ${query}` : theme === "dark" ? `dark ${query}` : query);
 
   const response = await fetch(url, {
     cache: "no-store",

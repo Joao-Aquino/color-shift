@@ -65,7 +65,7 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
           inputs:[...editor.querySelectorAll('input')].map(input => getComputedStyle(input).backgroundColor),
         }));
         assert.equal(style.background,theme === 'Light' ? 'rgb(46, 46, 46)' : 'rgb(74, 74, 74)');
-        assert.equal(style.text,theme === 'Light' ? 'rgb(23, 23, 23)' : 'rgb(237, 237, 237)');
+        assert.equal(style.text,'rgb(237, 237, 237)');
         assert.ok(style.inputs.every(color => color === 'rgba(0, 0, 0, 0)'));
       }
       if (theme === 'Light') await page.locator('[data-color-field-shell="foreground"]').screenshot({path:'/tmp/color-shift-editor-light.png'});

@@ -145,3 +145,15 @@ selection/replacement when focusing an unfocused textarea.
 repeat/disabled state, Undo and Cmd/Ctrl+S export opening, focus, Escape, repeat
 and reduced-motion behavior. The annotation suite additionally verifies
 transparent numeric inputs and Light selected-format tokens in all formats.
+
+## Theme-directed photo generation
+
+`theme-pair.test.cjs` checks 162 light/dark combinations, including saturated,
+neutral and identical colors: polarity, background/foreground tone bounds,
+minimum WCAG contrast and immutable input/palette preservation.
+`themed-photos-api.test.cjs` checks theme/default query construction, original
+tracking/display quality, allowed theme values and count limits without API keys.
+`themed-photos.browser.cjs` verifies actual pixel selection against misleading
+metadata, failed-thumbnail priority/fallback, click/Space parity, history,
+in-flight theme changes and mobile generation. Screenshots:
+`/tmp/color-shift-themed-light.png` and `/tmp/color-shift-themed-dark.png`.

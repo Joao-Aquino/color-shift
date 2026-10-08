@@ -96,7 +96,7 @@ export function ColorEditor({
           />
           {FORMATS.map((item) => (
             <TabsTrigger
-              className="z-10 h-7 rounded-full bg-transparent px-1 text-[11px] font-medium text-[var(--color-text-muted)] transition-colors group-data-[variant=default]/tabs-list:data-active:shadow-none data-active:bg-transparent data-active:text-[var(--color-text-value)] data-active:shadow-none dark:data-active:border-transparent dark:data-active:bg-transparent"
+              className="cs-format-tab z-10 h-7 rounded-full bg-transparent px-1 text-[11px] font-medium text-[var(--color-text-muted)] transition-colors group-data-[variant=default]/tabs-list:data-active:shadow-none data-active:bg-transparent data-active:text-[var(--color-format-selected-text)] data-active:shadow-none dark:data-active:border-transparent dark:data-active:bg-transparent"
               key={item}
               value={item}
             >

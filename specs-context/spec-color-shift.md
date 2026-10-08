@@ -425,4 +425,26 @@ Theme and action tooltips follow Figma `3396:988`: keys in a bordered, rounded b
 
 ### Color editor visual adjustment (2026-10-08)
 
-Channel/readout inputs use transparent backgrounds in both themes. The selected format pill in Light uses #2E2E2E with ds/gray/1000 text (#171717, resolved from Figma Light variables); Dark styling remains unchanged.
+Channel/readout inputs use transparent backgrounds in both themes. The selected format pill in Light uses #2E2E2E with #EDEDED text (corrected by the user after the initial ds/gray/1000 request); Dark styling remains unchanged.
+
+### Theme-directed random photos (2026-10-08)
+
+The Random photo action and Space shortcut use the visible Light/Dark theme.
+Light prefers brighter photography and generates a light background with a dark
+foreground. Dark prefers darker photography and generates a dark background with
+a light foreground. Switching the chrome theme preserves the current photo,
+manual edits and historical pairs; the preference applies on the next generation.
+
+One Unsplash request supplies four candidates, with a Light/Dark hint added to
+the existing abstract query family. Thumbnail pixels are sampled at 32px and the
+brightest/darkest valid candidate is selected. Decoded candidates take priority
+over failed thumbnails; if none can be sampled, Unsplash color metadata is used.
+Sampling has a five-second deadline. Photograph URLs, appearance and attribution
+are preserved. The selection is a preference among the available candidates,
+not a guaranteed brightness filter supplied by Unsplash.
+
+Generated color pairs retain their selected hues. OKLCH background lightness is
+at least 0.82 in Light and at most 0.28 in Dark; foreground tone follows the
+opposite polarity, with a WCAG minimum of 4.5:1. Manual edits remain unrestricted.
+The latest visible theme is read after asynchronous selection/extraction, so a
+pending request does not commit a palette for a stale theme.

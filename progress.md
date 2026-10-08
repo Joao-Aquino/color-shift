@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-10-08 - Corrected Light format text and theme-directed generation
+
+The user corrected selected-format text from #171717 to #EDEDED. Applied a dedicated selected-text token and scoped active-tab rule so the generic hover color cannot override it. Other Light text colors and the #2E2E2E pill background remain.
+
+Added theme-directed Random/Space generation. A single request gets four Unsplash candidates using the existing abstract queries with theme hints. Client sampling selects the brightest/darkest valid thumbnail; failed decoding/CORS falls back to color metadata only when no valid samples are available, with a bounded sampling deadline. Theme-directed OKLCH tones preserve hues and guarantee light/dark polarity with WCAG contrast at least 4.5:1. The current photo, edits and history are preserved on theme changes. Selection/palette creation reads the latest visible theme after asynchronous work. Initial buffer navigation and local imports retain their existing behavior.
+
+Validation: lint and webpack production build/TypeScript pass. Two deterministic suites validate 162 pairs and API query/parameter behavior. Chrome themed-photos, ui-annotations and Phase 7 suites pass: actual pixels vs misleading metadata, valid-thumbnail priority/fallback, desktop/mobile, in-flight theme changes, click/Space parity, history and EDEDED under hover. Live local-API calls returned HTTP 200 with four Unsplash photos in both Light and Dark. Photography brightness remains a preference among candidates; palette polarity/contrast is enforced.
+
 ## 2026-10-08 - Boxed shortcut tooltips, Fix/Export shortcuts and editor colors
 
 Applied Figma 3396:988 to shortcut tooltips: 1px bordered boxes, 4px radius, 2px padding, Geist 13px/16px and 16px Phosphor Command/Control/arrows. Undo and Export adapt modifiers to the platform; keys and modifiers share one box. Preserved accessible button labels and added aria-keyshortcuts.

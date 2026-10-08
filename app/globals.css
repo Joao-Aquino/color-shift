@@ -15,6 +15,7 @@
   --color-chrome-border: #2e2e2e;
   --color-chrome-border-strong: #4a4a4a;
   --color-format-selected: #4a4a4a;
+  --color-format-selected-text: #ededed;
   --color-text-label: #878787;
   --color-text-muted: #a1a1a1;
   --color-text-value: #ededed;
@@ -187,6 +188,7 @@
 .cs-theme-option { padding: 4px 8px; border-radius: 9999px; font-size: 12px; line-height: 16px; color: var(--color-text-muted); cursor: pointer; }
 [data-theme="light"] [data-theme-choice="light"], [data-theme="dark"] [data-theme-choice="dark"] { background: var(--color-theme-selected); color: #fff; }
 .cs-theme-option:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+:root[data-theme="light"] .cs-format-tab[aria-selected="true"] { color: var(--color-format-selected-text); }
 .cs-tooltip-arrow-light { display: none; }
 .cs-shortcut-tooltip { gap: 4px; }
 :root[data-theme="light"] .cs-shortcut-tooltip { gap: 8px; }
