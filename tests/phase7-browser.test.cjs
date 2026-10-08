@@ -20,7 +20,7 @@ fs.mkdirSync(output, { recursive: true });
     const count = Number(new URL(route.request().url()).searchParams.get('count') || 10);
     const photos = Array.from({ length: count }, () => {
       const id = sequence++;
-      return { id: `motion-${id}`, url: `/figma/photo.jpg`, tinyUrl: `/figma/photo.jpg`,
+      return { id: `motion-${id}`, url: `/motion-full-${id}.jpg`, tinyUrl: `/motion-tiny-${id}.jpg`,
         thumbUrl: '/figma/photo.jpg', color: '#f7b955', width: 1200, height: 900,
         alt: `Motion photo ${id}`, photographer: 'Mara Vale',
         photographerUrl: 'https://unsplash.com/@test', photoUrl: 'https://unsplash.com/photos/test' };

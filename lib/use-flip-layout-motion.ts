@@ -86,8 +86,6 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
     }
     
     const ease = sidebar ? sidebarEase() : "power3.out";
-    const fadeDuration = exiting ? exitDuration * 0.35 : enterDuration * 0.35;
-    const fadeDelay = exiting ? 0 : enterDuration * 0.15;
     const version = generation.current;
     const targets = Array.from(root.querySelectorAll<HTMLElement>(selector));
     
@@ -105,6 +103,12 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
       );
       const exitingContent = contents.filter(el => el.dataset.open === "false");
       const enteringContent = contents.filter(el => el.dataset.open === "true");
+      
+      const isSwitch = exitingContent.length > 0 && enteringContent.length > 0;
+      const exitFadeDuration = isSwitch ? exitDuration * 0.35 : (exiting ? exitDuration * 0.35 : enterDuration * 0.35);
+      const exitShapeDelay = isSwitch ? exitFadeDuration * 0.5 : (exiting ? exitFadeDuration * 0.5 : 0);
+      const enterFadeDuration = enterDuration * 0.35;
+      const enterFadeDelay = enterDuration * 0.15;
       
       const exits = exitingContent.filter(original => {
         const beforeState = before.get(original);
@@ -147,7 +151,12 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         return copy;
       });
 
+      gsap.ticker.lagSmoothing(0);
+      
       timeline.current = gsap.timeline({
+        onStart: () => {
+          gsap.ticker.lagSmoothing(500, 33);
+        },
         onUpdate: () => {
           exits.forEach(copy => { copy.style.translate = `0px ${-(window.scrollY - scroll)}px`; });
           root.dispatchEvent(new Event("cs:layout-motion", { bubbles: true }));
@@ -157,10 +166,10 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         },
       });
 
-      if (exiting && enteringContent.length > 0) {
+      if (exitingContent.length > 0 && enteringContent.length > 0) {
         timeline.current.to(enteringContent, {
           opacity: 0,
-          duration: fadeDuration,
+          duration: exitFadeDuration,
           ease: "power2.out",
         }, 0);
       }
@@ -179,7 +188,11 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         const positionChanged = Math.abs(prev.y - afterRect.top) > 1;
         
         if (heightChanged || positionChanged) {
-          const shapeDelay = exiting ? fadeDuration * 0.5 : 0;
+          const shellIsClosing = shell.querySelector('[data-open="false"]');
+          const shapeDelay = shellIsClosing ? exitShapeDelay : 0;
+          const shapeDuration = shellIsClosing 
+            ? (isSwitch ? exitDuration - exitShapeDelay : (exiting ? exitDuration - exitShapeDelay : enterDuration))
+            : (exiting ? exitDuration : enterDuration);
           
           timeline.current.fromTo(shell, 
             { 
@@ -191,7 +204,7 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
               height: afterHeight,
               paddingTop: afterPaddingTop,
               paddingBottom: afterPaddingBottom,
-              duration: duration - shapeDelay,
+              duration: shapeDuration,
               ease,
               clearProps: "height,paddingTop,paddingBottom",
             },
@@ -217,7 +230,12 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
                                Math.abs(prev.paddingBottom - afterPaddingBottom) > 0.5;
         
         if (heightChanged || paddingChanged) {
-          const shapeDelay = exiting ? fadeDuration * 0.5 : 0;
+          const buttonShell = button.closest('[data-color-field-shell]');
+          const shellIsClosing = buttonShell?.querySelector('[data-open="false"]');
+          const shapeDelay = shellIsClosing ? exitShapeDelay : 0;
+          const shapeDuration = shellIsClosing
+            ? (isSwitch ? exitDuration - exitShapeDelay : (exiting ? exitDuration - exitShapeDelay : enterDuration))
+            : (exiting ? exitDuration : enterDuration);
           
           timeline.current.fromTo(button, 
             { 
@@ -233,7 +251,7 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
               paddingBottom: afterPaddingBottom,
               paddingLeft: afterPaddingLeft,
               paddingRight: afterPaddingRight,
-              duration: duration - shapeDelay,
+              duration: shapeDuration,
               ease,
               clearProps: "height,paddingTop,paddingBottom,paddingLeft,paddingRight",
             },
@@ -246,22 +264,34 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         timeline.current.to(exits, {
           opacity: 0,
           y: -4,
-          duration: fadeDuration,
+          duration: exitFadeDuration,
           ease: "power2.out",
         }, 0);
       }
 
-      if (!exiting && enteringContent.length > 0) {
+      if (enteringContent.length > 0 && !isSwitch) {
         timeline.current.fromTo(enteringContent, 
           { opacity: 0, y: 4 },
           { 
             opacity: 1,
             y: 0,
-            duration: fadeDuration,
+            duration: enterFadeDuration,
             ease,
             clearProps: "opacity,y",
           },
-          fadeDelay
+          enterFadeDelay
+        );
+      } else if (enteringContent.length > 0 && isSwitch) {
+        timeline.current.fromTo(enteringContent, 
+          { opacity: 0, y: 4 },
+          { 
+            opacity: 1,
+            y: 0,
+            duration: enterFadeDuration,
+            ease,
+            clearProps: "opacity,y",
+          },
+          exitDuration * 0.5
         );
       }
 
@@ -275,10 +305,13 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
           const afterY = element.getBoundingClientRect().top;
           const delta = afterY - prev.y;
           if (Math.abs(delta) > 1) {
-            const shapeDelay = exiting ? fadeDuration * 0.5 : 0;
+            const shapeDelay = exitingContent.length > 0 ? exitShapeDelay : 0;
+            const shapeDuration = exitingContent.length > 0
+              ? (isSwitch ? exitDuration - exitShapeDelay : (exiting ? exitDuration - exitShapeDelay : enterDuration))
+              : (exiting ? exitDuration : enterDuration);
             timeline.current.fromTo(element, 
               { y: -delta },
-              { y: 0, duration: duration - shapeDelay, ease, clearProps: "y" },
+              { y: 0, duration: shapeDuration, ease, clearProps: "y" },
               shapeDelay
             );
           }
