@@ -58,7 +58,7 @@ export function ColorReadout({
             aria-describedby={invalid ? descriptionId : undefined}
             aria-invalid={invalid}
             aria-label={`${format} color value`}
-            className="h-7 w-full rounded-full border-0 bg-transparent px-2 text-right font-mono text-xs text-[var(--color-text-value)] tabular-nums focus-visible:ring-1 md:text-xs"
+            className="h-7 w-full rounded-full border-0 bg-transparent px-2 text-right font-mono text-xs text-[var(--color-text-value)] tabular-nums focus-visible:ring-1 md:text-xs dark:bg-transparent"
             onBlur={() => {
               if (cancelCommit.current) {
                 cancelCommit.current = false;

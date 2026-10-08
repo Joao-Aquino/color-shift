@@ -39,12 +39,12 @@ export function useThemeWipeToggle() {
     if (next) flushSync(() => setTheme(next));
   }, [clear]);
 
-  const changeTheme = useCallback((next: Theme, animate = true) => {
+  const changeTheme = useCallback((next: Theme) => {
     const root = document.documentElement;
     const current = root.dataset.theme === "light" ? "light" : "dark";
-    if (animate && pendingThemeRef.current === next) return;
+    if (pendingThemeRef.current === next) return;
     clear();
-    if (!animate || document.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    if (document.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
       typeof document.startViewTransition !== "function" || typeof root.animate !== "function") {
       flushSync(() => setTheme(next));
       return;

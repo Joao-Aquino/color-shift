@@ -8,9 +8,11 @@ export async function GET(request: Request) {
   const count = Number.isFinite(requestedCount)
     ? Math.min(Math.max(requestedCount, 1), 30)
     : 10;
+  const requestedTheme = searchParams.get("theme");
+  const theme = requestedTheme === "light" || requestedTheme === "dark" ? requestedTheme : undefined;
 
   try {
-    const photos = await getRandomPhotos(count);
+    const photos = await getRandomPhotos(count, theme);
     return Response.json(
       { photos },
       { headers: { "Cache-Control": "no-store" } },

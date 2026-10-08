@@ -14,6 +14,9 @@ export function MotionDevtools() {
     themeWipe: {
       durationMs: [MOTION_DEFAULTS["--theme-wipe-duration"] * 1000, 100, 1000, 50],
     },
+    scoreDescription: {
+      durationMs: [MOTION_DEFAULTS["--score-description-duration"] * 1000, 0, 300, 10],
+    },
     photo: {
       durationMs: [MOTION_DEFAULTS["--photo-duration"] * 1000, 0, 300, 10],
       initialOpacity: [MOTION_DEFAULTS["--photo-opacity"], 0, 1, 0.05],
@@ -39,6 +42,7 @@ export function MotionDevtools() {
     const properties = [
       ["--color-duration", `${motion.colorDurationMs / 1000}s`],
       ["--theme-wipe-duration", `${motion.themeWipe.durationMs / 1000}s`],
+      ["--score-description-duration", `${motion.scoreDescription.durationMs / 1000}s`],
       ["--photo-duration", `${motion.photo.durationMs / 1000}s`],
       ["--photo-opacity", String(motion.photo.initialOpacity)],
       ["--exit-duration", `${motion.states.exitDurationMs / 1000}s`],
@@ -53,7 +57,7 @@ export function MotionDevtools() {
         else style.removeProperty(name);
       }
     };
-  }, [motion.colorDurationMs, motion.themeWipe.durationMs, motion.photo.durationMs, motion.photo.initialOpacity,
+  }, [motion.colorDurationMs, motion.themeWipe.durationMs, motion.scoreDescription.durationMs, motion.photo.durationMs, motion.photo.initialOpacity,
     motion.states.exitDurationMs, motion.states.enterDurationMs, motion.states.easing]);
 
   useEffect(() => {

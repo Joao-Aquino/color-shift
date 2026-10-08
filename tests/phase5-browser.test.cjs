@@ -235,6 +235,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await page.getByRole('textbox',{name:'HEX color value',exact:true}).press('Enter');
     await page.locator('body').click({position:{x:2,y:2}});
     await page.keyboard.press('t');
+    await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
     assert.notEqual(await page.locator('html').getAttribute('data-theme'),themeBefore);
     console.log('PASS T shortcut with editable-control isolation');
 

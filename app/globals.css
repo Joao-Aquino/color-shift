@@ -14,6 +14,8 @@
   --color-chrome-divider: #1f1f1f;
   --color-chrome-border: #2e2e2e;
   --color-chrome-border-strong: #4a4a4a;
+  --color-format-selected: #4a4a4a;
+  --color-format-selected-text: #ededed;
   --color-text-label: #878787;
   --color-text-muted: #a1a1a1;
   --color-text-value: #ededed;
@@ -22,6 +24,7 @@
   --color-panel-loading: #151515;
   --color-popover-bg: #202020;
   --color-tooltip-bg: #1a1a1a;
+  --color-shortcut-border: #2e2e2e;
   --color-theme-selected: #2e2e2e;
   --color-score-good: #0f2e18;
   --color-score-meh: #331b00;
@@ -44,6 +47,7 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --color-duration: 0.2s;
   --theme-wipe-duration: 700ms;
+  --score-description-duration: 0.2s;
   --photo-duration: 0.2s;
   --photo-opacity: 0;
   --exit-duration: 0.25s;
@@ -78,6 +82,7 @@
   --color-chrome-divider: #ebebeb;
   --color-chrome-border: #ebebeb;
   --color-chrome-border-strong: #c9c9c9;
+  --color-format-selected: #2e2e2e;
   --color-text-label: #707070;
   --color-text-muted: #666666;
   --color-text-value: #171717;
@@ -86,6 +91,7 @@
   --color-panel-loading: #f2f2f2;
   --color-popover-bg: #ffffff;
   --color-tooltip-bg: #e5e5e5;
+  --color-shortcut-border: #c9c9c9;
   --color-theme-selected: #171717;
   --color-score-good: #ebfaeb;
   --color-score-meh: #fff4d6;
@@ -182,7 +188,11 @@
 .cs-theme-option { padding: 4px 8px; border-radius: 9999px; font-size: 12px; line-height: 16px; color: var(--color-text-muted); cursor: pointer; }
 [data-theme="light"] [data-theme-choice="light"], [data-theme="dark"] [data-theme-choice="dark"] { background: var(--color-theme-selected); color: #fff; }
 .cs-theme-option:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+:root[data-theme="light"] .cs-format-tab[aria-selected="true"] { color: var(--color-format-selected-text); }
 .cs-tooltip-arrow-light { display: none; }
+.cs-shortcut-tooltip { gap: 4px; }
+:root[data-theme="light"] .cs-shortcut-tooltip { gap: 8px; }
+.cs-shortcut-key { display: inline-flex; flex: none; align-items: center; justify-content: center; padding: 2px; border: 1px solid var(--color-shortcut-border); border-radius: 4px; font: inherit; white-space: nowrap; }
 :root[data-theme="light"] .cs-tooltip-arrow-dark { display: none; }
 :root[data-theme="light"] .cs-tooltip-arrow-light { display: block; }
 .cs-controls { grid-area: controls; display: flex; min-width: 0; flex-direction: column; gap: 16px; }
@@ -194,7 +204,16 @@
 .cs-specimen-type, .cs-specimen-measure { width: 88%; margin: 0; border: 0; padding: 0; background: transparent; color: inherit; font-family: inherit; font-size: var(--specimen-font-size); font-weight: 400; line-height: 1.15; letter-spacing: inherit; text-align: center; white-space: pre-wrap; overflow-wrap: anywhere; }
 .cs-specimen-type { display: block; resize: none; border-radius: 0; outline: none; overflow: hidden; cursor: text; caret-color: currentColor; }
 .cs-specimen-type::placeholder { color: currentColor; opacity: 1; }
+.cs-specimen-type:focus::placeholder { color: transparent; }
 .cs-specimen-measure { position: absolute; top: 0; left: 6%; visibility: hidden; pointer-events: none; }
+.cs-specimen-caret { position: absolute; top: 0; left: 0; width: calc(14em / 240); height: calc(202em / 240); background: currentColor; pointer-events: none; animation: cs-caret-blink 1s step-end infinite; }
+.cs-specimen-caret[hidden] { display: none; }
+.cs-specimen-surface[data-custom-caret="true"] .cs-specimen-type { caret-color: transparent; }
+@keyframes cs-caret-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@media (forced-colors: active) {
+  .cs-specimen-caret { display: none; }
+  .cs-specimen-surface[data-custom-caret="true"] .cs-specimen-type { caret-color: auto; }
+}
 .cs-photo-layer { position: absolute; inset: 0; pointer-events: none; }
 .cs-layout-content[data-open="false"] { display: none; }
 .cs-import-error button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
@@ -278,6 +297,7 @@ html[data-theme-ready] :where(body, .cs-app, .cs-footer, .cs-theme-toggle, .cs-t
   .cs-specimen-type, .cs-specimen-measure { font-weight: 500; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .cs-specimen-caret { animation: none; }
   html[data-theme-ready] *, html[data-theme-ready] *::before, html[data-theme-ready] *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
   html[data-theme-ready] .cs-photo-drop { transform: none !important; transition: opacity 150ms var(--ease-out), visibility 0s linear 150ms !important; }
   html[data-theme-ready] .cs-photo-drop[data-active="true"] { transition: opacity 150ms var(--ease-out), visibility 0s !important; }

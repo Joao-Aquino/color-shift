@@ -24,7 +24,7 @@ Not a 5-color palette generator. Not a color theory teaching tool. Two colors, o
 - **Photo-driven discovery.** Random Unsplash photography is the entry point. Each photo arrives with extracted color pairs, ready to evaluate. Navigate through photos with arrow keys to discover new palettes.
 - **Discoverable, not labeled.** No dropdowns of color theory terms. Harmony rules power the engine invisibly.
 - **Minimal chrome.** One compact sidebar holds every control. Everything else is color and photography.
-- **Buttery smooth.** GSAP animations on every interaction. Color transitions ease between states. Slider updates are instant. Specimen typing is immediate; score/ColorField layout uses Flip scale with easeInOutQuart. This is a Shift Nudge product.
+- **Buttery smooth.** GSAP animations on every interaction. Color transitions ease between states. Slider updates are instant. Specimen typing is immediate; score/ColorField layout animates real box dimensions with easeOutQuart. This is a Shift Nudge product.
 
 
 
@@ -160,16 +160,16 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 - Dark mode (default): black chrome (#000), muted text (#a39f9f), subtle borders (#2B2727)
 - Light mode (Phase 5, implemented): white/neutral chrome following Figma; palette tinting is deferred. The guarded `T` shortcut switches themes without resetting current work.
 - Keyboard shortcut: T
-- Light/Dark pointer clicks use the supplied horizontal theme wipe: Dark reveals left to right and Light right to left, 700ms ease-in-out, tunable as Theme Wipe → Duration Ms in development DialKit. Existing controls/theme persistence remain; keyboard activation/T, reduced motion and unsupported APIs are immediate. The earlier vertical curtain is archived in local branch `codex/theme-curtain` (`4ac7b422a326`).
+- Light/Dark clicks and keyboard activation/T use the supplied horizontal theme wipe: Dark reveals left to right and Light right to left, 700ms ease-in-out, tunable as Theme Wipe → Duration Ms in development DialKit. Existing controls/theme persistence remain; reduced motion and unsupported APIs are immediate. Theme controls show the T shortcut in a tooltip. The earlier vertical curtain is archived in local branch `codex/theme-curtain` (`4ac7b422a326`).
 
 
 
 ### 11. DialKit Integration
 
 - All motion parameters exposed as CSS custom properties on `:root`
-- `--color-duration`, `--photo-duration`, `--photo-opacity`, `--theme-wipe-duration`, `--exit-duration`, `--enter-duration`, `--sidebar-easing`
+- `--color-duration`, `--photo-duration`, `--photo-opacity`, `--theme-wipe-duration`, `--exit-duration`, `--enter-duration`, `--sidebar-easing`, `--score-description-duration`
 - DialKit can live-tune any of these during development or demonstration
-- Specimen squish/pop controls were removed. The subsequent review restores ColorField/score scale with development DialKit States → Easing (default easeInOutQuart).
+- Specimen squish/pop controls were removed. ColorField/score box resizing uses development DialKit States → Easing (default easeOutQuart, after real-resize update #9).
 
 
 
@@ -223,7 +223,7 @@ Phosphor icons use `regular` weight for most controls and `fill` only for active
 
 Every icon-only button must have an accessible label, visible focus state, and a non-color-only indication for selected, active, and disabled states. The theme toggle and score-tab info icons meet the same minimums (no sub-16px targets).
 
-**State transitions** for EXPORT ↔ COPY/DOWNLOAD use GSAP Flip with ease-out-quint: exit 150ms, entrance 200ms. Score threshold expansion and ColorField opening/closing use Flip scale with easeInOutQuart (power3.inOut), adjustable through DialKit States → Easing (subsequent browser review, 2026-10-07). Light action buttons use #F2F2F2 / #EBEBEB / #171717; EXPORT uses the explicit dark button style from Figma in both themes.
+**State transitions** for EXPORT ↔ COPY/DOWNLOAD use GSAP Flip with ease-out-quint: exit 150ms, entrance 200ms. Score threshold expansion and ColorField opening/closing animate real dimensions with easeOutQuart (power3.out), adjustable through DialKit States → Easing (real-resize update #9). Light action buttons use #F2F2F2 / #EBEBEB / #171717; EXPORT uses the explicit dark button style from Figma in both themes.
 
 ---
 
@@ -407,3 +407,44 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 ---
 
 *Spec rewritten: 2026-03-28 (from codebase, replaces 2026-03-25 original). Layout revised 2026-09-29 (sidebar, Figma V6).*
+
+### Phase 7 final interaction review (2026-10-08)
+
+Specimen editing begins at the end on first click/focus and uses the proportional
+Figma caret from 3416:366; selection and native editing remain available. Score
+description line-count changes ease their occupied height over 200ms without
+scaling text. All action shortcuts share pointer animations by explicit user
+preference; direct text editing and slider manipulation remain native. The
+complete shortcut list is in [keyboard-shortcuts.md](keyboard-shortcuts.md).
+
+### Shortcut tooltips (final review, 2026-10-08)
+
+Fix contrast uses F outside text input/interactive focus when correction is available. Export uses Cmd/Ctrl+S, including while editing, opens the same animated action row and focuses COPY. Repeated keydown does not restart either action.
+
+Theme and action tooltips follow Figma `3396:988`: keys in a bordered, rounded box, with Phosphor Command/Control icons beside Z (Undo) or S (Export) inside the same box. Both display the modifier appropriate to the platform. Arrow shortcuts use Phosphor arrows; T, S, F and Space use text. Accessible shortcut names remain available alongside `aria-keyshortcuts`. Full inventory: [keyboard shortcuts](keyboard-shortcuts.md).
+
+### Color editor visual adjustment (2026-10-08)
+
+Channel/readout inputs use transparent backgrounds in both themes. The selected format pill in Light uses #2E2E2E with #EDEDED text (corrected by the user after the initial ds/gray/1000 request); Dark styling remains unchanged.
+
+### Theme-directed random photos (2026-10-08)
+
+The Random photo action and Space shortcut use the visible Light/Dark theme.
+Light prefers brighter photography and generates a light background with a dark
+foreground. Dark prefers darker photography and generates a dark background with
+a light foreground. Switching the chrome theme preserves the current photo,
+manual edits and historical pairs; the preference applies on the next generation.
+
+One Unsplash request supplies four candidates, with a Light/Dark hint added to
+the existing abstract query family. Thumbnail pixels are sampled at 32px and the
+brightest/darkest valid candidate is selected. Decoded candidates take priority
+over failed thumbnails; if none can be sampled, Unsplash color metadata is used.
+Sampling has a five-second deadline. Photograph URLs, appearance and attribution
+are preserved. The selection is a preference among the available candidates,
+not a guaranteed brightness filter supplied by Unsplash.
+
+Generated color pairs retain their selected hues. OKLCH background lightness is
+at least 0.82 in Light and at most 0.28 in Dark; foreground tone follows the
+opposite polarity, with a WCAG minimum of 4.5:1. Manual edits remain unrestricted.
+The latest visible theme is read after asynchronous selection/extraction, so a
+pending request does not commit a palette for a stale theme.

@@ -1,6 +1,7 @@
 export const MOTION_DEFAULTS = {
   "--color-duration": 0.2,
   "--theme-wipe-duration": 0.7,
+  "--score-description-duration": 0.2,
   "--photo-duration": 0.2,
   "--photo-opacity": 0,
   "--exit-duration": 0.25,

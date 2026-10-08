@@ -8,6 +8,7 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
   const errors = [];
   try {
     const page = await browser.newPage({viewport:{width:2520,height:1314}});
+    await page.addInitScript(() => Object.defineProperty(navigator, 'platform', {value:'MacIntel', configurable:true}));
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     let sequence = 0;
@@ -37,16 +38,40 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
               left:slider.getBoundingClientRect().left,
             })),
             overflow:document.documentElement.scrollWidth > innerWidth,
+            inputs:[...editor.querySelectorAll('input')].map(input => getComputedStyle(input).backgroundColor),
           };
         },format);
         assert.equal(aligned.labelWidth,74);
         assert.ok(aligned.channels.every(channel => channel.labelWidth === 74 && Math.abs(channel.left-aligned.inputLeft) < 1),JSON.stringify(aligned));
         assert.equal(aligned.overflow,false);
+        assert.ok(aligned.inputs.every(color => color === 'rgba(0, 0, 0, 0)'),JSON.stringify(aligned));
       }
       if (width === 2520) await page.locator('[data-color-field-shell="foreground"]').screenshot({path:'/tmp/color-shift-aligned-readout-desktop.png'});
       await page.keyboard.press('Escape');
     }
     console.log('PASS readout/sliders share 74px labels and aligned input starts in all formats at four widths');
+
+    await page.setViewportSize({width:1440,height:980});
+    for (const theme of ['Light','Dark']) {
+      await page.getByRole('button',{name:theme,exact:true}).click();
+      await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
+      await page.locator('[data-color-field="foreground"]').click();
+      for (const format of ['HEX','RGB','HSL','HSB','OKLCH']) {
+        await page.getByRole('tab',{name:format,exact:true}).click();
+        await page.waitForTimeout(250);
+        const style = await page.locator('[data-color-editor]').evaluate(editor => ({
+          background:getComputedStyle(editor.querySelector('[data-format-indicator]')).backgroundColor,
+          text:getComputedStyle(editor.querySelector('[role="tab"][aria-selected="true"]')).color,
+          inputs:[...editor.querySelectorAll('input')].map(input => getComputedStyle(input).backgroundColor),
+        }));
+        assert.equal(style.background,theme === 'Light' ? 'rgb(46, 46, 46)' : 'rgb(74, 74, 74)');
+        assert.equal(style.text,'rgb(237, 237, 237)');
+        assert.ok(style.inputs.every(color => color === 'rgba(0, 0, 0, 0)'));
+      }
+      if (theme === 'Light') await page.locator('[data-color-field-shell="foreground"]').screenshot({path:'/tmp/color-shift-editor-light.png'});
+      await page.keyboard.press('Escape');
+    }
+    console.log('PASS transparent editor inputs in all formats/themes and Light selected-tab tokens');
 
     // Enable all actions, including Previous, Undo and Fix, before checking them.
     await page.setViewportSize({width:2520,height:1314});
@@ -68,7 +93,8 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
           const button = page.locator(`.cs-panel-actions [data-action="${action}"]`);
           assert.ok(await button.isEnabled(),action);
           await button.hover();
-          const tooltip = page.locator('[data-slot="tooltip-content"]').filter({hasText:await button.getAttribute('aria-label')});
+          const label = (await button.getAttribute('aria-label')).split(' (')[0];
+          const tooltip = page.locator('[data-slot="tooltip-content"]').filter({hasText:label});
           await tooltip.waitFor({state:'visible'});
           await page.waitForTimeout(200);
           const state = await tooltip.evaluate(node => ({
@@ -76,6 +102,14 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
             color:getComputedStyle(node).color,font:getComputedStyle(node).fontSize,
             lineHeight:getComputedStyle(node).lineHeight,padding:getComputedStyle(node).padding,
             pointer:getComputedStyle(node).pointerEvents,bounds:node.getBoundingClientRect().toJSON(),
+            gap:getComputedStyle(node).gap,
+            key:[...node.querySelectorAll('[data-slot="shortcut-key"]')].map(key => ({
+              label:key.getAttribute('aria-label'),padding:getComputedStyle(key).padding,
+              border:getComputedStyle(key).borderTopWidth,borderColor:getComputedStyle(key).borderTopColor,
+              radius:getComputedStyle(key).borderRadius,font:getComputedStyle(key).fontSize,
+              lineHeight:getComputedStyle(key).lineHeight,
+              icons:[...key.querySelectorAll('svg')].map(icon => ({width:icon.getBoundingClientRect().width,height:icon.getBoundingClientRect().height})),
+            })),
             arrows:[...node.querySelectorAll('img')].filter(image => getComputedStyle(image).display !== 'none').map(image => ({
               src:image.getAttribute('src'),loaded:image.complete && image.naturalWidth > 0,
               width:image.width,height:image.height,
@@ -90,8 +124,24 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
           assert.equal(state.font,'13px');
           assert.equal(state.lineHeight,'16px');
           assert.equal(state.padding,'8px 12px');
+          {
+            assert.equal(state.gap,theme === 'Dark' ? '4px' : '8px');
+            assert.equal(state.key.length,1);
+            const key = state.key[0];
+            assert.equal(key.padding,'2px');
+            assert.equal(key.border,'1px');
+            assert.equal(key.borderColor,theme === 'Dark' ? 'rgb(46, 46, 46)' : 'rgb(201, 201, 201)');
+            assert.equal(key.radius,'4px');
+            assert.equal(key.font,'13px');
+            assert.equal(key.lineHeight,'16px');
+            assert.deepEqual(key.icons,['undo','previous','next'].includes(action) ? [{width:16,height:16}] : []);
+            if (action === 'undo') assert.equal(key.label,'Command + Z');
+            if (action === 'fix') assert.equal(key.label,'F');
+            assert.ok(await button.getAttribute('aria-keyshortcuts'));
+          }
           assert.deepEqual(state.arrows,[{src:`/figma/tooltip-arrow-${theme.toLowerCase()}.svg`,loaded:true,width:14,height:6}]);
           if (action === 'swap' && width === 393) await page.screenshot({path:`/tmp/color-shift-tooltip-mobile-${theme.toLowerCase()}.png`});
+          if (action === 'undo' && width === 393) await tooltip.screenshot({path:`/tmp/color-shift-tooltip-command-${theme.toLowerCase()}.png`});
         }
       }
     }
@@ -108,8 +158,31 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3001';
     await page.locator('.cs-panel-actions [data-action="shuffle"]').hover();
     await activeTooltip.waitFor({state:'visible'});
     assert.equal(await activeTooltip.getAttribute('data-side'),'top');
+    await page.getByRole('button',{name:'Light',exact:true}).hover();
+    const themeTooltip = page.locator('[data-slot="tooltip-content"]').filter({hasText:'Toggle theme'});
+    await themeTooltip.waitFor({state:'visible'});
+    assert.equal(await themeTooltip.locator('[data-slot="shortcut-key"]').textContent(),'T');
+    await themeTooltip.screenshot({path:'/tmp/color-shift-tooltip-theme.png'});
+    await page.locator('[data-export-button]').hover();
+    const exportTooltip = page.locator('[data-slot="tooltip-content"]').filter({hasText:'Export colors'});
+    await exportTooltip.waitFor({state:'visible'});
+    assert.equal(await exportTooltip.locator('kbd').getAttribute('aria-label'),'Command + S');
+    assert.equal(await exportTooltip.locator('kbd svg').count(),1);
+    await exportTooltip.screenshot({path:'/tmp/color-shift-tooltip-export.png'});
+
+    await page.addInitScript(() => Object.defineProperty(navigator, 'platform', {value:'Win32', configurable:true}));
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('[data-action="swap"]').click();
+    await page.locator('[data-action="undo"]').hover();
+    const undoTooltip = page.locator('[data-slot="tooltip-content"]').filter({hasText:'Undo color edit'});
+    await undoTooltip.waitFor({state:'visible'});
+    assert.equal(await undoTooltip.locator('[data-slot="shortcut-key"]').getAttribute('aria-label'),'Control + Z');
+    assert.equal(await undoTooltip.locator('kbd svg').count(),1);
+    await page.locator('[data-export-button]').hover();
+    await exportTooltip.waitFor({state:'visible'});
+    assert.equal(await exportTooltip.locator('kbd').getAttribute('aria-label'),'Control + S');
     assert.deepEqual(errors,[]);
-    console.log('PASS neighboring mobile action remains clickable; desktop tooltips stay above; console errors: none');
+    console.log('PASS theme shortcut box, Command/Control platform icons, neighboring mobile actions, desktop positioning and no console errors');
   } finally {
     await browser.close();
   }

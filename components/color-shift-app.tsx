@@ -17,10 +17,13 @@ import {
   getContrastScore,
 } from "@/lib/color/contrast";
 import { createFallbackPair, extractColorPair } from "@/lib/color/palette";
+import { adaptColorPairToTheme } from "@/lib/color/theme-pair";
 import { fetchPhotos } from "@/lib/photos/client";
+import { selectPhotoForTheme } from "@/lib/photos/theme-selection";
 import { useResponsiveLayoutMotion } from "@/lib/use-responsive-layout-motion";
 import { useFlipLayoutMotion } from "@/lib/use-flip-layout-motion";
 import { useTheme } from "@/lib/use-theme";
+import type { Theme } from "@/lib/theme";
 import type {
   ColorPair,
   ColorTarget,
@@ -30,6 +33,7 @@ import type {
 
 const INITIAL_BUFFER_SIZE = 10;
 const REFILL_THRESHOLD = 3;
+const THEMED_PHOTO_CANDIDATES = 4;
 const MAX_IMPORT_BYTES = 20 * 1024 * 1024;
 const SUPPORTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"]);
 
@@ -41,6 +45,10 @@ interface PhotoEntry {
 interface ColorSnapshot {
   background: string;
   foreground: string;
+}
+
+function activeTheme(): Theme {
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
 function LoadingPanel({ className = "" }: { className?: string }) {
@@ -236,7 +244,7 @@ export function ColorShiftApp() {
 
       updateEntries((current) =>
         current.map((entry) =>
-          entry.photo.id === photo.id ? { ...entry, pair } : entry,
+          entry.photo.id === photo.id && !entry.pair ? { ...entry, pair } : entry,
         ),
       );
     },
@@ -433,19 +441,25 @@ export function ColorShiftApp() {
     setErrorMessage(null);
 
     try {
-      const [photo] = await fetchPhotos(1);
-      if (!photo) throw new Error("No photo was returned.");
+      const photos = await fetchPhotos(THEMED_PHOTO_CANDIDATES, undefined, activeTheme());
+      const photo = await selectPhotoForTheme(photos, activeTheme);
+      let pair: ColorPair;
+      try {
+        pair = await extractColorPair(photo.thumbUrl);
+      } catch {
+        pair = createFallbackPair(photo.color);
+      }
+      pair = adaptColorPairToTheme(pair, activeTheme());
 
       const nextIndex = Math.min(indexRef.current + 1, entriesRef.current.length);
       updateEntries((current) => {
         const next = [...current];
-        next.splice(nextIndex, 0, { photo, pair: null });
+        next.splice(nextIndex, 0, { photo, pair });
         return next;
       });
       indexRef.current = nextIndex;
       setIndex(nextIndex);
       resetHistory();
-      processPhotos([photo]);
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Unable to load a new photo.",
@@ -454,7 +468,7 @@ export function ColorShiftApp() {
       requestInFlight.current = false;
       setIsRequesting(false);
     }
-  }, [processPhotos, resetHistory, updateEntries]);
+  }, [resetHistory, updateEntries]);
 
   const swapColors = useCallback(() => {
     const snapshot = getCurrentSnapshot();
@@ -595,13 +609,20 @@ export function ColorShiftApp() {
       }
 
       if (
-        isInteractive ||
+        isEditable ||
         event.metaKey ||
         event.ctrlKey ||
         event.altKey
       ) {
         return;
       }
+
+      if (event.key.toLowerCase() === "t") {
+        event.preventDefault();
+        if (!event.repeat) changeTheme(theme === "dark" ? "light" : "dark");
+        return;
+      }
+      if (isInteractive) return;
 
       if (event.key === "ArrowLeft") {
         event.preventDefault();
@@ -615,15 +636,19 @@ export function ColorShiftApp() {
       } else if (event.key.toLowerCase() === "s") {
         event.preventDefault();
         swapColors();
-      } else if (event.key.toLowerCase() === "t") {
+      } else if (event.key.toLowerCase() === "f") {
         event.preventDefault();
-        changeTheme(theme === "dark" ? "light" : "dark", false);
+        if (event.repeat || isRequesting) return;
+        const pair = entriesRef.current[indexRef.current]?.pair;
+        if (pair && getContrastScore(pair.foreground, pair.background, contrastAlgorithm).value < selectedThresholds[contrastAlgorithm]) {
+          fixContrast();
+        }
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo, theme, changeTheme, changeScoreExpanded]);
+  }, [closeEditor, goNext, goPrevious, scoreExpanded, shuffle, swapColors, undo, theme, changeTheme, changeScoreExpanded, isRequesting, contrastAlgorithm, selectedThresholds, fixContrast]);
 
   const current = entries[index];
   const pair = current?.pair ?? null;
