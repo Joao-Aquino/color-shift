@@ -6,14 +6,11 @@ import { useCallback, useLayoutEffect, useRef, type RefObject } from "react";
 import { motionValue, prefersReducedMotion, sidebarEase } from "@/lib/motion";
 
 const SELECTOR = "[data-sidebar-layout]";
-const FADE_DURATION = 0.09;
 
 interface CapturedState {
   height: number;
   paddingTop: number;
   paddingBottom: number;
-  backgroundColor: string;
-  borderColor: string;
   y: number;
 }
 
@@ -52,14 +49,12 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
     const before = new Map<HTMLElement, CapturedState>();
     
     targets.forEach(element => {
-      const computed = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
+      const computed = getComputedStyle(element);
       before.set(element, {
         height: rect.height,
         paddingTop: parseFloat(computed.paddingTop),
         paddingBottom: parseFloat(computed.paddingBottom),
-        backgroundColor: computed.backgroundColor,
-        borderColor: computed.borderColor,
         y: rect.top,
       });
     });
@@ -77,8 +72,18 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
     
     if (!root || !before || prefersReducedMotion()) return;
     
-    const duration = motionValue(exiting ? "--exit-duration" : "--enter-duration");
+    const exitDuration = motionValue("--exit-duration");
+    const enterDuration = motionValue("--enter-duration");
+    const duration = exiting ? exitDuration : enterDuration;
+    
+    if (duration === 0) {
+      settle();
+      return;
+    }
+    
     const ease = sidebar ? sidebarEase() : "power3.out";
+    const fadeDuration = exiting ? exitDuration * 0.35 : enterDuration * 0.35;
+    const fadeDelay = exiting ? 0 : enterDuration * 0.15;
     const version = generation.current;
     const targets = Array.from(root.querySelectorAll<HTMLElement>(selector));
     
@@ -148,7 +153,7 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
       if (exiting && enteringContent.length > 0) {
         timeline.current.to(enteringContent, {
           opacity: 0,
-          duration: FADE_DURATION,
+          duration: fadeDuration,
           ease: "power2.out",
         }, 0);
       }
@@ -162,53 +167,29 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         const afterHeight = afterRect.height;
         const afterPaddingTop = parseFloat(afterComputed.paddingTop);
         const afterPaddingBottom = parseFloat(afterComputed.paddingBottom);
-        const afterBackgroundColor = afterComputed.backgroundColor;
-        const afterBorderColor = afterComputed.borderColor;
         
         const heightChanged = Math.abs(prev.height - afterHeight) > 1;
         const positionChanged = Math.abs(prev.y - afterRect.top) > 1;
         
         if (heightChanged || positionChanged) {
-          const props: gsap.TweenVars = {
-            duration,
-            ease,
-            clearProps: "height,paddingTop,paddingBottom,backgroundColor,borderColor",
-          };
+          const shapeDelay = exiting ? fadeDuration * 0.5 : 0;
           
-          if (heightChanged) {
-            Object.assign(props, {
-              height: afterHeight,
-              paddingTop: afterPaddingTop,
-              paddingBottom: afterPaddingBottom,
-            });
-          }
-          
-          if (prev.backgroundColor !== afterBackgroundColor) {
-            props.backgroundColor = afterBackgroundColor;
-          }
-          
-          if (prev.borderColor !== afterBorderColor) {
-            props.borderColor = afterBorderColor;
-          }
-          
-          const fromProps: gsap.TweenVars = {};
-          if (heightChanged) {
-            Object.assign(fromProps, {
+          timeline.current.fromTo(shell, 
+            { 
               height: prev.height,
               paddingTop: prev.paddingTop,
               paddingBottom: prev.paddingBottom,
-            });
-          }
-          
-          if (prev.backgroundColor !== afterBackgroundColor) {
-            fromProps.backgroundColor = prev.backgroundColor;
-          }
-          
-          if (prev.borderColor !== afterBorderColor) {
-            fromProps.borderColor = prev.borderColor;
-          }
-          
-          timeline.current.fromTo(shell, fromProps, props, 0);
+            },
+            { 
+              height: afterHeight,
+              paddingTop: afterPaddingTop,
+              paddingBottom: afterPaddingBottom,
+              duration: duration - shapeDelay,
+              ease,
+              clearProps: "height,paddingTop,paddingBottom",
+            },
+            shapeDelay
+          );
         }
       });
 
@@ -229,6 +210,8 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
                                Math.abs(prev.paddingBottom - afterPaddingBottom) > 0.5;
         
         if (heightChanged || paddingChanged) {
+          const shapeDelay = exiting ? fadeDuration * 0.5 : 0;
+          
           timeline.current.fromTo(button, 
             { 
               height: prev.height,
@@ -243,11 +226,11 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
               paddingBottom: afterPaddingBottom,
               paddingLeft: afterPaddingLeft,
               paddingRight: afterPaddingRight,
-              duration,
+              duration: duration - shapeDelay,
               ease,
               clearProps: "height,paddingTop,paddingBottom,paddingLeft,paddingRight",
             },
-            0
+            shapeDelay
           );
         }
       });
@@ -256,22 +239,22 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         timeline.current.to(exits, {
           opacity: 0,
           y: -4,
-          duration: FADE_DURATION,
+          duration: fadeDuration,
           ease: "power2.out",
         }, 0);
       }
 
-      if (!exiting && enteringContent.length > 0 && timeline.current) {
+      if (!exiting && enteringContent.length > 0) {
         timeline.current.fromTo(enteringContent, 
           { opacity: 0, y: 4 },
           { 
             opacity: 1,
             y: 0,
-            duration: duration * 0.5,
+            duration: fadeDuration,
             ease,
             clearProps: "opacity,y",
           },
-          FADE_DURATION
+          fadeDelay
         );
       }
 
@@ -285,10 +268,11 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
           const afterY = element.getBoundingClientRect().top;
           const delta = afterY - prev.y;
           if (Math.abs(delta) > 1) {
+            const shapeDelay = exiting ? fadeDuration * 0.5 : 0;
             timeline.current.fromTo(element, 
               { y: -delta },
-              { y: 0, duration, ease, clearProps: "y" },
-              0
+              { y: 0, duration: duration - shapeDelay, ease, clearProps: "y" },
+              shapeDelay
             );
           }
         });

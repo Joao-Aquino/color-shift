@@ -16,22 +16,30 @@ fs.mkdirSync(output, { recursive: true });
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     let sequence = 0;
-    await page.route('**/api/photos?*', async route => {
-      const count = Number(new URL(route.request().url()).searchParams.get('count') || 10);
-      const photos = Array.from({ length: count }, () => {
-        const id = sequence++;
-        return { id: `motion-${id}`, url: `/motion-full-${id}.jpg`, tinyUrl: `/motion-tiny-${id}.jpg`,
-          thumbUrl: '/figma/photo.jpg', color: '#f7b955', width: 1200, height: 900,
-          alt: `Motion photo ${id}`, photographer: 'Mara Vale',
-          photographerUrl: 'https://unsplash.com/@test', photoUrl: 'https://unsplash.com/photos/test' };
-      });
-      await route.fulfill({ json: { photos } });
+  await page.route('**/api/photos?*', async route => {
+    const count = Number(new URL(route.request().url()).searchParams.get('count') || 10);
+    const photos = Array.from({ length: count }, () => {
+      const id = sequence++;
+      return { id: `motion-${id}`, url: `/figma/photo.jpg`, tinyUrl: `/figma/photo.jpg`,
+        thumbUrl: '/figma/photo.jpg', color: '#f7b955', width: 1200, height: 900,
+        alt: `Motion photo ${id}`, photographer: 'Mara Vale',
+        photographerUrl: 'https://unsplash.com/@test', photoUrl: 'https://unsplash.com/photos/test' };
     });
-    await page.route('**/motion-tiny-*.jpg', async route => {
-      await new Promise(resolve => setTimeout(resolve, 50));
-      await route.fulfill({ path: bitmap });
+    await route.fulfill({ json: { photos } });
+  });
+  await page.route('**/api/photos?*', async route => {
+    const count = Number(new URL(route.request().url()).searchParams.get('count') || 10);
+    const photos = Array.from({ length: count }, () => {
+      const id = sequence++;
+      return { id: `motion-${id}`, url: `/figma/photo.jpg`, tinyUrl: `/figma/photo.jpg`,
+        thumbUrl: '/figma/photo.jpg', color: '#f7b955', width: 1200, height: 900,
+        alt: `Motion photo ${id}`, photographer: 'Mara Vale',
+        photographerUrl: 'https://unsplash.com/@test', photoUrl: 'https://unsplash.com/photos/test' };
     });
-    await page.route('**/motion-full-*.jpg', route => route.fulfill({ path: bitmap }));
+    await route.fulfill({ json: { photos } });
+  });
+  await page.route('**/motion-tiny-*.jpg', route => route.abort());
+  await page.route('**/motion-full-*.jpg', route => route.abort());
     // Preserve a visible placeholder while the full image is delayed.
     await page.route('**/_next/image?*', async route => {
       await new Promise(resolve => setTimeout(resolve, 320));

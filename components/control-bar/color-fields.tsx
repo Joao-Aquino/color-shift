@@ -165,7 +165,7 @@ function ColorField({
         aria-controls="color-editor"
         aria-expanded={active}
         className={cn(
-          "flex w-full items-center gap-2 text-left focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:outline-none transition-none",
+          "flex w-full items-center gap-2 text-left outline-none focus-visible:outline-none transition-none",
           active
             ? "h-8 pl-2"
             : "h-12 py-2 pr-2 pl-4",
@@ -173,6 +173,14 @@ function ColorField({
         data-color-field={target}
         data-sidebar-layout
         onClick={() => onSelect(target)}
+        onFocus={(e) => {
+          const shell = e.currentTarget.closest('[data-color-field-shell]');
+          if (shell) shell.setAttribute('data-focus-within', 'true');
+        }}
+        onBlur={(e) => {
+          const shell = e.currentTarget.closest('[data-color-field-shell]');
+          if (shell) shell.removeAttribute('data-focus-within');
+        }}
         type="button"
       >
         <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-muted)] uppercase">
