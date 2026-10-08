@@ -34,7 +34,7 @@ interface ControlContainerProps {
 }
 
 function Divider() {
-  return <div className="h-px bg-[var(--color-chrome-divider)]" />;
+  return <div className="h-px bg-[var(--color-chrome-divider)]" data-sidebar-layout />;
 }
 
 export function ControlContainer({

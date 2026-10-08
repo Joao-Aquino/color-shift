@@ -88,6 +88,9 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
       const shells = targets.filter(element => 
         element.hasAttribute("data-color-field-shell") || element.id === "contrast-score-panel"
       );
+      const buttons = targets.filter(element => 
+        element.hasAttribute("data-color-field")
+      );
       const contents = targets.filter(element => 
         element.classList.contains("cs-layout-content")
       );
@@ -209,6 +212,46 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         }
       });
 
+      buttons.forEach(button => {
+        const prev = before.get(button);
+        if (!prev || !timeline.current) return;
+        
+        const afterRect = button.getBoundingClientRect();
+        const afterComputed = getComputedStyle(button);
+        const afterHeight = afterRect.height;
+        const afterPaddingTop = parseFloat(afterComputed.paddingTop);
+        const afterPaddingBottom = parseFloat(afterComputed.paddingBottom);
+        const afterPaddingLeft = parseFloat(afterComputed.paddingLeft);
+        const afterPaddingRight = parseFloat(afterComputed.paddingRight);
+        
+        const heightChanged = Math.abs(prev.height - afterHeight) > 1;
+        const paddingChanged = Math.abs(prev.paddingTop - afterPaddingTop) > 0.5 || 
+                               Math.abs(prev.paddingBottom - afterPaddingBottom) > 0.5;
+        
+        if (heightChanged || paddingChanged) {
+          timeline.current.fromTo(button, 
+            { 
+              height: prev.height,
+              paddingTop: prev.paddingTop,
+              paddingBottom: prev.paddingBottom,
+              paddingLeft: parseFloat(getComputedStyle(button).paddingLeft),
+              paddingRight: parseFloat(getComputedStyle(button).paddingRight),
+            },
+            { 
+              height: afterHeight,
+              paddingTop: afterPaddingTop,
+              paddingBottom: afterPaddingBottom,
+              paddingLeft: afterPaddingLeft,
+              paddingRight: afterPaddingRight,
+              duration,
+              ease,
+              clearProps: "height,paddingTop,paddingBottom,paddingLeft,paddingRight",
+            },
+            0
+          );
+        }
+      });
+
       if (exits.length) {
         timeline.current.to(exits, {
           opacity: 0,
@@ -234,7 +277,8 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
 
       if (timeline.current) {
         targets.filter(el => 
-          !shells.includes(el) && !contents.includes(el) && Math.abs((before.get(el)?.y ?? 0) - el.getBoundingClientRect().top) > 1
+          !shells.includes(el) && !contents.includes(el) && !buttons.includes(el) && 
+          Math.abs((before.get(el)?.y ?? 0) - el.getBoundingClientRect().top) > 1
         ).forEach(element => {
           const prev = before.get(element);
           if (!prev || !timeline.current) return;
