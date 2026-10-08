@@ -9,8 +9,10 @@ const SELECTOR = "[data-sidebar-layout]";
 
 interface CapturedState {
   height: number;
+  width: number;
   paddingTop: number;
   paddingBottom: number;
+  x: number;
   y: number;
 }
 
@@ -53,8 +55,10 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
       const computed = getComputedStyle(element);
       before.set(element, {
         height: rect.height,
+        width: rect.width,
         paddingTop: parseFloat(computed.paddingTop),
         paddingBottom: parseFloat(computed.paddingBottom),
+        x: rect.left,
         y: rect.top,
       });
     });
@@ -102,8 +106,11 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
       const exitingContent = contents.filter(el => el.dataset.open === "false");
       const enteringContent = contents.filter(el => el.dataset.open === "true");
       
-      const exits = exitingContent.map(original => {
+      const exits = exitingContent.filter(original => {
         const beforeState = before.get(original);
+        return beforeState && beforeState.height > 0;
+      }).map(original => {
+        const beforeState = before.get(original)!;
         const copy = original.cloneNode(true) as HTMLElement;
         [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("*"))].forEach(element => {
           Array.from(element.attributes).forEach(attribute => {
@@ -115,7 +122,6 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         copy.setAttribute("aria-hidden", "true");
         copy.setAttribute("data-motion-ghost", "true");
         copy.inert = true;
-        const rect = beforeState ? { top: beforeState.y, left: original.getBoundingClientRect().left, width: original.getBoundingClientRect().width, height: beforeState.height } : original.getBoundingClientRect();
         const computed = getComputedStyle(original);
         ["--score-border", "--score-pill", "--score-pill-border", "--score-text"].forEach(property => {
           const value = computed.getPropertyValue(property);
@@ -123,10 +129,10 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
         });
         Object.assign(copy.style, {
           position: "fixed",
-          top: `${rect.top}px`,
-          left: `${rect.left}px`,
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
+          top: `${beforeState.y}px`,
+          left: `${beforeState.x}px`,
+          width: `${beforeState.width}px`,
+          height: `${beforeState.height}px`,
           margin: "0",
           display: "block",
           opacity: computed.opacity,

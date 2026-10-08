@@ -173,16 +173,6 @@ function ColorField({
         data-color-field={target}
         data-sidebar-layout
         onClick={() => onSelect(target)}
-        onFocus={(e) => {
-          const shell = e.currentTarget.closest('[data-color-field-shell]');
-          if (shell && e.currentTarget.matches(':focus-visible')) {
-            shell.setAttribute('data-focus-within', 'true');
-          }
-        }}
-        onBlur={(e) => {
-          const shell = e.currentTarget.closest('[data-color-field-shell]');
-          if (shell) shell.removeAttribute('data-focus-within');
-        }}
         type="button"
       >
         <span className="text-xs font-medium tracking-[0.1em] text-[var(--color-text-muted)] uppercase">

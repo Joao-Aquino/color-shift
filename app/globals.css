@@ -186,7 +186,7 @@
 :root[data-theme="light"] .cs-tooltip-arrow-dark { display: none; }
 :root[data-theme="light"] .cs-tooltip-arrow-light { display: block; }
 .cs-controls { grid-area: controls; display: flex; min-width: 0; flex-direction: column; gap: 16px; }
-[data-color-field-shell][data-focus-within] { box-shadow: 0 0 0 2px var(--color-focus) inset; }
+[data-color-field-shell]:has([data-color-field]:focus-visible) { box-shadow: 0 0 0 2px var(--color-focus) inset; }
 .cs-preview { grid-area: preview; position: relative; min-width: 0; }
 .cs-preview-panels { display: grid; grid-template-columns: 167fr 183fr; gap: 4px; height: 240px; overflow: hidden; border-radius: 8px; }
 .cs-specimen-surface { --specimen-font-size: 48px; transition: background-color var(--color-duration) ease, color var(--color-duration) ease; }

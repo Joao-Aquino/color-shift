@@ -27,19 +27,11 @@ fs.mkdirSync(output, { recursive: true });
     });
     await route.fulfill({ json: { photos } });
   });
-  await page.route('**/api/photos?*', async route => {
-    const count = Number(new URL(route.request().url()).searchParams.get('count') || 10);
-    const photos = Array.from({ length: count }, () => {
-      const id = sequence++;
-      return { id: `motion-${id}`, url: `/figma/photo.jpg`, tinyUrl: `/figma/photo.jpg`,
-        thumbUrl: '/figma/photo.jpg', color: '#f7b955', width: 1200, height: 900,
-        alt: `Motion photo ${id}`, photographer: 'Mara Vale',
-        photographerUrl: 'https://unsplash.com/@test', photoUrl: 'https://unsplash.com/photos/test' };
-    });
-    await route.fulfill({ json: { photos } });
+  await page.route('**/motion-tiny-*.jpg', async route => {
+    await new Promise(resolve => setTimeout(resolve, 50));
+    await route.fulfill({ path: bitmap });
   });
-  await page.route('**/motion-tiny-*.jpg', route => route.abort());
-  await page.route('**/motion-full-*.jpg', route => route.abort());
+  await page.route('**/motion-full-*.jpg', route => route.fulfill({ path: bitmap }));
     // Preserve a visible placeholder while the full image is delayed.
     await page.route('**/_next/image?*', async route => {
       await new Promise(resolve => setTimeout(resolve, 320));
