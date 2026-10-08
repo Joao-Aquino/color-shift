@@ -15,7 +15,13 @@ Application draft for the Unsplash developer account:
 - **Website:** https://colorshift.co-opstudio.com
 - **Screenshots to attach:** Desktop and mobile views with a photo plus visible photographer/Unsplash credit; export panel and resulting Markdown credit; optional browser Network view showing the tracking request. Capture these from the deployment that includes the Phase 8 changes.
 
-Submit from the account that owns the access key after the tracking code is deployed and verified with a real export. Record submission and approval dates here. The native app in Phase 9 must keep the same proxy, attribution, hotlinking and tracking behavior.
+The tracking code was verified on the Phase 8 preview on 2026-10-08. Submit from the account that owns the access key, describe the palette-export tracking point to Unsplash, and record submission and approval dates here. The native app in Phase 9 must keep the same proxy, attribution, hotlinking and tracking behavior.
+
+## Phase 8 preview verification
+
+On 2026-10-08, the protected branch preview `color-shift-git-codex-phase-8-hardening-co-op-studio.vercel.app` (deployment `dpl_8Me76KdDAQCZhF3vysaSfZB8fwJN`, commit `2f1a671`) was opened in an authenticated browser. A photo and a replacement photo both loaded directly from `images.unsplash.com` at 2400 px width; visible credit linked the photographer and Unsplash with the expected UTM parameters. Random photo selection, previous-photo history, and Light/Dark switching worked.
+
+The export offered Copy and Download .MD, with no image-file action. The downloaded Markdown contained the selected colors, contrast scores, and photographer/Unsplash attribution. Vercel request logs showed two `POST /api/photos/download` responses with HTTP 204 after the copy and Markdown download. The route returns 204 only after the Unsplash `download_location` request succeeds. The preview console reported no errors or warnings during this session. This verifies the published flow; Unsplash production approval and the exact interpretation of palette-use tracking remain pending.
 
 ## Dependency audit
 
