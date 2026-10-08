@@ -747,6 +747,7 @@ export function ColorShiftApp() {
       ) : (
         <p className="cs-credit">
           <span className="cs-credit-label uppercase">Photo</span>
+          <span className="cs-credit-label">by</span>
           <a
             className="underline-offset-2 hover:underline focus-visible:outline-2"
             href={current.photo.photographerUrl}

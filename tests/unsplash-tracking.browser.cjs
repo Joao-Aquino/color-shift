@@ -10,8 +10,13 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://127.0.0.1:3002';
   try {
     const page = await browser.newPage({ permissions: ['clipboard-read', 'clipboard-write'] });
     const tracked = [];
+    const hotlinkedUrl = 'https://images.unsplash.com/photo-test?ixid=preserved&w=2400';
+    await page.route('https://images.unsplash.com/photo-test?*', route => route.fulfill({
+      contentType: 'image/jpeg',
+      body: fs.readFileSync(path.join(__dirname, '../public/figma/photo.jpg')),
+    }));
     await page.route('**/api/photos?*', route => route.fulfill({ json: { photos: Array.from({ length: 10 }, (_, index) => ({
-      id: `tracked-${index}`, url: '/figma/photo.jpg', thumbUrl: '/figma/photo.jpg', tinyUrl: '/figma/photo.jpg',
+      id: `tracked-${index}`, url: hotlinkedUrl, thumbUrl: '/figma/photo.jpg', tinyUrl: '/figma/photo.jpg',
       color: '#f7b955', width: 1200, height: 900, alt: 'Reference landscape', photographer: 'Mara Vale',
       photographerUrl: 'https://unsplash.com/@test', photoUrl: 'https://unsplash.com/photos/test',
       downloadLocation: `https://api.unsplash.com/photos/tracked-${index}/download?ixid=preserved`,
@@ -22,6 +27,8 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://127.0.0.1:3002';
     });
     await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('[data-color-field]');
+    assert.equal(await page.locator('[data-photo-layer][data-current="true"] [data-photo-full]').getAttribute('src'), hotlinkedUrl);
+    assert.match(await page.locator('.cs-credit').innerText(), /Photo\s+by\s+Mara Vale\s+on\s+Unsplash/i);
     await page.getByRole('button', { name: 'EXPORT' }).click();
     await page.getByRole('button', { name: 'COPY' }).click();
     await page.waitForFunction(() => document.querySelector('[data-export-slot]')?.textContent.includes('COPIED'));

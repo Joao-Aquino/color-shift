@@ -66,12 +66,11 @@ function PhotoLayer({ layer, active, initial, onReady }: {
           event.currentTarget.style.visibility = "hidden";
           onReady(key);
         }}
-        quality={90}
         ref={imageRef}
         sizes="(min-width: 1180px) 38vw, 50vw"
         src={photo.url}
         style={{ opacity: 0 }}
-        unoptimized={photo.source === "local"}
+        unoptimized
       />
     </div>
   );

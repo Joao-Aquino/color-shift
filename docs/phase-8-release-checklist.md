@@ -4,12 +4,14 @@
 
 On 2026-10-08, a single authenticated `GET /photos/random?count=1` returned HTTP 200 with `X-Ratelimit-Limit: 50` and 49 requests remaining. This confirms the current Demo limit. It does not prove that every earlier 403 was caused by rate limiting; the app now distinguishes exhausted quota using the response header and also handles 429.
 
-The web app hotlinks images from `photo.urls`, attributes the photographer and Unsplash with UTM links, and calls `links.download_location` through the server when a user copies or downloads a color export based on an Unsplash photo. The API key remains server-side. Personal photo imports do not trigger Unsplash tracking.
+The web app displays images directly from `photo.urls`: the full image and tiny placeholder use `next/image` with `unoptimized`, so the browser requests the Unsplash URL instead of `/_next/image`. The app attributes the photographer and Unsplash with UTM links, and calls `links.download_location` through the server when a user copies or downloads a color export based on an Unsplash photo. That endpoint records a use event; the app does not offer an image-file download. The API key remains server-side. Personal photo imports do not trigger Unsplash tracking.
+
+The Unsplash examples cover inserting, setting or remixing a photo; they do not expressly discuss a color palette extracted from a photo. We use the explicit copy/download of that palette as the tracking point. Describe this exact flow in the production application and ask Unsplash whether they expect the event earlier (for example, when a user chooses a photo for color extraction). If they do, move the tracking point before approval.
 
 Application draft for the Unsplash developer account:
 
 - **Title:** Color Shift
-- **Description:** Color Shift is a photo-driven color and contrast tool. People explore abstract Unsplash photographs, extract a two-color pair, adjust it, compare WCAG 2 and APCA scores, and export the color values with photo credit. Users can also import their own photos locally. Images are hotlinked from Unsplash; visible credit links to the photographer and Unsplash. The app records a photo download event when a user copies or downloads a color export derived from that photo.
+- **Description:** Color Shift is a photo-driven color and contrast tool. People explore abstract Unsplash photographs, extract a two-color pair, adjust it, compare WCAG 2 and APCA scores, and export the color values with photo credit. Users can also import their own photos locally. Images are hotlinked from Unsplash; visible credit links to the photographer and Unsplash. The app records a photo use event when a user copies or downloads a color export derived from that photo. It does not download image files.
 - **Website:** https://colorshift.co-opstudio.com
 - **Screenshots to attach:** Desktop and mobile views with a photo plus visible photographer/Unsplash credit; export panel and resulting Markdown credit; optional browser Network view showing the tracking request. Capture these from the deployment that includes the Phase 8 changes.
 
