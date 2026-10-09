@@ -36,7 +36,7 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://127.0.0.1:3002';
     assert.deepEqual(tracked, [{ photoId: 'tracked-0', location: 'https://api.unsplash.com/photos/tracked-0/download?ixid=preserved' }]);
 
     const bytes = fs.readFileSync(path.join(__dirname, '../public/figma/photo.jpg')).toString('base64');
-    await page.locator('[data-responsive-motion="photo"]').evaluate((target, encoded) => {
+    await page.locator('section[aria-label="Source photo"]').evaluate((target, encoded) => {
       const data = Uint8Array.from(atob(encoded), character => character.charCodeAt(0));
       const transfer = new DataTransfer();
       transfer.items.add(new File([data], 'personal.jpg', { type: 'image/jpeg' }));

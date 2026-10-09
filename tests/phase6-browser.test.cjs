@@ -8,7 +8,7 @@ const baseURL = process.env.COLOR_SHIFT_TEST_URL || 'http://127.0.0.1:3001';
 const photoBytes = fs.readFileSync(path.join(__dirname, '../public/figma/photo.jpg')).toString('base64');
 
 async function dropFile(page, name, mimeType, bytes) {
-  await page.locator('[data-responsive-motion="photo"]').evaluate((target, fileData) => {
+  await page.locator('section[aria-label="Source photo"]').evaluate((target, fileData) => {
     const binary = atob(fileData.bytes);
     const data = Uint8Array.from(binary, character => character.charCodeAt(0));
     const transfer = new DataTransfer();
@@ -49,11 +49,11 @@ async function dropFile(page, name, mimeType, bytes) {
     assert.equal(await page.locator('.cs-specimen-type').inputValue(), 'Sample contents');
     await input.click();
     assert.ok(await input.evaluate(node => document.activeElement === node));
-    assert.equal(await page.locator('[data-responsive-motion="circle"]').count(), 0);
+    assert.equal(await page.locator('.cs-specimen-circle').count(), 0);
     assert.equal(await input.inputValue(), 'Sample contents');
     await input.press('Escape');
 
-    await page.locator('[data-responsive-motion="photo"]').evaluate(target => {
+    await page.locator('section[aria-label="Source photo"]').evaluate(target => {
       const transfer = new DataTransfer();
       transfer.items.add(new File(['preview'], 'my-image.jpg', { type: 'image/jpeg' }));
       target.dispatchEvent(new DragEvent('dragenter', { bubbles: true, dataTransfer: transfer }));
@@ -102,7 +102,7 @@ async function dropFile(page, name, mimeType, bytes) {
     assert.equal(await page.locator('.cs-specimen-type').inputValue(), 'Sample contents');
     assert.ok((await page.locator('[data-photo-layer][data-current="true"] [data-photo-full]').getAttribute('src')).startsWith('blob:'));
     await page.screenshot({ path: '/tmp/color-shift-phase6-desktop.png' });
-    await page.locator('[data-responsive-motion="photo"]').evaluate(target => {
+    await page.locator('section[aria-label="Source photo"]').evaluate(target => {
       const transfer = new DataTransfer();
       transfer.items.add(new File(['preview'], 'another.jpg', { type: 'image/jpeg' }));
       target.dispatchEvent(new DragEvent('dragenter', { bubbles: true, dataTransfer: transfer }));
@@ -117,20 +117,20 @@ async function dropFile(page, name, mimeType, bytes) {
     });
     assert.deepEqual(dropGeometry, { inset: 16, iconWidth: 32, iconHeight: 32, border: 'dashed' });
     await page.screenshot({ path: '/tmp/color-shift-phase6-drop-desktop.png' });
-    await page.locator('[data-responsive-motion="photo"]').evaluate(target => {
+    await page.locator('section[aria-label="Source photo"]').evaluate(target => {
       target.dispatchEvent(new DragEvent('dragleave', { bubbles: true }));
     });
     await page.waitForFunction(() => document.querySelector('.cs-photo-drop').dataset.active === 'false');
     await page.waitForFunction(() => getComputedStyle(document.querySelector('.cs-photo-drop')).visibility === 'hidden');
     const stableDropNode = await dropState.elementHandle();
-    await page.locator('[data-responsive-motion="photo"]').evaluate(target => {
+    await page.locator('section[aria-label="Source photo"]').evaluate(target => {
       const transfer = new DataTransfer();
       transfer.items.add(new File(['preview'], 'rapid.jpg', { type: 'image/jpeg' }));
       target.dispatchEvent(new DragEvent('dragenter', { bubbles: true, dataTransfer: transfer }));
     });
     await page.waitForTimeout(50);
-    await page.locator('[data-responsive-motion="photo"]').evaluate(target => target.dispatchEvent(new DragEvent('dragleave', { bubbles: true })));
-    await page.locator('[data-responsive-motion="photo"]').evaluate(target => {
+    await page.locator('section[aria-label="Source photo"]').evaluate(target => target.dispatchEvent(new DragEvent('dragleave', { bubbles: true })));
+    await page.locator('section[aria-label="Source photo"]').evaluate(target => {
       const transfer = new DataTransfer();
       transfer.items.add(new File(['preview'], 'rapid.jpg', { type: 'image/jpeg' }));
       target.dispatchEvent(new DragEvent('dragenter', { bubbles: true, dataTransfer: transfer }));
@@ -138,7 +138,7 @@ async function dropFile(page, name, mimeType, bytes) {
     assert.equal(await stableDropNode.evaluate(node => node === document.querySelector('.cs-photo-drop')), true);
     await page.waitForTimeout(260);
     assert.equal(await dropState.evaluate(node => getComputedStyle(node).opacity), '1');
-    await page.locator('[data-responsive-motion="photo"]').evaluate(target => target.dispatchEvent(new DragEvent('dragleave', { bubbles: true })));
+    await page.locator('section[aria-label="Source photo"]').evaluate(target => target.dispatchEvent(new DragEvent('dragleave', { bubbles: true })));
     assert.deepEqual(errors, []);
 
     const recoveryPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -146,7 +146,7 @@ async function dropFile(page, name, mimeType, bytes) {
     await recoveryPage.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await recoveryPage.getByText('Photos unavailable.').waitFor();
     await recoveryPage.emulateMedia({ reducedMotion: 'reduce' });
-    await recoveryPage.locator('[data-responsive-motion="photo"]').evaluate(target => {
+    await recoveryPage.locator('section[aria-label="Source photo"]').evaluate(target => {
       const transfer = new DataTransfer();
       transfer.items.add(new File(['preview'], 'still.jpg', { type: 'image/jpeg' }));
       target.dispatchEvent(new DragEvent('dragenter', { bubbles: true, dataTransfer: transfer }));

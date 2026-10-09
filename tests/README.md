@@ -101,8 +101,7 @@ The previous curtain component and its browser suite remain available on local
 branch `codex/theme-curtain`, commit `4ac7b422a326`.
 
 Desktop action geometry checks await three consecutive frames at the final
-viewport with responsive transforms cleared, avoiding measurement before the
-queued breakpoint Flip starts.
+viewport before measurement.
 
 ## Sidebar easing controls
 

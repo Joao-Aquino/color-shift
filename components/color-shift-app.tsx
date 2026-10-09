@@ -20,7 +20,6 @@ import { createFallbackPair, extractColorPair } from "@/lib/color/palette";
 import { adaptColorPairToTheme } from "@/lib/color/theme-pair";
 import { fetchPhotos } from "@/lib/photos/client";
 import { selectPhotoForTheme } from "@/lib/photos/theme-selection";
-import { useResponsiveLayoutMotion } from "@/lib/use-responsive-layout-motion";
 import { useFlipLayoutMotion } from "@/lib/use-flip-layout-motion";
 import { useTheme } from "@/lib/use-theme";
 import type { Theme } from "@/lib/theme";
@@ -60,7 +59,7 @@ function LoadingPanel({ className = "" }: { className?: string }) {
 }
 
 export function ColorShiftApp() {
-  const layoutRef = useResponsiveLayoutMotion();
+  const layoutRef = useRef<HTMLElement>(null);
   const { theme } = useTheme();
   const { changeTheme } = useThemeWipeToggle();
   const [entries, setEntries] = useState<PhotoEntry[]>([]);
@@ -680,7 +679,7 @@ export function ColorShiftApp() {
   };
 
   const preview = (
-    <div data-responsive-motion="preview" data-dragging={isDraggingPhoto} className="cs-preview">
+    <div data-dragging={isDraggingPhoto} className="cs-preview">
       <div className="cs-preview-panels">
         <div className="cs-specimen-panel relative min-w-0">
           {ready ? (
@@ -698,7 +697,6 @@ export function ColorShiftApp() {
 
         <section
           aria-label="Source photo"
-          data-responsive-motion="photo"
           className="relative h-full min-w-0 flex-1 overflow-hidden bg-[var(--color-panel-loading)]"
           onDragEnter={onPhotoDragEnter}
           onDragLeave={onPhotoDragLeave}

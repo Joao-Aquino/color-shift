@@ -72,7 +72,7 @@ Cleanup clears the timer and disconnects observation, but cannot stop native scr
 
 ## Verification
 
-- **Mechanical**: `npm run lint`; `npx tsc --noEmit --incremental false`; `node tests/collapsible-presence.test.cjs`; `node tests/responsive-layout-motion.test.cjs`; `git diff --check`; `npx next build --webpack`. All must pass. Webpack is the established fallback for the environment's Turbopack restrictions.
+- **Mechanical**: `npm run lint`; `npx tsc --noEmit --incremental false`; `node tests/collapsible-presence.test.cjs`; `git diff --check`; `npx next build --webpack`. All must pass. Webpack is the established fallback for the environment's Turbopack restrictions. The Plan 006 responsive-motion test was removed after that feature was dropped.
 - **Browser**: run a production server on an unused port in the isolated worktree. Set `COLOR_SHIFT_TEST_URL` accordingly and run `tests/phase5-browser.test.cjs` with `PLAYWRIGHT_MODULE=/Users/joaoaquino/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright`.
 - **Feel check**: at 393 x 852, open Foreground from the unscrolled initial page. Expansion and viewport correction should read as one continuous movement. Inspect normal-speed and frame-by-frame samples, plus Dark/Light settled screenshots. Repeat rapid field switches and close mid-motion: no late automatic scroll after cancellation. Manually scroll while opening: the user's gesture wins. At 320 x 320 the oversized panel aligns by its top and every input remains manually reachable. At >=640px do not scroll the page for editor reveal.
 - **Reduced motion**: test both initial and live preference changes. No new position tween; final content and focus remain usable.

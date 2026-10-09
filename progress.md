@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-10-08 - Phase 8 scope and dependency security follow-up
+
+John dropped Plan 006 continuous breakpoint easing and confirmed that physical-device testing has been performed throughout the project. The dedicated breakpoint Flip hook, markers, and tests were removed; the separate Phase 7 animations remain. The device log records John's confirmation without inventing device models, versions, or screenshots.
+
+The browser palette extractor now assembles Vibrant's browser-only pipeline directly, removing `node-vibrant` and its unused Node/Jimp dependency chain. The six shadcn CSS variants actually used by the app were moved locally, allowing removal of the `shadcn` CLI. `npm audit --omit=dev` reports zero findings; the full audit has five high findings from the development-only Next ESLint/braces chain. The braces advisory has no patched release. CI now enforces the production audit. See `docs/phase-8-release-checklist.md` for the risk decision and validation status.
+
+Validation passed: lint, deterministic tests, TypeScript, webpack production build, production dependency audit, and Chrome themed-photo, Phase 5, Phase 6, Phase 7 and Unsplash tracking suites. The default local Turbopack build still encounters the environment's process/port restriction; PR CI will test that build in GitHub's runner.
+
 ## 2026-10-08 - Phase 8 hardening started
 
 Started Phase 8 on `codex/phase-8-hardening`. Added CI for lint, Next type generation, TypeScript, build and deterministic tests; added `npm test` and replaced the boilerplate README. Added a reusable device/browser log with the limited historical user-reported result, and reconciled the URL, font, contrast-search and APCA-label spec drift.

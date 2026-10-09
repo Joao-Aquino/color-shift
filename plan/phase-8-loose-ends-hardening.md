@@ -15,6 +15,7 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 **Scope:**
 - GitHub Actions workflow running on pull requests and pushes to `main`.
 - Job steps: `npm run lint`, `next typegen` followed by `tsc --noEmit --incremental false`, `next build`, and `npm test` (the deterministic test suite).
+- Reject new production-dependency advisories with `npm audit --omit=dev --audit-level=moderate`.
 - Add `npm test` script to `package.json` that runs the deterministic tests (currently run manually via direct Node invocation).
 
 **Done when:** Pull requests display passing/failing CI status; the workflow runs on every push; all four checks (lint, types, build, tests) execute successfully on clean `main`.
@@ -57,6 +58,8 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 - If dropped, remove or simplify the related code in `lib/use-responsive-layout-motion.ts` and update the plan status and `progress.md`.
 
 **Done when:** Resize easing works as intended across all resize interactions, **or** the feature is formally dropped with updated documentation and cleaned-up code.
+
+**Decision (2026-10-08):** John dropped this separate easing feature. The dedicated breakpoint hook, markers, and its test harness were removed. CSS handles responsive layout changes immediately; Phase 7 motion is retained.
 
 ### 5. README Rewrite
 **Why:** The current `README.md` is unmodified `create-next-app` boilerplate and does not describe the actual project.

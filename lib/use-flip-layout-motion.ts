@@ -39,7 +39,6 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
     const root = rootRef.current;
     if (!root || pending.current) return;
     generation.current += 1;
-    root.dispatchEvent(new Event("cs:sidebar-will-change", { bubbles: true }));
     
     if (prefersReducedMotion()) {
       pending.current = null;

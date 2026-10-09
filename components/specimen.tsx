@@ -42,7 +42,7 @@ export function Specimen({ background, foreground, text, onTextChange }: Specime
     const point = range.getBoundingClientRect();
     const bounds = mirror.getBoundingClientRect();
     if (!point.height || !bounds.width) return;
-    // Convert rendered bounds back into local coordinates during parent Flip.
+    // Convert rendered bounds back into local coordinates if an ancestor is transformed.
     const scaleX = mirror.offsetWidth / bounds.width;
     const scaleY = mirror.offsetHeight / bounds.height;
     const size = parseFloat(mirror.style.fontSize);
@@ -118,7 +118,6 @@ export function Specimen({ background, foreground, text, onTextChange }: Specime
   return (
     <div
       ref={surfaceRef}
-      data-responsive-motion="specimen"
       className="cs-specimen-surface relative flex h-full w-full items-center justify-center overflow-hidden"
       style={{ backgroundColor: background, color: foreground }}
     >
@@ -129,7 +128,6 @@ export function Specimen({ background, foreground, text, onTextChange }: Specime
         ref={inputRef}
         aria-label="Specimen text"
         className="cs-specimen-type"
-        data-responsive-motion="type"
         maxLength={120}
         onChange={event => onTextChange(event.target.value)}
         onPointerDown={() => { focusAtEnd.current = document.activeElement !== inputRef.current; }}

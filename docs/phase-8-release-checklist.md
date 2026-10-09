@@ -25,7 +25,9 @@ The export offered Copy and Download .MD, with no image-file action. The downloa
 
 ## Dependency audit
 
-On 2026-10-08, compatible dependency updates and `npm audit fix` reduced the report from 16 to 14 vulnerabilities: 9 high and 5 moderate. Remaining high alerts come from `braces` → `micromatch` → `fast-glob` → `@next/eslint-plugin-next` / `eslint-config-next` and `shadcn` tooling. The latest published `braces` is 3.0.3 and npm suggests incompatible tool downgrades. `shadcn` remains necessary for the `shadcn/tailwind.css` import. Remaining moderate alerts come from `file-type` → Jimp → `@vibrant/image-node` → `node-vibrant`. The app imports `node-vibrant/browser`; forcing the proposed `node-vibrant` 3.1.6 downgrade would change the extraction API. These are provisionally accepted until compatible upstream fixes are available. Re-run `npm audit` before release and review advisories if the dependency graph changes.
+On 2026-10-08, the browser palette pipeline was rebuilt from the four browser-only Vibrant packages, removing `node-vibrant`, its unused Node/Jimp backend, and the `file-type` advisory. The app used only six variants from `shadcn/tailwind.css`; those variants now live in `app/globals.css`, and the `shadcn` CLI and its dependency chain were removed. The full audit fell from 14 findings (9 high, 5 moderate) to 5 high findings, all in the development-only chain `eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` → `braces`. `npm audit --omit=dev` reports zero findings and now runs in CI.
+
+The [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) affects every published `braces` version through 3.0.3 and lists no patched version. npm proposes downgrading `eslint-config-next` to 14.2.35, which is incompatible with this Next 16 app and would weaken its lint coverage. Retain the current Next lint configuration, keep glob patterns controlled by the repository rather than user input, and revisit this development-tool-only chain when upstream publishes a patch. Do not describe the full audit as clean.
 
 ## Manual repository tasks
 
@@ -35,6 +37,6 @@ On 2026-10-08, compatible dependency updates and `npm audit fix` reduced the rep
 ## Validation still needed
 
 - Verify CI on a pull request and on `main` after this branch is reviewed and merged.
-- The themed-photo, Phase 5, Phase 6 and Unsplash tracking Chrome suites passed locally on the updated stack. Repeat after deployment if the deployed environment differs.
-- Record a new physical-device test session in `tests/device-browser-log.md`.
-- Decide whether to complete or drop continuous resize easing (Plan 006); document and implement that decision.
+- After the dependency replacements, the themed-photo, Phase 5, Phase 6, Phase 7 and Unsplash tracking Chrome suites passed on the branch with no browser console errors. Lint, deterministic tests, TypeScript and the webpack production build also passed. The local Turbopack build still hits the environment's process/port restriction; verify the CI build on the PR and smoke-test the merged production deployment.
+- Physical-device testing was confirmed by João on 2026-10-08 and recorded in `tests/device-browser-log.md` as user-reported evidence without device/version details.
+- Plan 006 was dropped by product decision on 2026-10-08; its dedicated responsive motion code was removed while Phase 7 animations remain.

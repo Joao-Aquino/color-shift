@@ -7,6 +7,7 @@ Automated Chrome suites and physical-device checks are different evidence. Brows
 | Date | Device / OS / browser | Result | Source and limits |
 | --- | --- | --- | --- |
 | 2026-10-03 | Not recorded | Passed, as reported by John | `progress.md` entry dated 2026-10-03. Device model, OS version, browser, exact interactions, and screenshots were not recorded. This does not certify later Phase 7 motion changes. |
+| 2026-10-08 | Physical devices used throughout the project; models, OS and browsers not recorded | Passed, as confirmed by João | João confirmed ongoing physical-device testing and asked to consider this item complete. The exact combinations, interactions and screenshots were not supplied, so this is user-reported evidence. |
 
 ## Session template
 
