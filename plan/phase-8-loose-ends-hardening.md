@@ -99,7 +99,35 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 
 **Done when:** A device/browser testing document exists, includes backfilled historical results, and provides a template for future test sessions.
 
-### 8. Specification Drift
+### 8. Privacy Policy
+**Why:** App Store Connect requires a public privacy policy URL for every app submission (Phase 10). A privacy policy is also a best practice for any public web application that uses third-party services or stores data locally.
+
+**Scope:**
+- Write a privacy policy in plain, human language covering:
+  - Who operates Color Shift (John Aquino as an individual developer).
+  - What data is and isn't collected (no personal information, no accounts).
+  - Local storage usage (theme preference, development-only motion settings).
+  - Third-party services: Unsplash (photo API, download tracking, photographer attribution), Vercel (hosting), Google Fonts (typefaces).
+  - Future iOS app considerations (photo library access, camera access if implemented).
+  - Children's privacy, policy changes, contact information.
+- Host the policy at `colorshift.co-opstudio.com/privacy` as a public page matching the site's design.
+- Link to the privacy policy from the web app footer or about section.
+- Ensure the policy URL is stable and can be used for App Store Connect submission.
+- Complete the Apple App Privacy questionnaire (Phase 10) consistently with this policy.
+
+**Acceptance criteria:**
+- Privacy policy is written, reviewed by John, and finalized with contact email.
+- Policy is implemented as a public route at `/privacy` matching the site's visual design.
+- Policy is linked from the web app (footer, about section, or settings).
+- Policy accurately reflects the app's actual data practices (no invented features, no omissions).
+- Policy covers both current web app and future iOS app data practices.
+- Policy text is clear, concise, and avoids legal jargon where possible.
+
+**Done when:** Privacy policy page is live at `colorshift.co-opstudio.com/privacy`, linked from the app, and ready for use in App Store Connect.
+
+**Note:** A draft privacy policy is available in `plan/privacy-policy-draft.md` with open questions marked for John to resolve (contact email, analytics decisions, etc.). A custom Terms & Conditions page is NOT required—Apple's standard EULA applies by default.
+
+### 9. Specification Drift
 **Why:** Minor inconsistencies between the original spec (`specs-context/spec-color-shift.md`) and the implemented app have accumulated during Phases 1–6.
 
 **Scope:**
@@ -116,7 +144,7 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 - Native iOS/macOS app (Phase 9) — that remains a separate track.
 
 ## Parallel / ordering flexibility
-This phase can run in parallel with or before Phase 7 (animation polish). The ordering is left as an open question for John to decide based on priorities. Phase 8 focuses on stability and infrastructure, while Phase 7 is a creative/polish pass; they do not have strong dependencies on each other.
+Phase 7 (animation polish) was completed and merged to `main` on 2026-10-07. This phase follows Phase 7 sequentially. Phase 8 focuses on stability, infrastructure, and hardening before the iOS app (Phase 9) and App Store launch (Phase 10).
 
 ## Done means
 - CI workflow is active and passing on `main`.
@@ -126,6 +154,7 @@ This phase can run in parallel with or before Phase 7 (animation polish). The or
 - README accurately describes the project and setup steps.
 - Repository housekeeping tasks are listed for John (branches, homepage link).
 - Device/browser testing is documented with backfilled and template content.
+- Privacy policy is live at `colorshift.co-opstudio.com/privacy` and linked from the app.
 - Spec/implementation drift items are resolved and documented.
 
-The web app is production-ready from an infrastructure, stability, and documentation perspective.
+The web app is production-ready from an infrastructure, stability, and documentation perspective, with the privacy policy prerequisite satisfied for App Store submission.

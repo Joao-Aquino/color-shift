@@ -57,14 +57,16 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 **Why:** Required by App Store Review Guidelines and user transparency.
 
 **Scope:**
-- **Privacy policy URL:** Write and host a privacy policy on `colorshift.co-opstudio.com` (e.g., `/privacy`) covering data collection, Unsplash API usage, on-device photo processing, and any analytics/crash reporting. Must be publicly accessible and match app behavior.
-- **App Privacy nutrition labels:** Complete App Store Connect's App Privacy questionnaire. Declare:
+- **Privacy policy URL:** Prerequisite completed in Phase 8. The privacy policy is hosted at `colorshift.co-opstudio.com/privacy` and covers data collection, Unsplash API usage, on-device photo processing, and third-party services. The policy already addresses both web and iOS app practices.
+- **App Privacy nutrition labels:** Complete App Store Connect's App Privacy questionnaire consistently with the Phase 8 privacy policy. Declare:
   - **Photos:** User-selected photos from library are processed on-device; not collected, not transmitted to Color Shift servers.
   - **Unsplash API requests:** Proxied through server; no user-identifiable data sent; access key remains server-side.
-  - **Analytics/Crash Reporting (if applicable):** Declare any third-party SDKs (e.g., Crashlytics, App Center) and their data collection.
+  - **Analytics/Crash Reporting (if applicable):** Declare any third-party SDKs (e.g., Crashlytics, Sentry) and their data collection. If any analytics/crash reporting services are added during Phase 9 development, the Phase 8 privacy policy must be updated accordingly before App Store submission.
 - Ensure accuracy: privacy labels are user-facing and binding; inaccuracies risk rejection or post-launch enforcement action.
 
-**Done when:** Privacy policy is written, reviewed, and hosted at a stable URL; App Privacy labels are completed accurately in App Store Connect.
+**Done when:** App Privacy labels are completed accurately in App Store Connect, matching the Phase 8 privacy policy; any Phase 9 analytics/crash reporting additions are reflected in the privacy policy.
+
+**Note:** The privacy policy page is implemented and linked from the web app as part of Phase 8, item 8.
 
 ### 6. Third-Party Content & Attribution Compliance
 **Why:** Unsplash API guidelines require attribution; App Store Review validates licensing and third-party content compliance.
