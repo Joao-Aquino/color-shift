@@ -2,10 +2,7 @@
 
 **OPEN QUESTIONS FOR JOHN:**
 1. What email address should be listed for privacy inquiries? (Currently marked as `[CONTACT EMAIL]`)
-2. Does Vercel log any request data beyond standard hosting logs? Should we mention Vercel's standard infrastructure logging?
-3. For the iOS app: will we add any crash reporting, analytics, or error tracking services (e.g., Crashlytics, Sentry)? If yes, these need to be declared.
-4. Should we explicitly call out that Google Fonts serves the Geist typefaces, or is this covered sufficiently under "third-party services"?
-5. Do you want a more detailed explanation of Unsplash's data practices, or is linking to their privacy policy sufficient?
+2. For the iOS app: will we add any crash reporting, analytics, or error tracking services (e.g., Crashlytics, Sentry)? If yes, these need to be declared.
 
 ---
 
@@ -25,7 +22,7 @@ Color Shift is developed and operated by John Aquino. For privacy inquiries, con
 
 **We do not collect personal information.** Color Shift does not require accounts, emails, names, or any other personal data to use the app.
 
-**Photos you work with:** When you select or upload a photo in Color Shift, it is processed entirely on your device. We do not upload, store, or transmit your photos to our servers.
+**Photos you work with:** When you select or upload a photo in Color Shift (via drag-and-drop, file picker, or paste), the browser creates a local reference to that file on your device. The photo is processed entirely in your browser for color extraction. We do not upload, store, or transmit your photos to our servers.
 
 **Theme preference:** Color Shift stores your light/dark theme choice in your browser's local storage so it persists across sessions. This data never leaves your device.
 
@@ -35,11 +32,9 @@ Color Shift is developed and operated by John Aquino. For privacy inquiries, con
 
 Color Shift uses the following third-party services:
 
-**Unsplash:** When you load photos from Unsplash, Color Shift makes server-side requests to the Unsplash API to fetch images. We do not send any personal data to Unsplash. When you export or download a color pair that uses an Unsplash photo, we notify Unsplash (as required by their API guidelines) to credit the photographer. Unsplash images are hosted on Unsplash's servers and loaded directly in your browser. For more information, see [Unsplash's Privacy Policy](https://unsplash.com/privacy).
+**Unsplash:** When you load photos from Unsplash, Color Shift makes server-side requests to the Unsplash API to fetch images. We do not send any personal data to Unsplash. When you copy or download a color pair that uses an Unsplash photo, we send a server-side request to Unsplash's download tracking endpoint (as required by their API guidelines) to credit the photographer. Unsplash images are hosted on Unsplash's servers and loaded directly in your browser. For more information, see [Unsplash's Privacy Policy](https://unsplash.com/privacy).
 
 **Vercel:** Color Shift is hosted on Vercel. Vercel may collect standard web server logs (IP addresses, browser types, request timestamps) as part of their hosting infrastructure. For more information, see [Vercel's Privacy Policy](https://vercel.com/legal/privacy-policy).
-
-**Google Fonts:** Color Shift uses the Geist and Geist Mono typefaces, which are delivered via Next.js's font optimization system. This may involve requests to Google's font servers or may be self-hosted depending on the deployment configuration. For more information, see [Google's Privacy Policy](https://policies.google.com/privacy).
 
 ### iOS App (Future)
 

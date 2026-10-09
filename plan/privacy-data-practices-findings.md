@@ -67,27 +67,24 @@ This document records the complete investigation of Color Shift's data collectio
 
 ---
 
-### 3. Google Fonts
-**Purpose:** Typeface delivery (Geist and Geist Mono fonts)
+### 3. Fonts (Self-Hosted)
+**Typefaces:** Geist and Geist Mono
 
 **Implementation:**
-- Fonts loaded via Next.js's `next/font/google` system
-- May involve requests to Google's font servers or self-hosting (depends on Next.js optimization)
+- Fonts loaded via Next.js's `next/font/google` system, which downloads fonts at build time and self-hosts them
+- Fonts are served from the application's own domain (no runtime requests to Google)
 - Fonts applied via CSS custom properties (`--font-geist-sans`, `--font-geist-mono`)
 
-**Data sent to Google:**
-- Font requests (if not self-hosted by Next.js optimization)
-- Standard HTTP headers (User-Agent, Referer, etc.)
-
-**Data NOT sent:**
-- No user-identifiable information beyond standard web requests
-- No tracking cookies from Color Shift
+**Data sent to external services:**
+- ❌ None — fonts are self-hosted and served from Color Shift's own domain
+- ❌ No requests to Google Fonts servers at runtime
+- ❌ No tracking or analytics from font loading
 
 **Files:**
 - `app/layout.tsx` (font imports via `next/font/google`)
 - `app/globals.css` (font family declarations)
 
-**Google Privacy Policy:** https://policies.google.com/privacy
+**Note:** While `next/font/google` downloads fonts from Google Fonts during the build process, the fonts are bundled with the application and served from the same domain at runtime. Users' browsers never communicate with Google's servers for font delivery.
 
 ---
 
@@ -141,20 +138,23 @@ This document records the complete investigation of Color Shift's data collectio
 2. User file uploads (drag-and-drop, file picker, or paste)
 
 **Processing:** 
+- User-uploaded photos: Browser creates a local object URL (`URL.createObjectURL`) that references the file on the user's device
 - Photos are processed entirely client-side using browser APIs
-- Color extraction via `node-vibrant` library (runs in browser)
+- Color extraction via `node-vibrant` library (runs in browser using the local object URL)
 - Image decoding, canvas rendering, and color analysis all happen on the user's device
 
 **Storage:** 
 - Photos are NOT uploaded to Color Shift servers
 - Photos are NOT stored in localStorage or IndexedDB
-- Photos exist only in memory during the current session
+- User-uploaded photos exist only as local object URLs in memory during the current session
+- Object URLs are revoked when the component unmounts or the page is closed
 
 **Transmission:** 
-- User-uploaded photos never leave the user's device
+- User-uploaded photos never leave the user's device (processed via local object URLs)
 - Unsplash photos are loaded directly from `images.unsplash.com` (not proxied through Color Shift servers)
 
 **Files:**
+- `components/color-shift-app.tsx` (line 273: `URL.createObjectURL(file)`, lines 275-310: local photo handling)
 - `lib/color/vibrant-browser.ts` (client-side color extraction)
 - `components/photo-transition.tsx` (photo display and drag-drop)
 - `lib/photos/client.ts` (Unsplash photo fetching)
@@ -189,11 +189,14 @@ This document records the complete investigation of Color Shift's data collectio
 - Download: creates a client-side blob and triggers browser download (no server involvement)
 
 **Server-side effect:** 
-- Triggers Unsplash download tracking via `/api/photos/download` (required by Unsplash API guidelines)
+- When user copies or downloads a color pair using an Unsplash photo, triggers Unsplash download tracking via `/api/photos/download` (required by Unsplash API guidelines)
+- This sends a POST request to the Unsplash API with the photo ID and download location URL (server-side only, no user data)
 
 **Files:**
 - `lib/export.ts` (markdown generation)
-- `components/control-bar/export-controls.tsx` (copy/download UI and logic)
+- `components/control-bar/export-controls.tsx` (lines 197, 224: calls `trackPhotoUse` on copy/download)
+- `lib/photos/client.ts` (line 26-34: `trackPhotoUse` function)
+- `app/api/photos/download/route.ts` (server-side download tracking endpoint)
 
 ---
 
@@ -305,21 +308,22 @@ If crash reporting (e.g., Crashlytics, Sentry) is added to the iOS app, it MUST 
 
 ### What we DO
 1. Fetch photos from Unsplash API (server-side)
-2. Process photos on-device for color extraction
-3. Store theme preference locally
-4. Track Unsplash photo downloads (required by their API guidelines)
+2. Process photos on-device for color extraction using local object URLs
+3. Store theme preference locally in browser localStorage
+4. Track Unsplash photo usage when user copies/downloads color pairs (required by Unsplash API guidelines)
 5. Host on Vercel (standard web infrastructure)
-6. Load Google Fonts (Geist typefaces)
+6. Self-host Geist typefaces (downloaded at build time, served from our domain)
 
 ### What we DON'T DO
 1. ❌ Collect personal information
 2. ❌ Require accounts or authentication
-3. ❌ Upload user photos to servers
+3. ❌ Upload user photos to servers (processed via local object URLs)
 4. ❌ Use cookies
 5. ❌ Track users with analytics
 6. ❌ Store color values or user-generated content
 7. ❌ Sell or share data with third parties (beyond Unsplash API usage)
 8. ❌ Use advertising or tracking SDKs
+9. ❌ Send font requests to Google (fonts are self-hosted)
 
 ---
 
@@ -338,7 +342,6 @@ If crash reporting (e.g., Crashlytics, Sentry) is added to the iOS app, it MUST 
 **Third-party privacy policies:**
 - Unsplash: https://unsplash.com/privacy
 - Vercel: https://vercel.com/legal/privacy-policy
-- Google: https://policies.google.com/privacy
 
 ---
 
