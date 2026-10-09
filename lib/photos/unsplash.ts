@@ -30,6 +30,7 @@ interface UnsplashPhoto {
   };
   links: {
     html: string;
+    download_location: string;
   };
   user: {
     name: string;
@@ -81,7 +82,34 @@ function normalizePhoto(photo: UnsplashPhoto): Photo {
     photographer: photo.user.name,
     photographerUrl: withTracking(photo.user.links.html),
     photoUrl: withTracking(photo.links.html),
+    downloadLocation: photo.links.download_location,
   };
+}
+
+export class UnsplashApiError extends Error {
+  constructor(public readonly status: number, public readonly rateLimited: boolean) {
+    super(`Unsplash responded with ${status}.`);
+  }
+}
+
+function apiHeaders(accessKey: string) {
+  return { Authorization: `Client-ID ${accessKey}`, "Accept-Version": "v1" };
+}
+
+export async function trackPhotoDownload(photoId: string, location: string) {
+  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+  if (!accessKey) throw new Error("UNSPLASH_ACCESS_KEY is not configured.");
+
+  const url = new URL(location);
+  if (
+    !/^[A-Za-z0-9_-]{1,64}$/.test(photoId) ||
+    url.protocol !== "https:" || url.hostname !== "api.unsplash.com" ||
+    url.port || url.username || url.password ||
+    url.pathname !== `/photos/${photoId}/download`
+  ) throw new Error("Invalid Unsplash download location.");
+
+  const response = await fetch(url, { cache: "no-store", redirect: "manual", headers: apiHeaders(accessKey) });
+  if (!response.ok) throw new UnsplashApiError(response.status, response.status === 429);
 }
 
 export async function getRandomPhotos(count: number, theme?: Theme): Promise<Photo[]> {
@@ -100,14 +128,15 @@ export async function getRandomPhotos(count: number, theme?: Theme): Promise<Pho
 
   const response = await fetch(url, {
     cache: "no-store",
-    headers: {
-      Authorization: `Client-ID ${accessKey}`,
-      "Accept-Version": "v1",
-    },
+    headers: apiHeaders(accessKey),
   });
 
   if (!response.ok) {
-    throw new Error(`Unsplash responded with ${response.status}.`);
+    throw new UnsplashApiError(
+      response.status,
+      response.status === 429 ||
+        (response.status === 403 && response.headers.get("x-ratelimit-remaining") === "0"),
+    );
   }
 
   const data = (await response.json()) as UnsplashPhoto[];

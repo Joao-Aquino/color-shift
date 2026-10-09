@@ -1,5 +1,5 @@
 import { wcagContrast } from "culori";
-import { Vibrant } from "node-vibrant/browser";
+import { Vibrant } from "@/lib/color/vibrant-browser";
 
 import { bumpToContrast } from "@/lib/color/contrast";
 import type {

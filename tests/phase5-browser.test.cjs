@@ -25,7 +25,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await page.route('**/api/photos?*', mockPhotos);
     await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('[data-color-field]');
-    assert.equal(await page.locator('[data-responsive-motion="photo"] button').count(), 3);
+    assert.equal(await page.getByRole('region', {name:'Source photo'}).locator('button').count(), 3);
     assert.equal(await page.getByRole('button', {name:'Load a new Unsplash photo'}).count(), 0);
     await page.locator('[data-photo-layer][data-current="true"] [data-photo-full]').evaluate(img => img.decode());
     await page.waitForTimeout(350);
@@ -70,13 +70,12 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
         const bounds = node.getBoundingClientRect();
         return Math.abs(bounds.width - 48) < 0.01 && Math.abs(bounds.height - 48) < 0.01;
       });
-      const moving = [...document.querySelectorAll('[data-responsive-motion]')].some(node => node.style.transform);
-      window.phase5LayoutStableCount = sizeMatches && !moving ? (window.phase5LayoutStableCount || 0) + 1 : 0;
+      window.phase5LayoutStableCount = sizeMatches ? (window.phase5LayoutStableCount || 0) + 1 : 0;
       return window.phase5LayoutStableCount >= 3;
     }, null, { polling: 'raf' });
     const desktopActions = await page.evaluate(() => {
       const specimen = document.querySelector('.cs-specimen-panel').getBoundingClientRect();
-      const photo = document.querySelector('[data-responsive-motion="photo"]').getBoundingClientRect();
+      const photo = document.querySelector('section[aria-label="Source photo"]').getBoundingClientRect();
       const credit = document.querySelector('.cs-credit').getBoundingClientRect();
       return ['specimen','photo'].map((group, index) => {
         const panel = index === 0 ? specimen : photo;
@@ -101,11 +100,9 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     assert.ok(desktopActions.every(group => group.centered && group.bottom === 16 && group.creditAbove),JSON.stringify(desktopActions));
     assert.ok(desktopActions.every(group => group.actions.every(action => action.width === 48 && action.height === 48 && action.iconWidth === 16 && action.background === 'rgb(26, 26, 26)')),JSON.stringify(desktopActions));
     await page.screenshot({path:'/tmp/color-shift-relocated-desktop.png'});
-    const specimenLabel = await page.locator('[data-responsive-motion="specimen"]').getAttribute('aria-label');
     const originalColors = await page.locator('[data-color-field]').evaluateAll(nodes => nodes.map(node => node.textContent.match(/#[0-9A-F]{6}/i)[0]));
     await page.locator('.cs-panel-actions [data-action="swap"]').click();
     assert.deepEqual(await page.locator('[data-color-field]').evaluateAll(nodes => nodes.map(node => node.textContent.match(/#[0-9A-F]{6}/i)[0])),[...originalColors].reverse());
-    assert.equal(await page.locator('[data-responsive-motion="specimen"]').getAttribute('aria-label'),specimenLabel);
     await page.locator('.cs-panel-actions [data-action="undo"]').click();
     assert.deepEqual(await page.locator('[data-color-field]').evaluateAll(nodes => nodes.map(node => node.textContent.match(/#[0-9A-F]{6}/i)[0])),originalColors);
     await page.locator('.cs-panel-actions [data-action="next"]').click();
@@ -155,7 +152,6 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
         width:innerWidth,
         scroll:document.documentElement.scrollWidth,
         footer:getComputedStyle(document.querySelector('[data-control-footer]')).position,
-        hidden:[...document.querySelectorAll('[data-responsive-motion]')].filter(n=>!n.getBoundingClientRect().height).map(n=>n.dataset.responsiveMotion),
         groups:[...document.querySelectorAll('.cs-panel-actions')].map(group => {
           const panel=group.parentElement.getBoundingClientRect(), bounds=group.getBoundingClientRect();
           return {fit:bounds.left>=panel.left-1 && bounds.right<=panel.right+1,centered:Math.abs((bounds.left+bounds.right)/2-(panel.left+panel.right)/2)<1,bottom:Math.round(panel.bottom-bounds.bottom),sizes:[...group.querySelectorAll('button')].map(button=>Math.round(button.getBoundingClientRect().width))};
@@ -248,9 +244,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     console.log('PASS action focus persists across mobile and desktop breakpoints');
 
     await page.setViewportSize({width:320,height:320});
-    // Resize/matchMedia schedule the breakpoint Flip on the next frame.
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    await page.waitForFunction(() => [...document.querySelectorAll('[data-responsive-motion]')].every(node => !node.style.transform));
     await page.evaluate(() => window.scrollBy(0,120));
     const shortBounds=await page.locator('.cs-panel-actions [data-action="next"]').boundingBox();
     const shortFooter=await page.locator('[data-control-footer]').boundingBox();
@@ -283,7 +277,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
       const fitting = await specimenText.evaluate(node => ({
         width: node.clientWidth, height: node.clientHeight,
         contentWidth: node.scrollWidth, contentHeight: node.scrollHeight,
-        panel: node.closest('[data-responsive-motion="specimen"]').clientHeight,
+        panel: node.closest('.cs-specimen-surface').clientHeight,
       }));
       assert.ok(fitting.width > 0 && fitting.height > 0 && fitting.height < fitting.panel * 0.7, JSON.stringify(fitting));
       assert.ok(fitting.contentWidth <= fitting.width + 2 && fitting.contentHeight <= fitting.height + 2, JSON.stringify(fitting));
@@ -344,7 +338,7 @@ const verifyMobileReveal = require('./mobile-editor-reveal.browser.cjs');
     await retryPage.route('**/api/photos?*',async route=>{
       if(failInitialLoad){
         failInitialLoad=false;
-        await route.fulfill({status:502,json:{error:'Temporary photo failure'}});
+        await route.fulfill({status:503,json:{error:'Temporary photo failure'}});
       } else {
         await mockPhotos(route);
       }

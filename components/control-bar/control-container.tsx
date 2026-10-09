@@ -69,7 +69,6 @@ export function ControlContainer({
       {preview}
       <aside
         aria-label="Color Shift controls"
-        data-responsive-motion="controls"
         className="cs-controls"
       >
         <div className="hidden desktop:block"><Divider /></div>

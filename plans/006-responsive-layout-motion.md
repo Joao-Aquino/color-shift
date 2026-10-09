@@ -1,6 +1,6 @@
 # 006 - Ease responsive layout changes
 
-- **Status**: PARTIAL - continuous dragging needs follow-up
+- **Status**: DROPPED on 2026-10-08 by product decision. The dedicated breakpoint easing hook and its markers were removed; responsive layout follows CSS immediately. The separate Phase 7 animations remain in place.
 - **Baseline commit**: 53a21f8 (implementation added in the following session)
 - **Severity**: MEDIUM
 - **Category**: Missed opportunities / interruptibility / accessibility

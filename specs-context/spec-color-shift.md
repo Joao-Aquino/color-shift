@@ -2,7 +2,7 @@
 
 **Name:** Color Shift
 **Tagline:** Two colors. One photo. Feel the contrast.
-**Potential URL:** [coloshift.co-opstudio.com/color](http://coloshift.co-opstudio.com/color)  
+**Production URL:** [colorshift.co-opstudio.com](https://colorshift.co-opstudio.com)
 **Created by:** John Aquino ([joao@co-opstudio.com](mailto:joao@co-opstudio.com))  
 **Repo:** `color-shift` (Next.js 16 + Tailwind v4 (or latesst) + TypeScript)
 
@@ -52,7 +52,7 @@ Not a 5-color palette generator. Not a color theory teaching tool. Two colors, o
 - **Specimen panel:** Aa specimen. Background color fills the panel. Foreground color renders "Aa" at massive scale, centered. Click/tap the text to edit it directly, with only a native caret and automatic font fitting.
 - **Photo panel:** Unsplash photo, full-bleed within its panel. Credit at bottom-right, "Photographer, Unsplash", both linking out.
 - Panels have page padding and rounded corners (Figma V6).
-- Mobile (Phase 5, implemented): header and side-by-side specimen/photo precede scrolling score and inline editing; a fixed footer holds EXPORT and a floating trigger. Six actions expand vertically above it. See `plan/phase-5-theming-responsive.md` for the confirmed design, browser verification, and pending device checks.
+- Mobile (Phase 5, implemented): header and side-by-side specimen/photo precede scrolling score and inline editing; a fixed footer holds EXPORT and a floating trigger. Six actions expand vertically above it. See `plan/phase-5-theming-responsive.md` for the confirmed design and browser verification; João confirmed physical-device testing on 2026-10-08.
 
 > Numbers and hex values in the Figma mockups are placeholders. The engine is the source of truth.
 
@@ -73,7 +73,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 ### 1. Photo-Driven Color Extraction
 
 - App loads 10 random Unsplash landscape photos on launch
-- Each photo is processed through node-vibrant (browser-side) to extract a VibrantPalette (6 swatches: Vibrant, DarkVibrant, LightVibrant, Muted, DarkMuted, LightMuted)
+- Each photo is processed through the browser-only Vibrant pipeline to extract a VibrantPalette (6 swatches: Vibrant, DarkVibrant, LightVibrant, Muted, DarkMuted, LightMuted)
 - Engine scores all swatch pairs by contrast ratio + vibrancy + prominence, picks the best bg/fg pair
 - Foreground is auto-bumped to guarantee AA contrast (4.5 WCAG or 60 APCA)
 - Buffer auto-refills when you get within 3 photos of the end (always 10 ahead)
@@ -102,6 +102,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 
 - **WCAG 2:** contrast ratio (e.g. "4.50:1"), grades: AAA (≥7.0), AA (≥4.5), AA Large (≥3.0), Fail
 - **APCA:** Lc value (e.g. "Lc 72.3"), grades: AAA (≥75), AA (≥60), AA Large (≥45), Fail
+- APCA uses these familiar badge names as Color Shift's shorthand for its chosen Lc thresholds. They are not WCAG conformance grades and should not be read as an APCA certification.
 - Toggle between algorithms with the WCAG | APCA tabs at the top of the score tile
 - WCAG and APCA score values use the existing GSAP odometer animation on value change. Other numeric values remain unanimated.
 
@@ -249,14 +250,14 @@ Every icon-only button must have an accessible label, visible focus state, and a
 
 | Package                  | Job                                                                                 |
 | ------------------------ | ----------------------------------------------------------------------------------- |
-| `next` 16.2.1            | App framework                                                                       |
-| `react` 19.2.4           | UI                                                                                  |
+| `next` 16.4.0            | App framework                                                                       |
+| `react` 19.3.0           | UI                                                                                  |
 | `tailwindcss` v4         | Styling                                                                             |
 | `culori`                 | OKLCH/HSB/RGB color engine (perceptually uniform conversions, gamut mapping)        |
 | `apca-w3`                | APCA contrast algorithm (Lc values)                                                 |
 | `@phosphor-icons/react`  | Web UI icon library for swap, arrows, generate, export/copy/download, close controls |
 | `gsap`                  | Score odometer, photo transitions, slider easing, Flip export layout |
-| `node-vibrant` (browser) | Photo color extraction (VibrantPalette: 6 swatches per image)                       |
+| `@vibrant/*` (browser)   | Photo color extraction (VibrantPalette: 6 swatches per image)                       |
 | `dialkit`                | Live motion parameter tuning via CSS custom properties                              |
 | `motion`                 | Available (Framer Motion), not currently primary                                    |
 | `opentype.js`            | Font path data for SVG text rendering                                               |
@@ -265,9 +266,9 @@ Every icon-only button must have an accessible label, visible focus state, and a
 
 
 
-### Custom Fonts (local, in `src/fonts/`)
+### Fonts
 
-- **Geist Sans: [https://fonts.google.com/specimen/Geist](https://fonts.google.com/specimen/Geist)**
+- The app loads Geist Sans and Geist Mono with `next/font/google` in `app/layout.tsx`; there is no active `src/fonts/` directory.
 
 
 
@@ -337,8 +338,8 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | Download .MD button               | Implemented    | Real Markdown file download and success reset verified in the browser                                               |
 | Editable Aa text                  | Implemented    | Type custom text to test real content; the text persists across photo navigation                                   |
 | Tile/grid photo transitions       | Researched     | 9 animation patterns documented in `transitions.md`                                                                 |
-| Responsive mobile layout          | Implemented    | Browser-verified; physical software-keyboard and safe-area checks pending                                            |
-| Vercel deployment                 | Planned        |                                                                                                                     |
+| Responsive mobile layout          | Implemented    | Browser-verified; João confirmed ongoing physical-device testing on 2026-10-08, without a recorded device/browser matrix |
+| Vercel deployment                 | Implemented    | Preview and production deployments are active; Phase 8 production smoke test remains.                              |
 | iOS build                         | Planned        | Full native Swift app                                                                                               |
 | macOS build                       | Planned        | Full native menu bar app                                                                                            |
 | Figma MCP export                  | Stretch        | Push swatches directly into a Figma file                                                                            |
@@ -365,7 +366,7 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 
 | Feature                   | What Students Learn                                         |
 | ------------------------- | ----------------------------------------------------------- |
-| Photo color extraction    | node-vibrant, Canvas API, image processing                  |
+| Photo color extraction    | Vibrant browser pipeline, Canvas API, image processing      |
 | OKLCH color engine        | culori library, perceptual color spaces, gamut mapping      |
 | Color formats             | HEX/RGB/HSL/HSB/OKLCH translation, modern CSS color spaces  |
 | Unsplash API              | API integration with env keys, proxy routes                 |

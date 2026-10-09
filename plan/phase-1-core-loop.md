@@ -19,7 +19,7 @@ Prove the core loop — a random Unsplash photo yields an extracted, guaranteed-
 - On launch, fetch a buffer of 10 random landscape photos via `GET /api/photos?count=N`, proxying the Unsplash API with `UNSPLASH_ACCESS_KEY`.
 - Each photo runs through `node-vibrant` client-side to extract a 6-swatch palette (Vibrant, DarkVibrant, LightVibrant, Muted, DarkMuted, LightMuted).
 - A scoring step picks the best background/foreground swatch pair (contrast + vibrancy + prominence).
-- Foreground is auto-bumped so every pair guarantees WCAG AA (≥4.5:1) — no photo ever produces a failing pair. Build the bump as a generic `bumpToContrast(color, against, target)` binary-search-on-OKLCH-lightness function (not hardcoded to 4.5) — Phase 3's threshold bumping reuses this exact function against arbitrary WCAG/APCA targets instead of reimplementing it.
+- Foreground is auto-bumped so every pair guarantees WCAG AA (≥4.5:1) — no photo ever produces a failing pair. The implemented generic `bumpToContrast(color, against, target)` samples OKLCH lightness and refines the best candidate (rather than using the originally proposed binary search). Phase 3's threshold bumping reuses it against arbitrary WCAG/APCA targets.
 - Buffer refills automatically once you're within 3 photos of the end, always keeping 10 ahead.
 
 ### 2. Specimen (left half, desktop split-screen)

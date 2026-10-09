@@ -3,10 +3,10 @@
 Run the deterministic tests from the repository root:
 
 ```sh
-node tests/theme.test.cjs
-node tests/collapsible-presence.test.cjs
-node tests/responsive-layout-motion.test.cjs
+npm test
 ```
+
+Record physical-device and browser checks using [device-browser-log.md](device-browser-log.md).
 
 For the Phase 5 integration test, start a production preview on port 3001:
 
@@ -74,7 +74,7 @@ passed; the device, OS, and browser matrix was not recorded here.
 `phase5-browser.test.cjs` also runs `mobile-editor-reveal.browser.cjs`.
 The helper records app scroll writes and frame geometry to verify that actual
 editors scale open and are revealed at 393 x 852. It covers Escape during the first
-scroll write, pending-photo unmount/listener cleanup, visible raw field switches,
+scroll write, visible raw field switches,
 rapid keyboard reversal, trusted wheel/touch cancellation, footer/format/viewport
 changes, renewed activation, live reduced motion, input-focus protection,
 desktop-to-mobile entry and mobile/tablet reentry, and oversized manual scrolling.
@@ -101,8 +101,7 @@ The previous curtain component and its browser suite remain available on local
 branch `codex/theme-curtain`, commit `4ac7b422a326`.
 
 Desktop action geometry checks await three consecutive frames at the final
-viewport with responsive transforms cleared, avoiding measurement before the
-queued breakpoint Flip starts.
+viewport before measurement.
 
 ## Sidebar easing controls
 
@@ -157,3 +156,6 @@ tracking/display quality, allowed theme values and count limits without API keys
 metadata, failed-thumbnail priority/fallback, click/Space parity, history,
 in-flight theme changes and mobile generation. Screenshots:
 `/tmp/color-shift-themed-light.png` and `/tmp/color-shift-themed-dark.png`.
+`unsplash-tracking.browser.cjs` checks that a completed Unsplash copy sends the
+returned `download_location` through the tracking route and that a personal-photo
+export does not call Unsplash.
