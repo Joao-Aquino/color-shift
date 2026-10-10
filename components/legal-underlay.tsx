@@ -208,15 +208,14 @@ function TermsOfService() {
 }
 
 const SHORTCUTS: { key: Shortcut; label: string }[] = [
-  { label: "Export", key: "S" },
-  { label: "Switch", key: "S" },
-  { label: "Controls", key: "S" },
-  { label: "Switch Colors", key: "S" },
-  { label: "Toggle Theme", key: "T" },
-  { label: "Color Palette", key: "C" },
-  { label: "Brightness Level", key: "B" },
-  { label: "Hue Adjustment", key: "H" },
-  { label: "Saturation Control", key: "S" },
+  { label: "Export colors", key: "Export" },
+  { label: "Undo color edit", key: "Undo" },
+  { label: "Toggle theme", key: "T" },
+  { label: "Previous photo", key: "ArrowLeft" },
+  { label: "Next photo", key: "ArrowRight" },
+  { label: "New random photo", key: "Space" },
+  { label: "Swap colors", key: "S" },
+  { label: "Fix contrast", key: "F" },
 ];
 
 function Shortcuts() {
@@ -229,7 +228,7 @@ function Shortcuts() {
         {SHORTCUTS.map(({ key, label }) => (
           <div className="underlay-nav__shortcut-row" key={label}>
             <dt>{label}</dt>
-            <dd><ShortcutKey shortcut={key} withModifier /></dd>
+            <dd><ShortcutKey shortcut={key} /></dd>
           </div>
         ))}
       </dl>
