@@ -263,11 +263,19 @@ This document records the complete investigation of Color Shift's data collectio
 All data practices described above apply to the iOS app:
 - Same Unsplash API integration (proxied through server)
 - Same local storage (theme preference stored in UserDefaults or similar)
-- Same "no analytics" policy (unless crash reporting is added)
+- No third-party analytics or crash reporting services
 
-### Open Question: Crash Reporting
-If crash reporting (e.g., Crashlytics, Sentry) is added to the iOS app, it MUST be declared in:
-1. Privacy policy
+### Crash Diagnostics (iOS)
+**Current plan:** No third-party crash reporting or analytics SDKs at launch.
+
+**Apple's native crash reports:**
+- Apple may collect crash reports when the app crashes
+- Only shared with the developer if the user has opted in to "Share with App Developers" in iOS device settings
+- Also collected from TestFlight testers (TestFlight crash reports)
+- Color Shift does not collect crash data directly; Apple's crash reporting is handled by the iOS platform
+
+**Important:** If any third-party analytics or crash reporting SDK (e.g., Crashlytics, Sentry) is added later, it MUST be declared in:
+1. Privacy policy (update before release)
 2. App Store Connect App Privacy questionnaire
 3. iOS app's permission prompts (if applicable)
 
@@ -283,9 +291,12 @@ If crash reporting (e.g., Crashlytics, Sentry) is added to the iOS app, it MUST 
 - ✅ **Linked to user:** No
 - ✅ **Tracking:** No
 
+#### Diagnostics
+- ✅ **Collected:** No (no third-party crash reporting or analytics SDKs)
+- **Note:** Apple's native crash reports are platform-level and user-controlled via iOS settings; they are not "collected by the app" for App Privacy purposes
+
 #### Usage Data
-- ✅ **Collected:** No (no analytics, no crash reporting as of now)
-- **Note:** If crash reporting is added, this becomes YES
+- ✅ **Collected:** No (no analytics)
 
 #### Identifiers
 - ✅ **Collected:** No (no device IDs, no advertising IDs, no user accounts)

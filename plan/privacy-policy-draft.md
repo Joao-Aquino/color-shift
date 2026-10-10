@@ -1,9 +1,5 @@
 # Color Shift — Privacy Policy Draft
 
-**OPEN QUESTIONS FOR JOHN:**
-1. What email address should be listed for privacy inquiries? (Currently marked as `[CONTACT EMAIL]`)
-2. For the iOS app: will we add any crash reporting, analytics, or error tracking services (e.g., Crashlytics, Sentry)? If yes, these need to be declared.
-
 ---
 
 ## Privacy Policy
@@ -16,7 +12,7 @@ Color Shift is built and maintained by John Aquino as an individual developer. T
 
 ### Who We Are
 
-Color Shift is developed and operated by John Aquino. For privacy inquiries, contact us at [CONTACT EMAIL].
+Color Shift is developed and operated by John Aquino. For privacy inquiries, contact us at joao@co-opstudio.com.
 
 ### What Data We Collect
 
@@ -41,6 +37,7 @@ Color Shift uses the following third-party services:
 When the native iOS version of Color Shift launches:
 - **Photo library access:** If you choose to select a photo from your library, Color Shift will request permission to access your photos. Selected photos are processed on your device and are not uploaded or transmitted anywhere.
 - **Camera access (if implemented):** If the app includes camera capture, it will request camera permission. Captured photos are processed on your device and are not uploaded or transmitted anywhere.
+- **Crash diagnostics:** The iOS app does not use third-party crash reporting or analytics services. Apple may collect crash reports when the app crashes, but only if you have opted in to "Share with App Developers" in your iOS device settings. We do not collect crash data ourselves.
 - All other data practices described in this policy remain the same.
 
 ### Cookies
@@ -67,4 +64,4 @@ Because Color Shift does not collect personal information, there is no personal 
 
 ### Contact
 
-If you have questions about this privacy policy, please contact us at [CONTACT EMAIL].
+If you have questions about this privacy policy, please contact us at joao@co-opstudio.com.
