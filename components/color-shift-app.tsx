@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Specimen } from "@/components/specimen";
 import { useThemeWipeToggle } from "@/components/ui/theme-wipe-toggle";
 import { PhotoTransition } from "@/components/photo-transition";
+import { LegalFooter } from "@/components/legal-footer";
 import {
   adjustColorToContrast,
   CONTRAST_THRESHOLDS,
@@ -769,7 +770,7 @@ export function ColorShiftApp() {
   );
 
   return (
-    <main ref={layoutRef} className="cs-app">
+    <main ref={layoutRef} className="cs-app" data-main>
       <ControlContainer
         preview={preview}
         theme={theme}
@@ -802,6 +803,7 @@ export function ColorShiftApp() {
         selectedThreshold={selectedThreshold}
         thresholds={thresholds}
       />
+      <LegalFooter />
     </main>
   );
 }

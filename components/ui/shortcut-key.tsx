@@ -6,17 +6,17 @@ import { ArrowRightIcon } from "@phosphor-icons/react/ArrowRight";
 import { CommandIcon } from "@phosphor-icons/react/Command";
 import { ControlIcon } from "@phosphor-icons/react/Control";
 
-export type Shortcut = "T" | "S" | "F" | "Space" | "ArrowLeft" | "ArrowRight" | "Undo" | "Export";
+export type Shortcut = "B" | "C" | "F" | "H" | "S" | "T" | "Space" | "ArrowLeft" | "ArrowRight" | "Undo" | "Export";
 
 const subscribe = () => () => {};
 const isApplePlatform = () => /Mac|iPhone|iPad|iPod/.test(navigator.platform);
 const serverPlatform = () => false;
 
-export function ShortcutKey({ shortcut }: { shortcut: Shortcut }) {
+export function ShortcutKey({ shortcut, withModifier }: { shortcut: Shortcut; withModifier?: boolean }) {
   const apple = useSyncExternalStore(subscribe, isApplePlatform, serverPlatform);
   const ModifierIcon = apple ? CommandIcon : ControlIcon;
-  const modified = shortcut === "Undo" || shortcut === "Export";
-  const key = shortcut === "Undo" ? "Z" : "S";
+  const modified = withModifier || shortcut === "Undo" || shortcut === "Export";
+  const key = shortcut === "Undo" ? "Z" : shortcut === "Export" ? "S" : shortcut;
   const label = modified ? `${apple ? "Command" : "Control"} + ${key}`
     : shortcut === "ArrowLeft" ? "Left arrow"
     : shortcut === "ArrowRight" ? "Right arrow" : shortcut;
