@@ -57,14 +57,16 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 **Why:** Required by App Store Review Guidelines and user transparency.
 
 **Scope:**
-- **Privacy policy URL:** Prerequisite completed in Phase 8. The privacy policy is hosted at `colorshift.co-opstudio.com/privacy` and covers data collection, Unsplash API usage, on-device photo processing, and third-party services. The policy already addresses both web and iOS app practices.
+- **Privacy policy URL:** Prerequisite completed in Phase 8. The privacy policy is hosted at `colorshift.co-opstudio.com/privacy` and covers data collection, Unsplash API usage, on-device photo processing, and third-party services. The policy already addresses both web and iOS app practices, including Apple's native crash reports.
 - **App Privacy nutrition labels:** Complete App Store Connect's App Privacy questionnaire consistently with the Phase 8 privacy policy. Declare:
   - **Photos:** User-selected photos from library are processed on-device; not collected, not transmitted to Color Shift servers.
   - **Unsplash API requests:** Proxied through server; no user-identifiable data sent; access key remains server-side.
-  - **Analytics/Crash Reporting (if applicable):** Declare any third-party SDKs (e.g., Crashlytics, Sentry) and their data collection. If any analytics/crash reporting services are added during Phase 9 development, the Phase 8 privacy policy must be updated accordingly before App Store submission.
+  - **Diagnostics:** No third-party crash reporting or analytics SDKs. Apple's native crash reports are platform-level (user opt-in via iOS settings) and not declared as "data collected by the app."
+  - **Usage Data / Identifiers:** None collected.
+- **Important:** If any third-party analytics or crash reporting SDK is added post-launch, the privacy policy and App Privacy questionnaire MUST be updated before that release.
 - Ensure accuracy: privacy labels are user-facing and binding; inaccuracies risk rejection or post-launch enforcement action.
 
-**Done when:** App Privacy labels are completed accurately in App Store Connect, matching the Phase 8 privacy policy; any Phase 9 analytics/crash reporting additions are reflected in the privacy policy.
+**Done when:** App Privacy labels are completed accurately in App Store Connect, matching the Phase 8 privacy policy (no data collection, no tracking).
 
 **Note:** The privacy policy page is implemented and linked from the web app as part of Phase 8, item 8.
 
