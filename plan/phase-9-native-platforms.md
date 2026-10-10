@@ -29,6 +29,8 @@ Bring the same two-color specimen + WCAG/APCA scoring experience to native platf
 
 **Prerequisite:** Unsplash production access (addressed in Phase 8). The native app must follow the Unsplash API guidelines: proxy all API calls through the web server route (never embed the access key in the native app), track photo downloads via `links.download_location`, and display photographer/Unsplash attribution with UTM links. Production access approval covers both web and native apps.
 
+**Privacy Policy:** Phase 8 includes a privacy policy covering both web and iOS app data practices. The current policy assumes no third-party analytics or crash reporting SDKs (only Apple's native crash reports, which are user opt-in). If any third-party analytics or crash reporting SDK (e.g., Crashlytics, Sentry) is added during development or post-launch, the privacy policy and App Store Connect App Privacy questionnaire MUST be updated before that release.
+
 ## Open questions to resolve before building
 - Separate repo(s) for iOS/macOS, or a monorepo alongside this Next.js app?
 - Shared color/contrast logic: port the TypeScript (culori/apca-w3) logic to Swift, or call back into the web API routes for scoring?
