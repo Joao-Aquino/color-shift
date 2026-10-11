@@ -36,7 +36,7 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 - **App name:** "Color Shift" (check availability; fallback variants if taken).
 - **Subtitle:** Short tagline (e.g., "Two colors. One photo." — max 30 characters).
 - **Keywords:** Comma-separated search terms (max 100 characters). Consider: contrast, accessibility, WCAG, APCA, color palette, design tool, photography.
-- **Description:** Full-length App Store description covering what it does, teaching value, camera input, contrast scoring, and export. Match the tone of `specs-context/spec-color-shift.md`.
+- **Description:** Full-length App Store description covering what it does, teaching value, Photo Library input, contrast scoring, and export. Match the tone of `specs-context/spec-color-shift.md`.
 - **Promotional text:** Optional 170-character updatable marketing copy (can change without app review).
 - **Category:** Primary (e.g., Graphics & Design or Developer Tools) + optional secondary.
 - **Age rating:** Complete the App Store Connect questionnaire. Likely 4+ (no objectionable content).
@@ -47,7 +47,7 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 **Why:** Visuals are the primary conversion driver on the App Store.
 
 **Scope:**
-- **Screenshots:** Required for multiple device sizes (6.9", 6.7", 6.5", 5.5" iPhone; 13" and 12.9" iPad if supporting iPad). Show camera capture, specimen + scoring, color editing, export. Follow App Store Screenshot specifications.
+- **Screenshots:** Required for multiple device sizes (6.9", 6.7", 6.5", 5.5" iPhone; 13" and 12.9" iPad if supporting iPad). Show Photo Library or Unsplash input, specimen + scoring, color editing, and export. Follow App Store Screenshot specifications.
 - **App icon:** 1024×1024 PNG, no transparency, no alpha channel. Must match in-app icon. Design consistent with Color Shift visual identity.
 - **App preview video (optional):** 15–30 second demo video showing core workflow. Must use actual app footage; no third-party content. Follow App Store App Preview specifications.
 
@@ -85,10 +85,10 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 **Why:** Proactively address common rejection reasons before submission.
 
 **Scope:**
-- **Minimum Functionality (4.2):** Verify the native app provides value beyond a web wrapper. Native camera capture, `NSColorSampler` on macOS, platform-specific UI, and offline color logic (if ported natively) differentiate it from the web app.
+- **Minimum Functionality (4.2):** Verify the native app provides value beyond a web wrapper. On-device Photo Library processing, `NSColorSampler` on macOS, platform-specific UI, and offline color logic differentiate it from the web app.
 - **User Interface (4.0):** Follow Human Interface Guidelines; ensure native controls, gestures, and platform conventions.
 - **Performance (2.3):** Test app launch time, responsiveness, memory usage, battery impact on actual devices.
-- **Permissions (5.1.1):** If accessing Photos or Camera, provide clear purpose strings (`NSPhotoLibraryUsageDescription`, `NSCameraUsageDescription`).
+- **Permissions (5.1.1):** When accessing Photos, provide a clear `NSPhotoLibraryUsageDescription` purpose string. The app does not request camera access.
 - **Data Use & Privacy (5.1):** Match privacy policy and labels; no undisclosed data transmission.
 - **Legal (5.0):** Verify all third-party content (Unsplash photos) is properly licensed and attributed.
 
@@ -100,7 +100,7 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 **Scope:**
 - **Internal testing:** Distribute to up to 100 App Store Connect users (team members). No App Review required; immediate access after build processing.
 - **External testing:** Distribute to up to 10,000 external testers via email or public link. Requires App Review for first build per version; subsequent builds in the same version auto-distribute.
-- Collect feedback on camera capture, scoring accuracy, export workflow, and any crashes or edge cases.
+- Collect feedback on Photo Library import, scoring accuracy, export workflow, and any crashes or edge cases.
 - Iterate on bugs and UX issues; upload new builds as needed.
 
 **Done when:** Internal testing is complete; external beta (if pursued) has cycled through at least one round of feedback; app is stable and ready for submission.

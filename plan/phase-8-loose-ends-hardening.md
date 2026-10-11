@@ -124,7 +124,7 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
   - What data is and isn't collected (no personal information, no accounts).
   - Local storage usage (theme preference, development-only motion settings).
   - Third-party services: Unsplash (photo API, download tracking, photographer attribution) and Vercel (hosting). Geist font files are self-hosted by the deployed app and do not create a separate third-party font request.
-  - Future iOS app considerations (photo library access, camera access if implemented).
+  - Future iOS app considerations (on-device Photo Library access).
   - Children's privacy, policy changes, contact information.
 - Host the policy at `www.colorshiftapp.com/privacy` as a public page matching the site's design.
 - Link to the privacy policy from the web app footer or about section.

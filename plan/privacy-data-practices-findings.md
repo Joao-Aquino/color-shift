@@ -249,16 +249,6 @@ This document records the complete investigation of Color Shift's data collectio
 - Photos NOT uploaded to servers
 - Photos NOT stored in app data
 
-#### Camera Access (if implemented)
-**Purpose:** User can capture a photo with camera for color extraction
-
-**Permission:** `NSCameraUsageDescription` (iOS permission prompt)
-
-**Data handling:**
-- Captured photos processed on-device
-- Photos NOT uploaded to servers
-- Photos NOT stored in app data
-
 ### iOS Data Practices
 All data practices described above apply to the iOS app:
 - Same Unsplash API integration (proxied through server)

@@ -17,7 +17,7 @@ Add ways to use a personal photo and test custom text in the existing specimen.
 - Type custom text into the specimen to test real content instead of the default "Aa".
 
 ## Explicitly out of scope for Phase 6
-- Native camera capture (iOS-specific, Phase 9)
+- Native Photo Library import (iOS-specific, Phase 9)
 - Figma MCP export (stretch, see `stretch.md`)
 
 ## Done means

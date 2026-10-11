@@ -307,9 +307,9 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 
 ### iOS — Planned
 
-- Camera as primary input (point at something, capture a color)
+- Unsplash photos and user-selected Photo Library images as inputs
 - Same two-color specimen + WCAG/APCA scoring
-- Calls web API routes OR runs color logic natively
+- Reuses web photo API routes and runs color/contrast logic natively
 - Built in Swift/SwiftUI
 - Skippable video for web-only students
 
@@ -334,7 +334,7 @@ Full experience as described above. Next.js 16 + Tailwind v4, deployed on Vercel
 | --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Scrollable layout mode            | Planned        | Vertical gallery of color + photo pairs                                                                             |
 | Photo drag-and-drop (web)         | Implemented    | Drop an image onto the photo area to extract colors locally. macOS follows with the native app in Phase 9.          |
-| Camera / photo capture (iOS)      | Planned        | Alternate input to Unsplash: take a photo, extract colors from your own image                                       |
+| Photo Library import (iOS)        | Planned        | Alternate input to Unsplash: select a photo and extract colors locally on-device                                    |
 | Download .MD button               | Implemented    | Real Markdown file download and success reset verified in the browser                                               |
 | Editable Aa text                  | Implemented    | Type custom text to test real content; the text persists across photo navigation                                   |
 | Tile/grid photo transitions       | Researched     | 9 animation patterns documented in `transitions.md`                                                                 |

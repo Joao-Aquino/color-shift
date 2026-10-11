@@ -36,7 +36,6 @@ Color Shift uses the following third-party services:
 
 When the native iOS version of Color Shift launches:
 - **Photo library access:** If you choose to select a photo from your library, Color Shift will request permission to access your photos. Selected photos are processed on your device and are not uploaded or transmitted anywhere.
-- **Camera access (if implemented):** If the app includes camera capture, it will request camera permission. Captured photos are processed on your device and are not uploaded or transmitted anywhere.
 - **Crash diagnostics:** The iOS app does not use third-party crash reporting or analytics services. Apple may collect crash reports when the app crashes, but only if you have opted in to "Share with App Developers" in your iOS device settings. We do not collect crash data ourselves.
 - All other data practices described in this policy remain the same.
 

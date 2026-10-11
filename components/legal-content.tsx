@@ -50,7 +50,6 @@ export function PrivacyPolicyContent() {
         <h3>Future iOS app</h3>
         <ul>
           <li>If you choose a photo from your library, Color Shift will request permission and process the selected photo on your device. It will not be uploaded or transmitted.</li>
-          <li>If camera capture is added, the app will request camera permission and process captured photos on your device without uploading them.</li>
           <li>The iOS app is planned without third-party analytics or crash-reporting services. Apple may make crash reports available only when you opt in through iOS settings.</li>
         </ul>
       </section>

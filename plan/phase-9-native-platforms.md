@@ -10,9 +10,9 @@ Bring the same two-color specimen + WCAG/APCA scoring experience to native platf
 ## What gets built (proposed)
 
 ### iOS — Planned
-- Camera as primary input (point at something, capture a color).
+- Unsplash photos and user-selected Photo Library images as inputs.
 - Same two-color specimen + WCAG/APCA scoring as web.
-- Calls web API routes, or runs color logic natively (decision needed).
+- Reuses the web photo API routes and runs color/contrast logic natively in a shared Swift package.
 - Built in Swift/SwiftUI.
 - Skippable video for web-only students (this is a teaching product — see `specs-context/spec-color-shift.md` "Teaching Value").
 
@@ -32,15 +32,19 @@ Bring the same two-color specimen + WCAG/APCA scoring experience to native platf
 **Privacy Policy:** Phase 8 includes a privacy policy covering both web and iOS app data practices. The current policy assumes no third-party analytics or crash reporting SDKs (only Apple's native crash reports, which are user opt-in). If any third-party analytics or crash reporting SDK (e.g., Crashlytics, Sentry) is added during development or post-launch, the privacy policy and App Store Connect App Privacy questionnaire MUST be updated before that release.
 
 ## Open questions to resolve before building
-- Separate repo(s) for iOS/macOS, or a monorepo alongside this Next.js app?
-- Shared color/contrast logic: port the TypeScript (culori/apca-w3) logic to Swift, or call back into the web API routes for scoring?
-- Does this phase start only after Phases 1–7 are fully done on web, or can native development run in parallel once the color/contrast API surface (Phase 1–3) is stable?
+- Repository: resolved. Native development lives in `Joao-Aquino/color-shift-apple`; this repository retains the cross-project roadmap and product specification.
+- Shared color/contrast logic: resolved. Port WCAG/APCA scoring to a shared Swift package and verify parity against golden values from the TypeScript implementation.
+- Ordering: resolved. Native development can begin while Phase 8 awaits Unsplash production approval. Approval remains required before public release.
 
 ## Explicitly out of scope for Phase 9
-- Feature parity with every web phase on day one — start with the core specimen + scoring experience, camera/screen-picker input, matching Phase 1's scope.
+- Camera capture on iOS.
+- Feature parity with every web phase on day one — start with the core specimen + scoring experience, Photo Library/Unsplash input on iOS, and screen-picker input on macOS.
 - App Store submission and launch logistics — handled in Phase 10.
 
 ## Done means
-(To be defined once repo/architecture questions above are resolved.)
+- The iOS app can load an Unsplash photo or a user-selected library image, derive a two-color pair, render the specimen, and report WCAG/APCA scores matching the web implementation's golden fixtures.
+- Unsplash requests and tracking go through the web server routes; no Unsplash credential ships in the app.
+- The macOS target provides a menu-bar experience and `NSColorSampler` input using the same shared contrast core.
+- Unit tests cover the shared scoring core and the primary app state transitions.
 
 Phase 10 covers App Store enrollment, metadata, privacy policy, TestFlight, submission, and release.
