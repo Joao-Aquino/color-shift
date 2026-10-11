@@ -8,7 +8,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
   await page.route('**/api/photos?*',route=>route.fulfill({json:{photos:Array.from({length:10},(_,id)=>({id:`ease-${id}`,url:'/figma/photo.jpg',tinyUrl:'/figma/photo.jpg',thumbUrl:'/figma/photo.jpg',color:'#f7b955',width:1200,height:900,alt:'Reference',photographer:'Mara Vale',photographerUrl:'https://unsplash.com/@test',photoUrl:'https://unsplash.com/photos/test'}))}}));
   await page.goto(process.env.COLOR_SHIFT_TEST_URL || 'http://localhost:3000/',{waitUntil:'domcontentloaded'});
   await page.waitForSelector('[data-color-field]');
-  await page.waitForFunction(()=>document.documentElement.style.getPropertyValue('--sidebar-easing') === 'easeInOutQuart');
+  await page.waitForFunction(()=>document.documentElement.style.getPropertyValue('--sidebar-easing') === 'easeOutQuart');
   const panel = page.getByRole('button',{name:'Phase 7 motion',exact:true});
   if(await panel.getAttribute('aria-expanded') === 'false') await panel.click();
   const states = page.getByRole('button',{name:'States',exact:true});
@@ -45,27 +45,28 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
    },{selector,button});
   }
   const selector='[data-color-field-shell="background"]', button='[data-color-field="background"]';
-  const quart = await quarterProgress(selector,button);
+  const easeOut = await quarterProgress(selector,button);
   function assertCurve(samples, inverse) {
    assert.ok(samples.length > 5, JSON.stringify(samples));
    // GSAP uses its own ticker clock; compare curve shape independent of its
    // offset from the MutationObserver that observes the committed layout.
    const offsets = samples.map(s => inverse(s.progress) - s.t);
-   assert.ok(Math.max(...offsets) - Math.min(...offsets) < 0.035, JSON.stringify(samples));
+   // The score's short pixel range quantizes repeated height samples.
+   assert.ok(Math.max(...offsets) - Math.min(...offsets) < 0.05, JSON.stringify(samples));
   }
-  const inverseQuart = p => p < 0.5 ? (p / 8) ** 0.25 : 1 - ((1 - p) / 8) ** 0.25;
-  assertCurve(quart, inverseQuart);
+  const inverseEaseOut = p => 1 - (1 - p) ** 0.25;
+  assertCurve(easeOut, inverseEaseOut);
   await page.keyboard.press('Escape');await page.waitForTimeout(250);
   await select('linear');
   const linear = await quarterProgress(selector,button);
   assertCurve(linear, p => p);
-  assert.ok(linear[0].progress > quart[0].progress + 0.08, 'DialKit selection changes the actual scale curve');
+  assert.ok(easeOut[0].progress > linear[0].progress + 0.08, 'DialKit selection changes the actual resize curve');
   await page.keyboard.press('Escape');await page.waitForTimeout(250);
-  await select('easeInOutQuart');
+  await select('easeOutQuart');
   const score=await quarterProgress('#contrast-score-panel','#contrast-score-panel > button');
-  assertCurve(score, inverseQuart);
+  assertCurve(score, inverseEaseOut);
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.documentElement.style.getPropertyValue('--sidebar-easing') === 'easeInOutQuart');
-  console.log('PASS DialKit live easing selection, persisted default and measured quart/linear curves for fields and score');
+  await page.waitForFunction(()=>document.documentElement.style.getPropertyValue('--sidebar-easing') === 'easeOutQuart');
+  console.log('PASS DialKit live easing selection, persisted default and measured ease-out/linear resize curves for fields and score');
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

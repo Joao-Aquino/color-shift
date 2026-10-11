@@ -48,9 +48,9 @@ function ColorField({
     const mobile = window.matchMedia("(max-width: 639px)");
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const viewport = window.visualViewport;
-    const footer = document.querySelector<HTMLElement>("[data-control-footer]");
     let frame = 0;
     let cancelled = false;
+    let observedFooter: HTMLElement | null = null;
 
     function pause() {
       cancelAnimationFrame(frame);
@@ -63,6 +63,7 @@ function ColorField({
 
     function reveal() {
       frame = 0;
+      const footer = observeFooter();
       if (cancelled || !mobile.matches || !shell?.isConnected || !content || !footer) return;
       if (shell.querySelector("[data-color-field]")?.getAttribute("aria-expanded") !== "true") return;
       if (getComputedStyle(footer).position !== "fixed") return;
@@ -92,6 +93,7 @@ function ColorField({
     }
 
     function schedule() {
+      observeFooter();
       if (!cancelled && mobile.matches && !frame) frame = requestAnimationFrame(reveal);
     }
     function onMobileChange() {
@@ -107,15 +109,24 @@ function ColorField({
       else if (event.target instanceof Element && shell?.contains(event.target)) schedule();
     }
     const observer = new ResizeObserver(schedule);
+    function observeFooter() {
+      const footer = document.querySelector<HTMLElement>("[data-control-footer]");
+      if (footer === observedFooter) return footer;
+      if (observedFooter) observer.unobserve(observedFooter);
+      observedFooter = footer;
+      if (footer) observer.observe(footer, { box: "border-box" });
+      return footer;
+    }
     // A closing sibling moves this shell even when its own height is unchanged.
     shell.parentElement?.querySelectorAll("[data-color-field-shell]").forEach((field) => observer.observe(field, { box: "border-box" }));
     observer.observe(content);
-    if (footer) observer.observe(footer, { box: "border-box" });
+    observeFooter();
     mobile.addEventListener("change", onMobileChange);
     motion.addEventListener("change", onMotionChange);
     viewport?.addEventListener("resize", schedule);
     viewport?.addEventListener("scroll", schedule);
     window.addEventListener("resize", schedule);
+    window.addEventListener("scroll", schedule, { passive: true });
     document.addEventListener("cs:layout-motion", schedule);
     window.addEventListener("wheel", cancel, { passive: true, capture: true });
     window.addEventListener("touchmove", cancel, { passive: true, capture: true });
@@ -129,6 +140,7 @@ function ColorField({
       viewport?.removeEventListener("resize", schedule);
       viewport?.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
+      window.removeEventListener("scroll", schedule);
       document.removeEventListener("cs:layout-motion", schedule);
       window.removeEventListener("wheel", cancel, true);
       window.removeEventListener("touchmove", cancel, true);

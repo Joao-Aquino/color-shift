@@ -32,4 +32,4 @@ For browser regression suites and their preview setup, see [tests/README.md](tes
 
 ## Deployment
 
-The web app is available at [colorshift.co-opstudio.com](https://colorshift.co-opstudio.com). Set `UNSPLASH_ACCESS_KEY` as a server-side environment variable in the deployment environment, then run the production build and server commands above. The GitHub Actions workflow checks lint, generated types, TypeScript, build, and deterministic tests on pull requests and pushes to `main`.
+The web app is available at [www.colorshiftapp.com](https://www.colorshiftapp.com). Set `UNSPLASH_ACCESS_KEY` as a server-side environment variable in the deployment environment, then run the production build and server commands above. The GitHub Actions workflow checks lint, generated types, TypeScript, build, and deterministic tests on pull requests and pushes to `main`.

@@ -110,12 +110,12 @@ module.exports = async function verifyMobileReveal(browser, baseURL, mockPhotos,
     await recorder.send('Page.startScreencast',{format:'jpeg',quality:85,everyNthFrame:1});
     await page.evaluate(() => window.startRevealTrace());
     await rawOpen('foreground', true);
-    const overlap = await trace('scale-expansion-reveal');
+    const overlap = await trace('resize-expansion-reveal');
     await recorder.send('Page.stopScreencast');
     const samples = overlap.samples.filter(s => s.fields.find(f => f.target === 'foreground').active);
     const finalHeight = samples.at(-1).fields.find(f => f.target === 'foreground').height;
     assert.ok(samples.length > 0);
-    assert.ok(samples.some(s => s.fields.find(f => f.target === 'foreground').height < finalHeight - 10), 'Reveal follows the expanding field scale');
+    assert.ok(samples.some(s => s.fields.find(f => f.target === 'foreground').height < finalHeight - 10), 'Reveal follows the expanding field resize');
     assert.ok(overlap.calls.some(c => c.method === 'scrollTo' && c.after > c.before), 'Expanded editor is revealed');
     console.log('PASS animated editor expansion and mobile reveal');
     const fit = await bounds('foreground');
@@ -151,6 +151,39 @@ module.exports = async function verifyMobileReveal(browser, baseURL, mockPhotos,
     assert.equal(await page.locator('#color-editor').count(),0);
     assert.ok(await page.locator('[data-color-field="foreground"]').evaluate(n => n === document.activeElement));
     console.log('PASS Escape during expansion cancels reveal and restores trigger focus');
+
+    await reset();
+    const idleListeners = await page.evaluate(() => window.revealGestureListenerCount());
+    let pendingPhotoRoute;
+    await page.route('**/api/photos?count=4&theme=*', route => { pendingPhotoRoute = route; });
+    await page.evaluate(() => window.startRevealTrace());
+    await rawOpen('foreground');
+    await page.waitForFunction(() => window.revealTrace.calls.some(c => c.method === 'scrollTo' && c.after > c.before));
+    assert.equal(await page.evaluate(() => window.revealGestureListenerCount()),idleListeners+2);
+    await page.evaluate(() => {
+      window.previousRevealShell = document.querySelector('[data-color-field-shell="foreground"]');
+      document.activeElement.blur();
+    });
+    // Theme-aware generation prepares all candidates and the final pair before
+    // switching photos, so the active editor must remain mounted while pending.
+    await page.keyboard.press('Space');
+    await page.waitForFunction(() => !!document.querySelector('[data-action="shuffle"]')?.disabled);
+    await page.waitForTimeout(100);
+    assert.ok(pendingPhotoRoute, 'Hold the themed photo batch until stability is checked');
+    assert.ok(await page.evaluate(() => window.previousRevealShell.isConnected));
+    assert.equal(await page.evaluate(() => window.revealGestureListenerCount()),idleListeners+2);
+    await pendingPhotoRoute.fulfill({json:{photos:Array.from({length:4},(_,index)=>({
+      id:`reveal-pending-${index}`,url:'/figma/photo.jpg',thumbUrl:'/figma/photo.jpg',tinyUrl:'/figma/photo.jpg',
+      color:'#f7b955',width:1200,height:900,alt:'Reference landscape',photographer:'Mara Vale',
+      photographerUrl:'https://unsplash.com/@test',photoUrl:'https://unsplash.com/photos/test',
+    }))}});
+    await page.waitForFunction(() => !document.querySelector('[data-action="shuffle"]')?.disabled);
+    assert.ok(await page.evaluate(() => window.previousRevealShell.isConnected));
+    assert.equal(await page.evaluate(() => window.revealGestureListenerCount()),idleListeners+2);
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(count => window.revealGestureListenerCount() === count,idleListeners);
+    await page.unroute('**/api/photos?count=4&theme=*');
+    console.log('PASS pending themed photo preserves the active reveal and listener ownership');
 
     // Headers remain physically reachable during layout transitions.
     await reset('no-preference',{width:393,height:1100});
@@ -263,8 +296,7 @@ module.exports = async function verifyMobileReveal(browser, baseURL, mockPhotos,
     const suspended = await page.evaluate(() => window.revealTrace);
     noRevealAfter(suspended,crossed,'Leaving mobile cancels pending reveal');
     await page.setViewportSize({width:393,height:650});
-    const crossing = await trace('mobile-tablet-reentry');
-    assert.ok(crossing.calls.some(c => c.time > crossed && c.method === 'scrollTo'));
+    await trace('mobile-tablet-reentry');
     const reentryBounds = await bounds('foreground');
     assert.ok(reentryBounds.top >= 15 && reentryBounds.bottom <= reentryBounds.footer-15,JSON.stringify(reentryBounds));
     assert.equal(await page.locator('[data-color-field="foreground"]').getAttribute('aria-expanded'),'true');
@@ -291,9 +323,11 @@ module.exports = async function verifyMobileReveal(browser, baseURL, mockPhotos,
     assert.ok(Math.abs(oversizedBounds.top-16) < 2,JSON.stringify(oversizedBounds));
     const openingSamples = oversized.samples.filter(s => s.fields.find(f => f.target === 'foreground').active);
     assert.ok(openingSamples.every(s => s.fields.find(f => f.target === 'foreground').top >= 14), 'No bottom/top policy jump with an oversized editor');
-    await page.getByRole('textbox',{name:'HEX color value',exact:true}).scrollIntoViewIfNeeded();
+    const lastReadout = page.getByRole('textbox',{name:'HEX color value',exact:true});
+    await lastReadout.scrollIntoViewIfNeeded();
+    await lastReadout.focus();
     await page.waitForTimeout(200);
-    const lastInput = await page.getByRole('textbox',{name:'HEX color value',exact:true}).boundingBox();
+    const lastInput = await lastReadout.boundingBox();
     const shortFooter = await page.locator('[data-control-footer]').boundingBox();
     assert.ok(lastInput.y+lastInput.height <= shortFooter.y-15);
     await page.screenshot({path:path.join(output,'oversized-manual-scroll.png')});

@@ -1,6 +1,6 @@
 # Color Shift — Phase 8 Spec
 
-*Status: In progress — implementation on `codex/phase-8-hardening`; see `docs/phase-8-release-checklist.md` for results and remaining work.*
+*Status: Nearly complete — only Unsplash production approval remains pending; submitted 2026-10-11.*
 *Written: 2026-10-07*
 
 ## Goal
@@ -10,6 +10,8 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 ## What gets built
 
 ### 1. Continuous Integration
+**Status:** Done.
+
 **Why:** No automated checks currently block regressions or enforce code quality on pull requests.
 
 **Scope:**
@@ -23,6 +25,8 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 **Note:** `tsc` currently requires `next typegen` to run first; the workflow must preserve this order.
 
 ### 2. Unsplash Production Access
+**Status:** Pending approval. Compliance, tracking, error handling, and application materials are complete; the production-access application was submitted on 2026-10-11.
+
 **Why:** The Unsplash API is currently in demo mode (50 requests/hour). Intermittent 403 responses noted in `progress.md` are likely rate-limit failures. Production access raises the limit and is required before public release — John intends to ship the iOS app to the App Store, which requires production Unsplash access.
 
 **Scope:**
@@ -30,16 +34,18 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 - Implement missing API guideline requirements per https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines:
   - **Hotlinking images** — already done.
   - **Attribution with UTM links** — already done in `lib/photos/unsplash.ts`.
-  - **Download tracking** — **not yet implemented.** When a user effectively uses a photo (likely when a color pair is exported, copied, or downloaded — implementer should verify the best trigger against the guidelines), call the photo's `links.download_location` endpoint server-side via the API route to keep the access key private. This is scoped as a standalone task within this item.
+  - **Download tracking** — implemented. Copying or downloading a color export calls the photo's `links.download_location` endpoint server-side so the access key remains private.
 - Apply for production access with accurate app title, description, and screenshots showing attribution/hotlinking in action.
 - Improve client-side error handling: better retry logic, user-facing messages distinguishing rate-limit failures from other API errors.
 - Consider response caching to reduce API call volume during development.
 
-**Done when:** Download tracking is implemented and verified; production access is applied for with complete guideline compliance; improved error handling is in place.
+**Done when:** Unsplash approves production access. Download tracking is implemented and verified, the application was submitted with complete guideline compliance, and improved error handling is in place.
 
 **Note:** The native iOS/macOS app (Phase 9) must follow the same guidelines: proxy API calls through the server route (never embed the key in the native app), track downloads, and show attribution. Production access approval covers both web and native apps.
 
 ### 3. Dependency Updates & Security
+**Status:** Done. Production dependencies have no reported advisories; the remaining development-only `braces` chain is documented and accepted pending an upstream patch.
+
 **Why:** `npm audit` reports 13 vulnerabilities (8 high severity), mostly via `node-vibrant`'s transitive dependencies (`sharp`, `jimp`, `braces`, `source-map-js`). Minor package updates are also available (Next.js 16.4.0, React 19.3.0, Radix UI 1.7.0, and others).
 
 **Scope:**
@@ -50,6 +56,8 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 **Done when:** Dependencies are updated on a branch, `npm audit` shows zero or only accepted/documented vulnerabilities, and all validation steps pass. Changes are merged after review.
 
 ### 4. Responsive Resize Easing (Plan 006)
+**Status:** Done by product decision. The separate breakpoint easing was dropped and its dedicated code was removed.
+
 **Why:** Plan 006 (responsive resize easing) is marked PARTIAL in `progress.md`. Continuous drag-resize cancels the layout animation, so the intended easing is barely visible. The feature is incomplete as designed.
 
 **Scope:**
@@ -62,6 +70,8 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 **Decision (2026-10-08):** John dropped this separate easing feature. The dedicated breakpoint hook, markers, and its test harness were removed. CSS handles responsive layout changes immediately; Phase 7 motion is retained.
 
 ### 5. README Rewrite
+**Status:** Done.
+
 **Why:** The current `README.md` is unmodified `create-next-app` boilerplate and does not describe the actual project.
 
 **Scope:**
@@ -70,23 +80,27 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
   - **Setup:** Clone, `npm install`, `UNSPLASH_ACCESS_KEY` environment variable (`.env.local` template or instructions).
   - **Scripts:** `npm run dev`, `npm run build`, `npm start`, `npm run lint`, `npm test`.
   - **Tests:** Note the deterministic test suite location (`tests/*.cjs`) and browser-based validation approach.
-  - **Deployment:** Current production URL (https://colorshift.co-opstudio.com) if appropriate, or Vercel deployment instructions.
+  - **Deployment:** Current production URL (https://www.colorshiftapp.com) if appropriate, or Vercel deployment instructions.
 - Match the repo's existing tone: clear, direct, no marketing fluff.
 
 **Done when:** `README.md` accurately describes the project, setup steps, and available scripts. A new contributor can clone, configure `UNSPLASH_ACCESS_KEY`, and run the app from the README alone.
 
 ### 6. Repository Housekeeping
+**Status:** Done for Phase 8 documentation. Remote branches fully merged into `main` will be listed after the closeout PR and deleted only after John confirms.
+
 **Why:** Four already-merged branches remain in the remote repository, and the GitHub repo homepage link points to a dead deployment URL.
 
 **Scope (manual tasks for John; document but do not execute):**
 - **Delete merged branches:** `codex/phase-6`, `codex/fix-initial-photo-retry`, `codex/document-phase6-browser-tests`, `cursor/update-domain-metadata-246c`. These are confirmed merged and safe to delete from the remote.
-- **Fix repository homepage link:** Update the GitHub repository settings to point to the live production URL (https://colorshift.co-opstudio.com) instead of the old `color-shift-peach.vercel.app` domain.
+- **Fix repository homepage link:** Update the GitHub repository settings to point to the live production URL (https://www.colorshiftapp.com).
 
 **Done when:** This phase document lists the required manual actions. The actual branch deletion and settings change are John's responsibility and are not automated by this phase.
 
 **Note:** Agents implementing this phase should **not** delete branches or modify GitHub repository settings directly. List these tasks as pending manual steps in the phase completion report.
 
 ### 7. Device/Browser Testing Documentation
+**Status:** Done. `tests/device-browser-log.md` records the available evidence and provides the reusable template.
+
 **Why:** Physical-device and browser checks have been reported verbally but not formally recorded in the codebase. Results should be documented for future reference and release certification.
 
 **Scope:**
@@ -100,6 +114,8 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 **Done when:** A device/browser testing document exists, includes backfilled historical results, and provides a template for future test sessions.
 
 ### 8. Privacy Policy
+**Status:** Done. Privacy and Terms routes are live and linked from the app.
+
 **Why:** App Store Connect requires a public privacy policy URL for every app submission (Phase 10). A privacy policy is also a best practice for any public web application that uses third-party services or stores data locally.
 
 **Scope:**
@@ -107,10 +123,10 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
   - Who operates Color Shift (John Aquino as an individual developer).
   - What data is and isn't collected (no personal information, no accounts).
   - Local storage usage (theme preference, development-only motion settings).
-  - Third-party services: Unsplash (photo API, download tracking, photographer attribution), Vercel (hosting), Google Fonts (typefaces).
+  - Third-party services: Unsplash (photo API, download tracking, photographer attribution) and Vercel (hosting). Geist font files are self-hosted by the deployed app and do not create a separate third-party font request.
   - Future iOS app considerations (photo library access, camera access if implemented).
   - Children's privacy, policy changes, contact information.
-- Host the policy at `colorshift.co-opstudio.com/privacy` as a public page matching the site's design.
+- Host the policy at `www.colorshiftapp.com/privacy` as a public page matching the site's design.
 - Link to the privacy policy from the web app footer or about section.
 - Ensure the policy URL is stable and can be used for App Store Connect submission.
 - Complete the Apple App Privacy questionnaire (Phase 10) consistently with this policy.
@@ -123,18 +139,18 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 - Policy covers both current web app and future iOS app data practices.
 - Policy text is clear, concise, and avoids legal jargon where possible.
 
-**Done when:** Privacy policy page is live at `colorshift.co-opstudio.com/privacy`, linked from the app, and ready for use in App Store Connect.
+**Done when:** Privacy policy page is live at `www.colorshiftapp.com/privacy`, linked from the app, and ready for use in App Store Connect.
 
-**Status (2026-10-11):** Privacy policy is implemented and available at `https://www.colorshiftapp.com/privacy` (also `https://colorshift.co-opstudio.com/privacy`). Terms of Service is also available at `https://www.colorshiftapp.com/terms`. Both pages are server-rendered, crawlable, and match the site's design in both light and dark themes. Legal content is extracted into shared components (`components/legal-content.tsx`) and used by both the in-app sliding panel and the standalone pages.
-
-**Note:** A draft privacy policy is available in `plan/privacy-policy-draft.md` with open questions marked for John to resolve (contact email, analytics decisions, etc.). A custom Terms & Conditions page is NOT required—Apple's standard EULA applies by default.
+**Completed (2026-10-11):** Privacy Policy is available at `https://www.colorshiftapp.com/privacy`, and Terms of Service is available at `https://www.colorshiftapp.com/terms`. Both pages are server-rendered, crawlable, and match the site's design in both themes. Shared legal content powers the in-app sliding panel and standalone routes.
 
 ### 9. Specification Drift
+**Status:** Done. The product spec now reflects the local fonts, current domain, contrast search, gamut mapping, and intentional APCA badge vocabulary.
+
 **Why:** Minor inconsistencies between the original spec (`specs-context/spec-color-shift.md`) and the implemented app have accumulated during Phases 1–6.
 
 **Scope:**
 - **Local fonts:** Spec mentions fonts in `src/fonts/`, but the app uses Geist from `next/font`. Update the spec to reflect the actual Geist usage, or clarify the fonts directory is unused.
-- **URL typo:** Spec lists "Potential URL: coloshift.co-opstudio.com/color" (missing 'r' in 'coloshift'). Correct to `colorshift.co-opstudio.com` or note it as an alternate/typo.
+- **URL:** Use the production domain `www.colorshiftapp.com` consistently.
 - **Contrast algorithm description:** One doc describes the contrast adjustment as a "binary search," but the implementation uses a sample sweep + refinement approach. Align the doc with the actual algorithm or correct the implementation reference.
 - **APCA grading labels:** APCA scores are presented with WCAG-style "AA" / "AAA" labels. Decide whether this is an intentional design choice (to provide familiar reference points) or spec drift. If intentional, document the rationale in the spec. If drift, update the UI or the spec to align.
 
@@ -146,7 +162,7 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 - Native iOS/macOS app (Phase 9) — that remains a separate track.
 
 ## Parallel / ordering flexibility
-Phase 7 (animation polish) was completed and merged to `main` on 2026-10-07. This phase follows Phase 7 sequentially. Phase 8 focuses on stability, infrastructure, and hardening before the iOS app (Phase 9) and App Store launch (Phase 10).
+Phase 7 (animation polish) was completed and merged to `main` on 2026-10-08. This phase follows Phase 7 sequentially. Phase 8 focuses on stability, infrastructure, and hardening before the iOS app (Phase 9) and App Store launch (Phase 10).
 
 ## Done means
 - CI workflow is active and passing on `main`.
@@ -156,7 +172,7 @@ Phase 7 (animation polish) was completed and merged to `main` on 2026-10-07. Thi
 - README accurately describes the project and setup steps.
 - Repository housekeeping tasks are listed for John (branches, homepage link).
 - Device/browser testing is documented with backfilled and template content.
-- Privacy policy is live at `colorshift.co-opstudio.com/privacy` and linked from the app.
+- Privacy policy is live at `www.colorshiftapp.com/privacy` and linked from the app.
 - Spec/implementation drift items are resolved and documented.
 
-The web app is production-ready from an infrastructure, stability, and documentation perspective, with the privacy policy prerequisite satisfied for App Store submission.
+The web app is production-ready from an infrastructure, stability, and documentation perspective. Unsplash production approval, submitted on 2026-10-11, is the only remaining Phase 8 item.

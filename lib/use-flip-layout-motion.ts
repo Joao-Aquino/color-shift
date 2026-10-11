@@ -32,7 +32,9 @@ export function useFlipLayoutMotion(rootRef: RefObject<HTMLElement | null>, stat
     context.current = null;
     ghosts.current.forEach(element => element.remove());
     ghosts.current = [];
-    rootRef.current?.removeAttribute("data-layout-moving");
+    const root = rootRef.current;
+    root?.removeAttribute("data-layout-moving");
+    root?.dispatchEvent(new Event("cs:layout-motion", { bubbles: true }));
   }, [rootRef]);
 
   const prepare = useCallback(() => {

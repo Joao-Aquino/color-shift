@@ -50,10 +50,11 @@ opacity-only reduced-motion behavior.
 automatic font fitting and the absence of an editor box or Aa/circle toggle.
 It covers resolved Figma Light button/export colors, photo crossfade/rapid
 navigation, slider easing versus immediate dragging, score-only numeral motion,
-export cleanup, mobile reveal and live reduced motion. Rendered transforms and
-settled editor height confirm ColorField/score scale changes and cleanup. Screenshots are written to `/tmp/color-shift-phase7`.
+export cleanup, mobile reveal and live reduced motion. Rendered dimensions and
+settled editor height confirm interruptible real-resize motion and cleanup. Screenshots are written to `/tmp/color-shift-phase7`.
 Development DialKit exposes Phase 7 timing, sidebar States → Easing (default
-easeInOutQuart) and score numeral timing; production omits the panel.
+easeOutQuart) and score numeral timing; production omits the panel. ColorFields,
+score thresholds, and Export use 0.3s enter / 0.25s exit timing.
 
 Editor reveal checks cover both color fields and all five formats at 393 x 852
 in both themes and motion preferences, the oversized-panel fallback at 320 x 320,
@@ -73,8 +74,8 @@ passed; the device, OS, and browser matrix was not recorded here.
 
 `phase5-browser.test.cjs` also runs `mobile-editor-reveal.browser.cjs`.
 The helper records app scroll writes and frame geometry to verify that actual
-editors scale open and are revealed at 393 x 852. It covers Escape during the first
-scroll write, visible raw field switches,
+editors resize open and are revealed at 393 x 852. It covers Escape during the first
+scroll write, stable editor/listener ownership while a themed photo request is pending, visible raw field switches,
 rapid keyboard reversal, trusted wheel/touch cancellation, footer/format/viewport
 changes, renewed activation, live reduced motion, input-focus protection,
 desktop-to-mobile entry and mobile/tablet reentry, and oversized manual scrolling.
@@ -107,8 +108,8 @@ viewport before measurement.
 
 `motion-devtools.browser.cjs` targets the development server (default localhost:3000),
 where DialKit is available. It selects States → Easing, measures the actual
-quartic and linear scale curves on ColorFields and score, and checks reload
-persistence. Production suites check interrupted scale cleanup and mobile reveal.
+ease-out and linear real-resize curves on ColorFields and score, and checks reload
+persistence. Production suites check interrupted resize cleanup and mobile reveal.
 
 Theme wipe directions are destination-specific: Dark reveals left → right;
 Light reveals right → left.
