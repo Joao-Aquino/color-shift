@@ -125,6 +125,8 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 
 **Done when:** Privacy policy page is live at `colorshift.co-opstudio.com/privacy`, linked from the app, and ready for use in App Store Connect.
 
+**Status (2026-10-11):** Privacy policy is implemented and available at `https://www.colorshiftapp.com/privacy` (also `https://colorshift.co-opstudio.com/privacy`). Terms of Service is also available at `https://www.colorshiftapp.com/terms`. Both pages are server-rendered, crawlable, and match the site's design in both light and dark themes. Legal content is extracted into shared components (`components/legal-content.tsx`) and used by both the in-app sliding panel and the standalone pages.
+
 **Note:** A draft privacy policy is available in `plan/privacy-policy-draft.md` with open questions marked for John to resolve (contact email, analytics decisions, etc.). A custom Terms & Conditions page is NOT required—Apple's standard EULA applies by default.
 
 ### 9. Specification Drift
