@@ -123,7 +123,7 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
   - Who operates Color Shift (John Aquino as an individual developer).
   - What data is and isn't collected (no personal information, no accounts).
   - Local storage usage (theme preference, development-only motion settings).
-  - Third-party services: Unsplash (photo API, download tracking, photographer attribution), Vercel (hosting), Google Fonts (typefaces).
+  - Third-party services: Unsplash (photo API, download tracking, photographer attribution) and Vercel (hosting). Geist font files are self-hosted by the deployed app and do not create a separate third-party font request.
   - Future iOS app considerations (photo library access, camera access if implemented).
   - Children's privacy, policy changes, contact information.
 - Host the policy at `www.colorshiftapp.com/privacy` as a public page matching the site's design.
@@ -162,7 +162,7 @@ Harden the existing web implementation by filling infrastructure gaps, addressin
 - Native iOS/macOS app (Phase 9) — that remains a separate track.
 
 ## Parallel / ordering flexibility
-Phase 7 (animation polish) was completed and merged to `main` on 2026-10-07. This phase follows Phase 7 sequentially. Phase 8 focuses on stability, infrastructure, and hardening before the iOS app (Phase 9) and App Store launch (Phase 10).
+Phase 7 (animation polish) was completed and merged to `main` on 2026-10-08. This phase follows Phase 7 sequentially. Phase 8 focuses on stability, infrastructure, and hardening before the iOS app (Phase 9) and App Store launch (Phase 10).
 
 ## Done means
 - CI workflow is active and passing on `main`.

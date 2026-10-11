@@ -21,11 +21,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Color Shift",
   description: "Photo-driven color pairs with guaranteed readable contrast.",
-  metadataBase: new URL("https://colorshift.co-opstudio.com"),
+  metadataBase: new URL("https://www.colorshiftapp.com"),
   openGraph: {
     title: "Color Shift",
     description: "Photo-driven color pairs with guaranteed readable contrast.",
-    url: "https://colorshift.co-opstudio.com",
+    url: "https://www.colorshiftapp.com",
     siteName: "Color Shift",
     locale: "en_US",
     type: "website",
