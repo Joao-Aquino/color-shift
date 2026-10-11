@@ -1,6 +1,6 @@
 # Color Shift — Phase 7 Spec
 
-*Status: Implemented / browser-verified (2026-10-07)*
+*Status: Complete (2026-10-07)*
 *Written: 2026-09-26. Moved from Phase 5 to Phase 7 (last of the web-feature phases) on 2026-09-27.*
 
 ## Goal
@@ -33,8 +33,8 @@ Use the animation skills installed from [emilkowalski/skills](https://github.com
 
 ### 4. Sidebar state transitions
 - GSAP Flip animates EXPORT ↔ COPY/DOWNLOAD in the existing export slot.
-- Exit 150ms, entrance 200ms, ease-out-quint.
-- Score threshold expansion and ColorField opening, switching and closing animate real box dimensions with easeOutQuart (power3.out), following the merged real-resize update (#9). DialKit States → Easing selects the curve for both. Mobile reveal follows animation frames and respects footer geometry and manual scrolling.
+- Export, score threshold expansion, and ColorField opening, switching and closing share the real-resize timing: 0.3s enter and 0.25s exit with easeOutQuart (`power3.out`).
+- The animation changes real box dimensions; glyphs, borders, swatches, and editor controls are never scaled. DialKit States → Easing selects the curve for these transitions. Mobile reveal follows animation frames and respects footer geometry and manual scrolling.
 
 ### 5. Slider easing
 - GSAP animates slider handle position when the underlying color changes programmatically (e.g. photo navigation, threshold bump) — power4.inOut.
@@ -63,7 +63,7 @@ Photo navigation, WCAG/APCA numerals, export states and programmatic slider chan
 
 ### Review history
 
-The initial Phase 7 implementation included specimen squish/pop and Aa/circle rotation plus sidebar Flip. The first review replaced ColorField scaling with box resizing; a later review exposed a 0–1 resize intensity control in DialKit. The browser review initially made score and ColorFields immediate and changed specimen click to direct editing. The subsequent review restores scale on both sidebar components with easeInOutQuart and a development DialKit easing selector.
+The initial Phase 7 implementation included specimen squish/pop, Aa/circle rotation, and transform-based sidebar experiments. The completed implementation removed those experiments and uses interruptible real-dimension resizing for ColorFields, score thresholds, and Export. All three share easeOutQuart with 0.3s enter and 0.25s exit timing; editable values remain plain and specimen editing stays immediate.
 
 ### Verification
 

@@ -6,7 +6,7 @@ Plans from `improve-animations`. Execute with an agent (`improve-animations exec
 |---|---|---|---|
 | 001 | Snap ColorField shell to a single border-radius | HIGH | DONE |
 | 002 | Shorten score odometer to UI duration budget | HIGH | DONE |
-| 003 | IconButton named transitions + press scale | MEDIUM | DONE |
+| 003 | IconButton named transitions + press feedback | MEDIUM | DONE |
 | 004 | Score threshold accordion (CSS interim) | MEDIUM | DONE |
 | 005 | Fix EXPORT trigger progress + entrance motion | HIGH | DONE |
 | 006 | Ease responsive layout changes | MEDIUM | DROPPED |
@@ -28,4 +28,6 @@ Plans from `improve-animations`. Execute with an agent (`improve-animations exec
 
 - Product roadmap lives in `plan/` (singular). These motion plans live in `plans/` (plural) so they stay separate.
 - DialKit development controls and the Phase 7 animations remain. The separate responsive GSAP Flip hook from Plan 006 was removed.
+- Phase 7 is complete: sidebar state changes use real box resizing with easeOutQuart, 0.3s enter and 0.25s exit timing; Export uses the same timing.
+- Phase 8 is nearly complete. Unsplash production approval is the only pending item; the application was submitted on 2026-10-11.
 - `improve-animations` only writes plans; it does not edit app source. Implement via `improve-animations execute plans/005-export-button-motion.md` or Agent mode with that file.

@@ -2,7 +2,7 @@
 
 **Name:** Color Shift
 **Tagline:** Two colors. One photo. Feel the contrast.
-**Production URL:** [colorshift.co-opstudio.com](https://colorshift.co-opstudio.com)
+**Production URL:** [www.colorshiftapp.com](https://www.colorshiftapp.com)
 **Created by:** John Aquino ([joao@co-opstudio.com](mailto:joao@co-opstudio.com))  
 **Repo:** `color-shift` (Next.js 16 + Tailwind v4 (or latesst) + TypeScript)
 
@@ -75,7 +75,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 - App loads 10 random Unsplash landscape photos on launch
 - Each photo is processed through the browser-only Vibrant pipeline to extract a VibrantPalette (6 swatches: Vibrant, DarkVibrant, LightVibrant, Muted, DarkMuted, LightMuted)
 - Engine scores all swatch pairs by contrast ratio + vibrancy + prominence, picks the best bg/fg pair
-- Foreground is auto-bumped to guarantee AA contrast (4.5 WCAG or 60 APCA)
+- Foreground is auto-bumped to guarantee WCAG AA contrast (at least 4.5:1)
 - Buffer auto-refills when you get within 3 photos of the end (always 10 ahead)
 - Photo images are preloaded (full + thumb + 32px tiny placeholder)
 
@@ -101,8 +101,8 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 ### 4. Contrast Scoring (Dual Algorithm)
 
 - **WCAG 2:** contrast ratio (e.g. "4.50:1"), grades: AAA (≥7.0), AA (≥4.5), AA Large (≥3.0), Fail
-- **APCA:** Lc value (e.g. "Lc 72.3"), grades: AAA (≥75), AA (≥60), AA Large (≥45), Fail
-- APCA uses these familiar badge names as Color Shift's shorthand for its chosen Lc thresholds. They are not WCAG conformance grades and should not be read as an APCA certification.
+- **APCA:** unsigned Lc magnitude (e.g. "Lc 72.3"), with Color Shift labels: AAA (≥75), AA (≥60), AA Large (≥45), Fail (<45). The engine retains the signed value and text polarity internally.
+- The WCAG-style APCA labels are an intentional product vocabulary choice: familiar shorthand for Color Shift's Lc thresholds, not WCAG conformance grades or APCA certification. The selectable APCA thresholds in code are 30, 45, 60, and 75.
 - Toggle between algorithms with the WCAG | APCA tabs at the top of the score tile
 - WCAG and APCA score values use the existing GSAP odometer animation on value change. Other numeric values remain unanimated.
 
@@ -112,7 +112,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 
 - Thresholds: 1.5, 3.0, 4.5, 7.0 (WCAG) or 30, 45, 60, 75 (APCA)
 - Click the score tile to expand the threshold row. Click a threshold to bump the active color (fg by default, bg if its editor panel is open) to that exact contrast level
-- Binary search on OKLCH lightness to find the minimal color change that hits the target
+- Contrast adjustment samples 513 OKLCH lightness candidates across the full range, selects the closest candidate for the requested exact/minimum mode, then runs 18 local refinement steps around the best lightness. APCA adjustments preserve the current polarity; every candidate is chroma-clamped into sRGB.
 - Active threshold (nearest to current score) is visually highlighted
 
 
@@ -127,7 +127,7 @@ A second layout option where color + photo pairs stack vertically in a scrollabl
 - No 2D picker, no alpha (transparency is out of scope).
 - Slider values are normalized to 0-100 internally. GSAP animates slider positions when the photo changes (power4.inOut). During manual drag, animation is killed and updates are instant.
 - All sliders update the specimen and score in real time. Zero perceptible lag.
-- OKLCH chroma slider uses binary search gamut mapping to find the maximum in-gamut chroma for the current L and H values.
+- OKLCH chroma slider gamut mapping is a separate algorithm: it uses binary search to find the maximum in-gamut chroma for the current L and H values.
 
 
 

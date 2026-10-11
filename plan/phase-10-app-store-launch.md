@@ -57,7 +57,7 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 **Why:** Required by App Store Review Guidelines and user transparency.
 
 **Scope:**
-- **Privacy policy URL:** Prerequisite completed in Phase 8. The privacy policy is live at `https://www.colorshiftapp.com/privacy` (also available at `https://colorshift.co-opstudio.com/privacy`) and covers data collection, Unsplash API usage, on-device photo processing, and third-party services. The policy already addresses both web and iOS app practices, including Apple's native crash reports. Terms of Service is also available at `https://www.colorshiftapp.com/terms`.
+- **Privacy policy URL:** Prerequisite completed in Phase 8. The privacy policy is live at `https://www.colorshiftapp.com/privacy` and covers data collection, Unsplash API usage, on-device photo processing, and third-party services. The policy already addresses both web and iOS app practices, including Apple's native crash reports. Terms of Service is also available at `https://www.colorshiftapp.com/terms`.
 - **App Privacy nutrition labels:** Complete App Store Connect's App Privacy questionnaire consistently with the Phase 8 privacy policy. Declare:
   - **Photos:** User-selected photos from library are processed on-device; not collected, not transmitted to Color Shift servers.
   - **Unsplash API requests:** Proxied through server; no user-identifiable data sent; access key remains server-side.
@@ -123,7 +123,7 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 - **Crash reporting:** Integrate crash reporting SDK (e.g., Crashlytics, Sentry) or use Xcode Organizer for crash logs. Monitor and fix critical crashes.
 - **Ratings prompt:** Use `SKStoreReviewController` to request ratings at appropriate times (e.g., after successful export, not on first launch). Follow App Store guidelines (max 3 prompts per year per device).
 - **Versioning:** Follow semantic versioning (e.g., 1.0.0, 1.1.0, 2.0.0). Increment appropriately for bug fixes, features, breaking changes.
-- **Support URL:** Provide a support URL in App Store Connect (e.g., `colorshift.co-opstudio.com/support`) with FAQs, contact info, and known issues.
+- **Support URL:** Provide a support URL in App Store Connect (e.g., `www.colorshiftapp.com/support`) with FAQs, contact info, and known issues.
 - **Update cadence:** Plan for regular updates with bug fixes, new features, and iOS compatibility (e.g., annual iOS major version support).
 
 **Done when:** Crash reporting is active; ratings prompt is implemented; versioning and support infrastructure are in place; post-launch monitoring begins.

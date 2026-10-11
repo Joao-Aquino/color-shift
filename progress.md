@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-10-11 - Phase 7 closed; Phase 8 awaiting Unsplash approval
+
+Phase 7 is complete. ColorFields, score thresholds, and Export animate real box dimensions with easeOutQuart, using 0.3s enter and 0.25s exit timing. Text, swatches, borders, and editor controls retain their natural geometry throughout the transition.
+
+Phase 8 is nearly complete. CI, production dependency hardening, the dropped responsive-easing cleanup, README and testing documentation, privacy/terms routes, and spec reconciliation are done. The Unsplash production-access application was submitted on 2026-10-11; approval is the only remaining Phase 8 item.
+
+Closeout validation passed: lint, deterministic tests, TypeScript through `npx next build --webpack`, the production dependency audit, and every production-capable Chrome suite run sequentially against the build. The development-only DialKit suite passed separately against `next dev`. The Phase 5 regression now covers stable editor ownership during pending theme-aware Space generation and footer-portal replacement during mobile breakpoint re-entry; no browser console errors were reported.
+
 ## 2026-10-08 - Phase 8 scope and dependency security follow-up
 
 John dropped Plan 006 continuous breakpoint easing and confirmed that physical-device testing has been performed throughout the project. The dedicated breakpoint Flip hook, markers, and tests were removed; the separate Phase 7 animations remain. The device log records John's confirmation without inventing device models, versions, or screenshots.
@@ -48,9 +56,9 @@ The Phase 7 PR had already been merged, including the real-resize ColorField upd
 
 Validation: lint and TypeScript/webpack build; dedicated Chrome caret regression across desktop/tablet/mobile sizes, selection, wrapping/emoji/empty text, synthetic composition, forced colors and reduced motion. Saved screenshots in /tmp/color-shift-specimen-caret.
 
-## 2026-10-07 - Destination-specific theme wipe and restored sidebar scale
+## 2026-10-07 - Destination-specific theme wipe and sidebar state motion
 
-The user requested Dark left → right and Light right → left, restored scale on both ColorFields and score, and an editable easing selector in DialKit. The wipe now derives its direction from the destination theme. Sidebar Flip/presence is restored with easeInOutQuart (GSAP power3.inOut), leaving export easing unchanged. Development States → Easing selects easeInOutQuart, easeInOutCubic, easeOutQuart, easeOutExpo or linear through --sidebar-easing. Existing enter/exit duration controls still apply.
+The user requested Dark left → right and Light right → left plus an editable easing selector in DialKit. The wipe now derives its direction from the destination theme. The completed sidebar implementation uses real box resizing with easeOutQuart (GSAP power3.out) for ColorFields, score thresholds, and Export. Development States → Easing can select alternate curves through `--sidebar-easing`; the product default remains easeOutQuart with 0.3s enter and 0.25s exit timing.
 
 Mobile reveal follows cs:layout-motion frames and retains its manual wheel/touch and input-focus cancellation. Interrupted timelines, inert exit copies and temporary styles clean up on settlement, resize and reduced motion. The archived curtain branch remains available.
 

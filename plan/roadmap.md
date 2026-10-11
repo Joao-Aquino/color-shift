@@ -1,6 +1,6 @@
 # Color Shift — Roadmap
 
-*Status: Draft — phase ordering/grouping not yet confirmed*
+*Status: Active — web Phases 1–7 complete; Phase 8 awaiting Unsplash approval*
 *Written: 2026-09-26*
 
 Full product vision lives in `specs-context/spec-color-shift.md` and `specs-context/style-guide-color-shift.md`. This roadmap breaks that vision into buildable phases. Each phase has its own file in this folder.
@@ -13,8 +13,8 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 | 4 | `phase-4-export.md` | Export (copy + download) | Complete |
 | 5 | `phase-5-theming-responsive.md` | Theming (light mode) + responsive mobile | Implemented/browser-verified 2026-10-02; device checks pending |
 | 6 | `phase-6-extended-input-layouts.md` | Personal photo input + editable specimen text | Implemented/browser-verified 2026-10-06 |
-| 7 | `phase-7-animation-polish.md` | Animation polish (GSAP, score odometer, DialKit) | Implemented/browser-verified 2026-10-07 |
-| 8 | `phase-8-loose-ends-hardening.md` | Loose ends & hardening (CI, deps, docs, fixes, privacy policy) | Proposed / Not Started |
+| 7 | `phase-7-animation-polish.md` | Animation polish (GSAP, score odometer, DialKit) | Complete |
+| 8 | `phase-8-loose-ends-hardening.md` | Loose ends & hardening (CI, deps, docs, fixes, privacy policy) | Nearly complete — Unsplash approval pending (submitted 2026-10-11) |
 | 9 | `phase-9-native-platforms.md` | Native platforms (iOS + macOS) | Draft |
 | 10 | `phase-10-app-store-launch.md` | App Store launch (iOS, optional macOS, depends on Phase 8 privacy policy) | Draft |
 | — | `stretch.md` | Figma MCP export | Stretch, unscheduled |
