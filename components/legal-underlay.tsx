@@ -11,8 +11,16 @@ import {
   PrivacyPolicyContent,
   TermsOfServiceContent,
 } from "@/components/legal-content";
+import { ChangelogTimelineMotion } from "@/components/changelog-timeline-motion";
 
-type UnderlayDocumentId = "privacy" | "shortcuts" | "terms";
+type UnderlayDocumentId = "changelog" | "privacy" | "shortcuts" | "terms";
+
+const DOCUMENT_TITLE_IDS: Record<UnderlayDocumentId, string> = {
+  changelog: "changelog-title",
+  privacy: "privacy-policy-title",
+  shortcuts: "shortcuts-title",
+  terms: "terms-of-service-title",
+};
 
 function PrivacyPolicy() {
   return (
@@ -79,7 +87,13 @@ function Shortcuts() {
   );
 }
 
-export function LegalUnderlay({ children }: { children: ReactNode }) {
+export function LegalUnderlay({
+  changelog,
+  children,
+}: {
+  changelog: ReactNode;
+  children: ReactNode;
+}) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [activeDocument, setActiveDocument] = useState<UnderlayDocumentId | null>(null);
 
@@ -144,7 +158,12 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
       const button = event.currentTarget;
       if (!(button instanceof HTMLButtonElement)) return;
       const documentId = button.dataset.legalDocument;
-      if (documentId !== "privacy" && documentId !== "shortcuts" && documentId !== "terms") return;
+      if (
+        documentId !== "changelog" &&
+        documentId !== "privacy" &&
+        documentId !== "shortcuts" &&
+        documentId !== "terms"
+      ) return;
 
       activeTrigger = button;
       setActiveDocument(documentId);
@@ -245,7 +264,7 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
       <div data-mobile-control-footer-root />
       <section
         aria-hidden={activeDocument === null}
-        aria-labelledby={activeDocument === "privacy" ? "privacy-policy-title" : activeDocument === "shortcuts" ? "shortcuts-title" : "terms-of-service-title"}
+        aria-labelledby={activeDocument ? DOCUMENT_TITLE_IDS[activeDocument] : undefined}
         className="underlay-nav__menu"
         data-underlay-nav-menu
         id="legal-underlay-panel"
@@ -263,6 +282,9 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
           </button>
         </header>
         <div className="underlay-nav__inner">
+          <div hidden={activeDocument !== "changelog"}>
+            {changelog}
+          </div>
           <div hidden={activeDocument !== "terms"}>
             <TermsOfService />
           </div>
@@ -273,6 +295,7 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
             <Shortcuts />
           </div>
         </div>
+        <ChangelogTimelineMotion active={activeDocument === "changelog"} />
       </section>
     </div>
   );

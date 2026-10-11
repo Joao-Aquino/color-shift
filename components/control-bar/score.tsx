@@ -44,27 +44,39 @@ const gradeTabText: Record<ContrastScore["grade"], string> = {
 const gradeToneVars: Record<ContrastScore["grade"], CSSProperties> = {
   AAA: {
     "--score-border": "var(--color-score-good-border)",
+    "--score-divider": "var(--color-score-good-divider)",
+    "--score-meta": "var(--color-score-good-meta)",
     "--score-pill": "var(--color-score-good-pill)",
     "--score-pill-border": "var(--color-score-good-pill-border)",
-    "--score-text": "var(--color-score-good-text)",
+    "--score-pill-text": "var(--color-score-good-pill-text)",
+    "--score-text": "var(--color-score-good-threshold-text)",
   } as CSSProperties,
   AA: {
     "--score-border": "var(--color-score-good-border)",
+    "--score-divider": "var(--color-score-good-divider)",
+    "--score-meta": "var(--color-score-good-meta)",
     "--score-pill": "var(--color-score-good-pill)",
     "--score-pill-border": "var(--color-score-good-pill-border)",
-    "--score-text": "var(--color-score-good-text)",
+    "--score-pill-text": "var(--color-score-good-pill-text)",
+    "--score-text": "var(--color-score-good-threshold-text)",
   } as CSSProperties,
   "AA Large": {
     "--score-border": "var(--color-score-meh-border)",
+    "--score-divider": "var(--color-score-meh-divider)",
+    "--score-meta": "var(--color-score-meh-meta)",
     "--score-pill": "var(--color-score-meh-pill)",
     "--score-pill-border": "var(--color-score-meh-pill-border)",
-    "--score-text": "var(--color-score-meh-text)",
+    "--score-pill-text": "var(--color-score-meh-pill-text)",
+    "--score-text": "var(--color-score-meh-threshold-text)",
   } as CSSProperties,
   Fail: {
     "--score-border": "var(--color-score-bad-border)",
+    "--score-divider": "var(--color-score-bad-divider)",
+    "--score-meta": "var(--color-score-bad-meta)",
     "--score-pill": "var(--color-score-bad-pill)",
     "--score-pill-border": "var(--color-score-bad-pill-border)",
-    "--score-text": "var(--color-score-bad-text)",
+    "--score-pill-text": "var(--color-score-bad-pill-text)",
+    "--score-text": "var(--color-score-bad-threshold-text)",
   } as CSSProperties,
 };
 
@@ -205,7 +217,7 @@ export function Score({
             {score ? (
               algorithm === "APCA" ? (
                 <>
-                  <span className="min-w-0 flex-1 text-[11px] leading-[11px] font-medium">
+                  <span className="min-w-0 flex-1 text-[11px] leading-[11px] font-medium text-[var(--score-meta)]">
                     L<sup className="text-[7.1px]">C</sup>
                   </span>
                   <span className="flex min-w-0 flex-1 justify-end">
@@ -253,7 +265,7 @@ export function Score({
                 >
                   <div
                     aria-hidden
-                    className="h-px w-full rounded-[4px] bg-[var(--score-border)]"
+                    className="h-px w-full rounded-[4px] bg-[var(--score-divider)]"
                   />
                   <div className="mt-4">
                     <ThresholdButtons

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EFFECTIVE_DATE, PrivacyPolicyContent } from "@/components/legal-content";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy — Color Shift",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Privacy Policy",
   description: "Privacy policy for Color Shift, a photo-driven color pair tool with guaranteed readable contrast.",
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

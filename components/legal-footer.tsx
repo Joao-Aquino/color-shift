@@ -5,7 +5,7 @@ function LegalDocumentButton({
   document,
 }: {
   children: ReactNode;
-  document: "privacy" | "shortcuts" | "terms";
+  document: "changelog" | "privacy" | "shortcuts" | "terms";
 }) {
   return (
     <button
@@ -29,6 +29,7 @@ export function LegalFooter() {
     >
       <p data-node-id="3417:409">ColorShift © João Aquino, 2026</p>
       <nav aria-label="Footer links" className="cs-legal-footer-links" data-name="Footer links" data-node-id="3417:414">
+        <LegalDocumentButton document="changelog">Changelog</LegalDocumentButton>
         <LegalDocumentButton document="shortcuts">
           Shortcuts
         </LegalDocumentButton>
@@ -48,6 +49,7 @@ export function MobileLegalFooter() {
     <section aria-label="Legal information" className="cs-mobile-legal-footer">
       <p>ColorShift © João Aquino, 2026</p>
       <nav aria-label="Legal links" className="cs-mobile-legal-footer-links">
+        <LegalDocumentButton document="changelog">Changelog</LegalDocumentButton>
         <LegalDocumentButton document="terms">Terms of Service</LegalDocumentButton>
         <LegalDocumentButton document="privacy">Privacy Policy</LegalDocumentButton>
       </nav>

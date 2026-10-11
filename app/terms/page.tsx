@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EFFECTIVE_DATE, TermsOfServiceContent } from "@/components/legal-content";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of Service — Color Shift",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Terms of Service",
   description: "Terms of service for Color Shift, a photo-driven color pair tool with guaranteed readable contrast.",
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

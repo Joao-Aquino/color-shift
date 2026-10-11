@@ -4,6 +4,7 @@ import { Agentation } from "agentation";
 
 import { MotionDevtools } from "@/components/motion-devtools";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/seo";
 import { THEME_BOOTSTRAP } from "@/lib/theme";
 
 import "./globals.css";
@@ -19,21 +20,40 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Color Shift",
-  description: "Photo-driven color pairs with guaranteed readable contrast.",
-  metadataBase: new URL("https://www.colorshiftapp.com"),
-  openGraph: {
-    title: "Color Shift",
-    description: "Photo-driven color pairs with guaranteed readable contrast.",
-    url: "https://www.colorshiftapp.com",
-    siteName: "Color Shift",
-    locale: "en_US",
-    type: "website",
+  title: {
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Color Shift",
-    description: "Photo-driven color pairs with guaranteed readable contrast.",
+  description: SITE_DESCRIPTION,
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
+  keywords: [
+    "accessible color palette",
+    "color contrast checker",
+    "WCAG contrast",
+    "APCA contrast",
+    "photo color palette",
+    "color accessibility",
+  ],
+  authors: [{ name: "João Aquino" }],
+  creator: "João Aquino",
+  publisher: "João Aquino",
+  category: "design",
+  formatDetection: {
+    address: false,
+    email: false,
+    telephone: false,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 

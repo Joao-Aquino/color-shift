@@ -1,12 +1,26 @@
 # Progress Log
 
-## 2026-10-11 - Phase 7 closed; Phase 8 awaiting Unsplash approval
+## 2026-10-11 - Social preview and SEO foundation added
+
+Added the supplied 1200 × 630 Open Graph image with descriptive alt text and reused it for large Twitter cards. Centralized the production URL, titles, descriptions, and social metadata; added route-specific canonicals for the app, Privacy Policy, and Terms of Service; and expanded crawler directives with large-image previews.
+
+Added WebSite and WebApplication JSON-LD for the homepage, a web app manifest using the existing app icons, and a canonical host in `robots.txt`. The sitemap now uses the shared production URL and stable last-modified dates rather than changing the homepage timestamp on every build.
+
+## 2026-10-11 - In-app changelog drawer added
+
+Added a Changelog drawer generated directly from this progress log, keeping `progress.md` as the single source of truth for product updates. The drawer adapts Osmo Supply's step-by-step timeline to the Color Shift visual system, preserves the animated progress line and numbered marker states, and keeps every entry at full opacity while scrolling. Reduced-motion visitors see the timeline in its completed state.
+
+Linked the drawer from both desktop and mobile footers and kept the Markdown parsing on the server so the browser only receives the small GSAP timeline controller.
+
+## 2026-10-11 - Phase 8 implementation complete; release awaiting Unsplash approval
 
 Phase 7 is complete. ColorFields, score thresholds, and Export animate real box dimensions with easeOutQuart, using 0.3s enter and 0.25s exit timing. Text, swatches, borders, and editor controls retain their natural geometry throughout the transition.
 
-Phase 8 is nearly complete. CI, production dependency hardening, the dropped responsive-easing cleanup, README and testing documentation, privacy/terms routes, and spec reconciliation are done. The Unsplash production-access application was submitted on 2026-10-11; approval is the only remaining Phase 8 item.
+Phase 8 implementation is complete. CI, production dependency hardening, the dropped responsive-easing cleanup, README and testing documentation, privacy/terms routes, and spec reconciliation are done. Final interface polish added file-based Next.js app icons (`favicon.ico`, `icon.svg`, and `apple-icon.png`) and updated the Contrast Result light palette from Figma across Good, Bad, and Meh states, including distinct divider, threshold, selected-pill, and metadata colors while preserving the dark palette.
 
-Closeout validation passed: lint, deterministic tests, TypeScript through `npx next build --webpack`, the production dependency audit, and every production-capable Chrome suite run sequentially against the build. The development-only DialKit suite passed separately against `next dev`. The Phase 5 regression now covers stable editor ownership during pending theme-aware Space generation and footer-portal replacement during mobile breakpoint re-entry; no browser console errors were reported.
+The Unsplash production-access application was submitted on 2026-10-11. Approval is the only remaining Phase 8 release dependency and is external to the implementation; record the approval date in `docs/phase-8-release-checklist.md` when Unsplash responds.
+
+Closeout validation passed: lint, deterministic tests, TypeScript through `npx next build --webpack`, the production dependency audit, and every production-capable Chrome suite run sequentially against the build. The development-only DialKit suite passed separately against `next dev`. The final favicon and Contrast Result pass also passed lint, deterministic tests, a webpack production build, and visual verification against Figma node `3359:1577` in the local Light UI. The Phase 5 regression now covers stable editor ownership during pending theme-aware Space generation and footer-portal replacement during mobile breakpoint re-entry; no browser console errors were reported.
 
 ## 2026-10-08 - Phase 8 scope and dependency security follow-up
 
