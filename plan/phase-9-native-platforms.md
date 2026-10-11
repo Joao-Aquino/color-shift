@@ -1,6 +1,6 @@
-# Color Shift — Phase 9 Spec (Draft)
+# Color Shift — Phase 9 Spec
 
-*Status: Draft — likely a separate project/repo, not incremental on the Next.js phases*
+*Status: In progress — native foundation initialized in `Joao-Aquino/color-shift-apple` on 2026-10-11*
 *Written: 2026-09-26. Renumbered from Phase 8 to Phase 9 on 2026-10-07 (Phase 8 is now loose ends & hardening).*
 
 ## Goal

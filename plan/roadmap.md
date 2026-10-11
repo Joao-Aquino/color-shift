@@ -15,7 +15,7 @@ Full product vision lives in `specs-context/spec-color-shift.md` and `specs-cont
 | 6 | `phase-6-extended-input-layouts.md` | Personal photo input + editable specimen text | Implemented/browser-verified 2026-10-06 |
 | 7 | `phase-7-animation-polish.md` | Animation polish (GSAP, score odometer, DialKit) | Complete |
 | 8 | `phase-8-loose-ends-hardening.md` | Loose ends & hardening (CI, deps, docs, fixes, privacy policy) | Nearly complete — Unsplash approval pending (submitted 2026-10-11) |
-| 9 | `phase-9-native-platforms.md` | Native platforms (iOS + macOS) | Draft |
+| 9 | `phase-9-native-platforms.md` | Native platforms (iOS + macOS) | In progress — iOS foundation initialized 2026-10-11 |
 | 10 | `phase-10-app-store-launch.md` | App Store launch (iOS, optional macOS, depends on Phase 8 privacy policy) | Draft |
 | — | `stretch.md` | Figma MCP export | Stretch, unscheduled |
 
