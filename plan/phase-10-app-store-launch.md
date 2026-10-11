@@ -57,7 +57,7 @@ Publish the Color Shift iOS app (and optionally macOS) on the Apple App Store fo
 **Why:** Required by App Store Review Guidelines and user transparency.
 
 **Scope:**
-- **Privacy policy URL:** Prerequisite completed in Phase 8. The privacy policy is hosted at `colorshift.co-opstudio.com/privacy` and covers data collection, Unsplash API usage, on-device photo processing, and third-party services. The policy already addresses both web and iOS app practices, including Apple's native crash reports.
+- **Privacy policy URL:** Prerequisite completed in Phase 8. The privacy policy is live at `https://www.colorshiftapp.com/privacy` (also available at `https://colorshift.co-opstudio.com/privacy`) and covers data collection, Unsplash API usage, on-device photo processing, and third-party services. The policy already addresses both web and iOS app practices, including Apple's native crash reports. Terms of Service is also available at `https://www.colorshiftapp.com/terms`.
 - **App Privacy nutrition labels:** Complete App Store Connect's App Privacy questionnaire consistently with the Phase 8 privacy policy. Declare:
   - **Photos:** User-selected photos from library are processed on-device; not collected, not transmitted to Color Shift servers.
   - **Unsplash API requests:** Proxied through server; no user-identifiable data sent; access key remains server-side.
