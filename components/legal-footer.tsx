@@ -1,3 +1,25 @@
+import type { ReactNode } from "react";
+
+function LegalDocumentButton({
+  children,
+  document,
+}: {
+  children: ReactNode;
+  document: "privacy" | "shortcuts" | "terms";
+}) {
+  return (
+    <button
+      aria-controls="legal-underlay-panel"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      data-legal-document={document}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
+
 export function LegalFooter() {
   return (
     <footer
@@ -7,34 +29,28 @@ export function LegalFooter() {
     >
       <p data-node-id="3417:409">ColorShift © João Aquino, 2026</p>
       <nav aria-label="Footer links" className="cs-legal-footer-links" data-name="Footer links" data-node-id="3417:414">
-        <button
-          aria-controls="legal-underlay-panel"
-          aria-haspopup="dialog"
-          data-legal-document="shortcuts"
-          data-node-id="3417:412"
-          type="button"
-        >
+        <LegalDocumentButton document="shortcuts">
           Shortcuts
-        </button>
-        <button
-          aria-controls="legal-underlay-panel"
-          aria-haspopup="dialog"
-          data-legal-document="terms"
-          data-node-id="3418:1073"
-          type="button"
-        >
+        </LegalDocumentButton>
+        <LegalDocumentButton document="terms">
           Terms of Service
-        </button>
-        <button
-          aria-controls="legal-underlay-panel"
-          aria-haspopup="dialog"
-          data-legal-document="privacy"
-          data-node-id="3417:413"
-          type="button"
-        >
+        </LegalDocumentButton>
+        <LegalDocumentButton document="privacy">
           Privacy Policy
-        </button>
+        </LegalDocumentButton>
       </nav>
     </footer>
+  );
+}
+
+export function MobileLegalFooter() {
+  return (
+    <section aria-label="Legal information" className="cs-mobile-legal-footer">
+      <p>ColorShift © João Aquino, 2026</p>
+      <nav aria-label="Legal links" className="cs-mobile-legal-footer-links">
+        <LegalDocumentButton document="terms">Terms of Service</LegalDocumentButton>
+        <LegalDocumentButton document="privacy">Privacy Policy</LegalDocumentButton>
+      </nav>
+    </section>
   );
 }

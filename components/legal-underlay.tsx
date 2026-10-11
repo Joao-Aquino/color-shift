@@ -101,7 +101,6 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
     const menu = menuEl;
     const main = mainEl;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const originalBodyOverflow = document.body.style.overflow;
     let isOpen = false;
     let focusTimer = 0;
     let resizeTimer = 0;
@@ -123,9 +122,9 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
     }
 
     function finishClose(restoreFocus = true) {
-      main.inert = false;
+      gsap.set(main, { clearProps: "transform" });
       menu.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = originalBodyOverflow;
+      document.body.removeAttribute("data-menu-status");
       setActiveDocument(null);
       if (restoreFocus) activeTrigger?.focus();
       activeTrigger = null;
@@ -136,7 +135,7 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
     }
 
     function applyClosedState() {
-      gsap.set(main, { x: 0 });
+      gsap.set(main, { clearProps: "transform" });
     }
 
     applyClosedState();
@@ -149,14 +148,14 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
 
       activeTrigger = button;
       setActiveDocument(documentId);
+      menu.scrollTop = 0;
+      updateTriggerState(true, documentId);
+
+      if (isOpen) return;
+      isOpen = true;
       window.requestAnimationFrame(() => {
-        isOpen = true;
-        menu.scrollTop = 0;
         menu.setAttribute("aria-hidden", "false");
-        main.inert = true;
-        document.body.style.overflow = "hidden";
         document.body.setAttribute("data-menu-status", "open");
-        updateTriggerState(true, documentId);
 
         motion?.kill();
         if (reducedMotion.matches) {
@@ -168,25 +167,40 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
       });
     }
 
-    function closeDocument() {
+    function closeDocument(restoreFocus = true) {
       if (!isOpen) return;
       isOpen = false;
       window.clearTimeout(focusTimer);
-      document.body.setAttribute("data-menu-status", "");
+      document.body.setAttribute("data-menu-status", "closing");
       updateTriggerState(false);
 
       motion?.kill();
       if (reducedMotion.matches) {
         applyClosedState();
-        finishClose();
+        finishClose(restoreFocus);
       } else {
         motion = gsap.to(main, {
           x: 0,
           duration: 0.6,
           ease: "power2.inOut",
-          onComplete: () => finishClose(),
+          onComplete: () => finishClose(restoreFocus),
         });
       }
+    }
+
+    function handleOutsideClick(event: MouseEvent) {
+      if (!isOpen) return;
+      const target = event.target;
+      if (
+        !(target instanceof Element) ||
+        menu.contains(target) ||
+        target.closest("[data-legal-document]")
+      ) return;
+      closeDocument(false);
+    }
+
+    function handleCloseClick() {
+      closeDocument();
     }
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -195,20 +209,6 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
         event.preventDefault();
         closeDocument();
         return;
-      }
-      if (event.key !== "Tab") return;
-
-      const focusable = Array.from(menu.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'))
-        .filter((node) => !node.hidden && node.getClientRects().length > 0);
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable.at(-1)!;
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
       }
     }
 
@@ -220,7 +220,8 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
     }
 
     documentButtons.forEach((button) => button.addEventListener("click", openDocument));
-    closeButton.addEventListener("click", closeDocument);
+    closeButton.addEventListener("click", handleCloseClick);
+    root.addEventListener("click", handleOutsideClick);
     document.addEventListener("keydown", handleKeyDown);
     window.addEventListener("resize", handleResize);
 
@@ -228,13 +229,12 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
       window.clearTimeout(focusTimer);
       window.clearTimeout(resizeTimer);
       documentButtons.forEach((button) => button.removeEventListener("click", openDocument));
-      closeButton.removeEventListener("click", closeDocument);
+      closeButton.removeEventListener("click", handleCloseClick);
+      root.removeEventListener("click", handleOutsideClick);
       document.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("resize", handleResize);
       motion?.kill();
       applyClosedState();
-      main.inert = false;
-      document.body.style.overflow = originalBodyOverflow;
       document.body.removeAttribute("data-menu-status");
     };
   }, []);
@@ -242,10 +242,10 @@ export function LegalUnderlay({ children }: { children: ReactNode }) {
   return (
     <div className="underlay-nav" ref={rootRef}>
       {children}
+      <div data-mobile-control-footer-root />
       <section
         aria-hidden={activeDocument === null}
         aria-labelledby={activeDocument === "privacy" ? "privacy-policy-title" : activeDocument === "shortcuts" ? "shortcuts-title" : "terms-of-service-title"}
-        aria-modal={activeDocument ? "true" : undefined}
         className="underlay-nav__menu"
         data-underlay-nav-menu
         id="legal-underlay-panel"

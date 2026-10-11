@@ -3,6 +3,7 @@ import { ExportControls } from "./export-controls";
 import { Score } from "./score";
 import { ControlFooter } from "./control-footer";
 import { ThemeToggle } from "./theme-toggle";
+import { MobileLegalFooter } from "@/components/legal-footer";
 import type { Theme } from "@/lib/theme";
 import type {
   ColorTarget,
@@ -92,6 +93,7 @@ export function ControlContainer({
           onSelect={onSelectColor}
         />
       </aside>
+      <MobileLegalFooter />
       <ControlFooter>
         <ExportControls
           background={background}

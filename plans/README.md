@@ -11,6 +11,7 @@ Plans from `improve-animations`. Execute with an agent (`improve-animations exec
 | 005 | Fix EXPORT trigger progress + entrance motion | HIGH | DONE |
 | 006 | Ease responsive layout changes | MEDIUM | DROPPED |
 | 007 | Coordinate and interrupt mobile editor reveal | MEDIUM | DONE |
+| 008 | Polish mobile EXPORT drawer motion | MEDIUM | DONE |
 
 ## Execution order
 
@@ -21,6 +22,7 @@ Plans from `improve-animations`. Execute with an agent (`improve-animations exec
 5. `005-export-button-motion.md` — done
 6. `006-responsive-layout-motion.md` - dropped; dedicated breakpoint motion removed
 7. `007-coordinate-mobile-editor-reveal.md` - done; coordinated reveal and interruption verified after integration, preserving the existing CSS editor morph
+8. `008-polish-mobile-export-drawer-motion.md` - done; asymmetric mobile footer exit/return with an opacity-only reduced-motion path
 
 ## Notes
 
